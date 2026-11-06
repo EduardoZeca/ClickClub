@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ClickClub.Api/ClickClub.Api.csproj" />
+    <Project Path="src/ClickClub.Web/ClickClub.Web.csproj" />
+  </Folder>
+</Solution>

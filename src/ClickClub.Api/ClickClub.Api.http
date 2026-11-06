@@ -1,0 +1,6 @@
+@ClickClub.Api_HostAddress = http://localhost:5167
+
+GET {{ClickClub.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
