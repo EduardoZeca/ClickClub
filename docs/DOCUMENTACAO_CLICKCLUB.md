@@ -1,12 +1,12 @@
 # ClickClub — Documento de Requisitos e Planejamento
 
-**Versão:** 1.0 — Documentação funcional e modelagem inicial aprovadas  
-**Data:** 05/11/2026  
-**Estado:** Requisitos, regras de negócio, parâmetros e modelagem inicial aprovados em 05/11/2026. Documento-base para o ChatGPT Project ClickClub. Nenhum código implementado ou componente iniciado.
+**Versão:** 1.1 — Documentação funcional e modelagem inicial com complementações do enunciado do professor  
+**Data:** 09/11/2026  
+**Estado:** Requisitos iniciais aprovados em 05/11/2026 e complementações aprovadas em 09/11/2026. Componente 1 (Fundação) concluído segundo testes relatados pelo usuário em 06/11/2026; Componente 2 ainda não iniciado nem autorizado. Os registros de implementação e testes estão em `CONTINUIDADE_CLICKCLUB.md`.
 
 ## 1. Visão geral
 
-O ClickClub é um sistema para gestão de um clube social com possibilidade de operar várias unidades em diferentes municípios e estados. O sistema atenderá associados, dependentes, funcionários, porteiros e administradores, contemplando cadastro, carteirinhas, reservas de espaços, atividades esportivas, cobranças simuladas, comunicação e controle de acessos.
+O ClickClub é um sistema para gestão de uma organização de clube social com várias unidades, cada uma apresentada e administrada como um clube (por exemplo, Foz 2 e Guaíra 2), em diferentes municípios e estados. O cadastro associativo continua centralizado e um associado pode utilizar serviços de outros clubes elegíveis. O sistema atenderá associados, dependentes, funcionários, porteiros, presidentes de clube, tesoureiros e administradores, contemplando cadastro, adesões sujeitas à aprovação, carteirinhas, reservas de espaços, atividades esportivas, eventos sociais, cobranças simuladas, comunicação e controle de acessos.
 
 O objetivo inicial é um **projeto acadêmico funcional e demonstrável**, com arquitetura preparada para múltiplas unidades e sem obrigatoriedade de contratar serviços pagos. A primeira versão não equivale a um sistema homologado para controle físico de acesso ou operações financeiras reais.
 
@@ -28,12 +28,12 @@ O objetivo inicial é um **projeto acadêmico funcional e demonstrável**, com a
 ### 2.1 Núcleo prioritário (primeira entrega)
 
 1. Autenticação e autorização por perfil.
-2. Cadastro de unidades, associados titulares, dependentes e funcionários.
+2. Cadastro de clubes/unidades, associados titulares, dependentes, presidentes, tesoureiros e funcionários; tipos de vínculo e solicitações de adesão aprovadas pela administração.
 3. Cadastro de espaços e controle de reservas sem conflitos.
 4. Emissão e quitação **simuladas** de faturas; regra de inadimplência.
 5. Carteirinha digital com QR Code exibível offline no aparelho do sócio e validação online simulada pela portaria.
-6. Inscrição em turmas com limite de vagas e lista de espera.
-7. Avisos por unidade e geral, ouvidoria básica e relatórios administrativos essenciais.
+6. Inscrição em turmas com limite de vagas e lista de espera; cadastro de eventos sociais por público-alvo (somente associados ou público geral).
+7. Avisos por unidade e geral, ouvidoria com solicitações e reclamações e relatórios administrativos essenciais.
 
 ### 2.2 Funcionalidades futuras ou fora do escopo inicial
 
@@ -45,22 +45,25 @@ O objetivo inicial é um **projeto acadêmico funcional e demonstrável**, com a
 
 ## 3. Conceitos e decisões estruturais
 
-### 3.1 Unidade
+### 3.1 Clube/unidade
 
-Uma unidade possui identificador próprio, endereço, município, UF, fuso horário, situação (ativa/inativa), espaços, turmas, funcionários e avisos. O sistema deve suportar vários municípios e estados sem pressupor que todas as unidades tenham os mesmos horários, taxas, instalações ou atividades.
+Cada unidade **representa um clube** para fins de cadastro, telas e administração local. Possui identificador, nome, sigla, endereço, bairro, município, UF, telefone, e-mail, fuso horário, situação (ativa/inativa), espaços, turmas, eventos, funcionários e avisos. O sistema deve suportar vários municípios e estados sem pressupor que todos os clubes tenham os mesmos horários, taxas, instalações ou atividades.
 
-**Decisão aprovada (D01):** todas as unidades pertencem à mesma organização de clube; o cadastro e a situação associativa são centrais. Cada associado possui uma unidade de origem, mas pode consultar serviços e solicitar reservas em qualquer unidade habilitada, respeitando suas regras.
+**Decisão aprovada (D01; complementada em 09/11/2026):** todos os clubes/unidades pertencem à mesma organização; o cadastro e a situação associativa são centrais. Cada associado possui um clube de origem, mas pode consultar serviços e solicitar reservas em qualquer clube/unidade habilitado, respeitando suas regras. Não se trata de múltiplas organizações juridicamente independentes.
 
-### 3.2 Associado, dependente, categoria e perfil
+### 3.2 Associado, dependente, categoria, tipo de vínculo e perfil
 
 - **Titular:** pessoa responsável pela associação e pelas faturas do grupo familiar, quando aplicável.
 - **Dependente:** pessoa vinculada a um titular, com direitos de uso definidos pela categoria e idade.
 - **Categoria associativa:** familiar, individual, atleta ou outras configuráveis. Determina benefícios, tarifas e elegibilidade; não é uma permissão administrativa.
-- **Perfil de acesso:** titular, dependente, funcionário da unidade, administrador geral ou porteiro. Determina o que a conta pode fazer no sistema.
+- **Tipo de vínculo associativo:** Associado/Fundador (com direito a voto), Convidado ou Simpatizante (ambos sem direito a voto). Representa condição associativa, não a categoria de benefícios nem um perfil de acesso.
+- **Perfil de acesso:** titular, dependente, funcionário da unidade, presidente do clube, tesoureiro, administrador geral ou porteiro. Determina o que a conta pode fazer no sistema.
 
-Categoria associativa e perfil de acesso **não são a mesma coisa**. O administrador geral pode gerenciar categorias, mas a categoria “atleta” não concede privilégios de administrador.
+Categoria associativa, tipo de vínculo e perfil de acesso **são classificações distintas**. O administrador geral pode gerenciar categorias, mas a categoria “atleta” ou o tipo “fundador” não concede privilégios administrativos. Direito a voto será registrado como característica do tipo de vínculo; um módulo de eleições não integra o escopo.
 
 **Categorias iniciais aprovadas:** Familiar, Individual e Atleta. Valores, benefícios, limites de dependentes e eventuais variações por unidade permanecem configuráveis, sem números presumidos nesta documentação.
+
+**Tipos de vínculo iniciais aprovados em 09/11/2026:** Associado/Fundador, Convidado e Simpatizante. A inclusão desses tipos não gera descontos, isenções ou benefícios financeiros automáticos. Elegibilidade e valores continuam sujeitos às políticas associativas configuráveis. Dados cadastrais de pessoas devem contemplar CPF, endereço, bairro, cidade, UF, sexo, estado civil e interesses (múltiplos), além dos campos existentes. O acesso a dados pessoais permanece restrito por perfil e necessidade.
 
 **Decisão aprovada (D04):** dependentes podem possuir login próprio, com limitações conforme idade e direitos. Um dependente não recebe acesso ao financeiro do titular nem autorização automática para assumir despesas.
 
@@ -84,32 +87,46 @@ Conflitos de reserva e lotação devem ser verificados novamente pela API **dent
 
 Uma futura validação offline na portaria exigirá dispositivo de porteiro com chave pública, cache de bloqueios, janela limitada de sincronização e posterior envio dos registros. **Isso não integra o escopo aprovado da primeira entrega.** Uma carteirinha exibida offline pode estar revogada no servidor; a decisão de acesso continua pertencendo à API.
 
+### 3.6 Solicitação de adesão e aprovação (complementação de 09/11/2026)
+
+- Uma pessoa poderá solicitar pelo aplicativo adesão ao clube de origem como **Convidado** ou **Simpatizante**; a interface Mobile será desenvolvida no Componente 8, com API e persistência preparadas no Componente 2.
+- Associados/Fundadores serão cadastrados pela administração, não por autoinscrição no aplicativo na primeira versão.
+- A solicitação terá pelo menos os estados `Pendente`, `Aprovada` e `Rejeitada`. A solicitação pendente não cria vínculo associativo ativo nem autoriza uso de serviços exclusivos de associados.
+- Apenas o **Presidente do clube de origem** ou o **Administrador Geral** poderá aprovar ou rejeitar. Registrar responsável, instante e decisão para auditoria; o presidente não poderá aprovar solicitações de outro clube sem atribuição.
+- O acompanhamento de solicitações no aplicativo será detalhado no componente correspondente, sem concessão antecipada de privilégios.
+
+### 3.7 Eventos sociais (complementação de 09/11/2026)
+
+Além de atividades esportivas, cada clube poderá cadastrar eventos sociais, como almoços, jantares e cafés, com descrição, início, término, situação e público-alvo `SomenteAssociados` ou `PublicoGeral`. Eventos abertos ao público não dispensam controle de acesso: a identificação de visitantes será detalhada no componente específico, preservando a validação online pela API e a proibição de liberação manual quando a API estiver indisponível. Não haverá bilheteria, venda de ingressos ou transações financeiras reais por iniciativa própria.
+
 ## 4. Perfis e permissões
 
 | Perfil | Permissões previstas |
 |---|---|
 | Administrador geral | Gerenciar unidades, categorias, pessoal, associados, regras, financeiro geral, atividades, relatórios e auditoria. |
+| Presidente do clube | Administrar cadastros e operações permitidas do(s) clube(s) atribuído(s); aprovar/rejeitar solicitações de adesão do respectivo clube. Não modifica políticas globais. |
+| Tesoureiro | Consultar e administrar operações financeiras simuladas autorizadas dentro de seu escopo de clube, sem acesso global automático. |
 | Funcionário da unidade | Gerenciar instalações, turmas, reservas e atendimento **somente das unidades atribuídas**. Não altera políticas globais. |
 | Porteiro | Validar carteirinhas e convidados, consultar autorizações relevantes e registrar entradas/saídas da unidade atribuída. Não altera faturas. |
 | Sócio titular | Consultar seu cadastro e dependentes, carteirinha, cobranças, reservas, atividades, avisos e chamados. |
 | Dependente | Consultar a própria carteirinha, avisos, atividades e reservas permitidas, respeitando idade, categoria e autorização do titular. |
 
-Toda autorização é conferida pela API; ocultar botões na interface não substitui segurança no servidor. A possibilidade de uma conta possuir mais de um papel ou funcionário atender duas unidades deve ser prevista pela modelagem de vínculos, mesmo que o primeiro protótipo use apenas um papel principal.
+Toda autorização é conferida pela API; ocultar botões na interface não substitui segurança no servidor. A possibilidade de uma conta possuir mais de um papel ou funcionário atender duas unidades deve ser prevista pela modelagem de vínculos, mesmo que o primeiro protótipo use apenas um papel principal. **Administrador Geral** equivale ao superadministrador do enunciado; **Presidente** e **Tesoureiro** possuem papéis locais, sem acesso indistinto aos demais clubes. Titular, dependente, categoria e tipo de vínculo permanecem conceitos separados.
 
 ## 5. Requisitos funcionais
 
 | ID | Descrição | Prioridade |
 |---|---|---|
-| **RF01** | Autenticar e autorizar os cinco perfis de acesso, com permissões por perfil e unidade. | Essencial |
+| **RF01** | Autenticar e autorizar os sete perfis de acesso previstos, com permissões por perfil e clube/unidade; permitir múltiplos papéis/atribuições conforme modelagem. | Essencial |
 | **RF02** | Permitir ao associado visualizar e solicitar serviços e reservas de unidades diferentes da sua unidade de origem, conforme elegibilidade. | Essencial |
 | **RF03** | Consultar agenda e reservar espaços por data e horário; apresentar taxa aplicável e impedir sobreposição de reservas confirmadas ou bloqueios de manutenção. | Essencial |
 | **RF04** | Exibir carteirinha digital e QR Code previamente armazenado no mobile do associado, mesmo sem conexão no aparelho; credencial válida por 24 horas e renovada quando houver rede; a leitura/decisão na portaria será online pela API. | Essencial |
 | **RF05** | Impedir novas reservas e novas autorizações de entrada de titular e dependentes quando a associação tiver mensalidade vencida há **mais de 10 dias**. A portaria não libera entradas bloqueadas ou sem validação online. | Essencial |
-| **RF06** | Cadastrar, consultar, alterar, ativar e desativar unidades com localização e horários próprios. | Essencial |
-| **RF07** | Cadastrar, consultar, alterar e desativar titulares; gerenciar categoria, unidade de origem e estado associativo. | Essencial |
+| **RF06** | Cadastrar, consultar, alterar, ativar e desativar clubes/unidades com identificação (incluindo sigla), endereço, bairro, município, UF, telefone, e-mail, fuso e horários próprios. | Essencial |
+| **RF07** | Cadastrar, consultar, alterar e desativar titulares; registrar dados pessoais complementares e interesses; gerenciar categoria, tipo de vínculo, clube de origem e estado associativo. | Essencial |
 | **RF08** | Vincular/desvincular dependentes ao titular e registrar data de nascimento e condição de autorização. | Essencial |
-| **RF09** | Administrar funcionários, porteiros e suas atribuições de unidade. | Essencial |
-| **RF10** | Cadastrar tipos de espaço, capacidades, horários, preços e períodos indisponíveis por unidade. Tipos iniciais: salão de festas, churrasqueira e quadra, com possibilidade de expansão. | Essencial |
+| **RF09** | Administrar funcionários, porteiros, presidentes e tesoureiros, com papéis e atribuições por clube/unidade. | Essencial |
+| **RF10** | Cadastrar tipos de espaço, capacidades, horários, preços e períodos indisponíveis por unidade. Tipos iniciais: salão de festas, churrasqueira e quadra, com possibilidade de expansão; registrar finalidade da locação quando aplicável. | Essencial |
 | **RF11** | Consultar reservas, cancelar conforme política e registrar o cálculo de taxa/multa/reembolso **simulado**. | Essencial |
 | **RF12** | Cadastrar e editar a lista de convidados das reservas elegíveis até o limite estabelecido e permitir conferência na portaria. | Essencial |
 | **RF13** | Gerar faturas de mensalidade por competência, com itens discriminados de mensalidade, taxas e locações transferidas, evitando duplicação da mesma cobrança. | Essencial |
@@ -117,13 +134,18 @@ Toda autorização é conferida pela API; ocultar botões na interface não subs
 | **RF15** | Cadastrar atividades, turmas, instrutores (se utilizados), capacidade, datas, horários e unidade. | Essencial |
 | **RF16** | Inscrever associados elegíveis em turmas/eventos, impedir excesso de vagas e disponibilizar lista de espera. | Essencial |
 | **RF17** | Publicar avisos gerais e por unidade; permitir leitura no Web/Mobile. | Essencial |
-| **RF18** | Criar e acompanhar chamados de ouvidoria com categoria, status e histórico de respostas. | Essencial |
+| **RF18** | Criar e acompanhar chamados de ouvidoria diferenciados como `Solicitação` ou `Reclamação`, com categoria, status e histórico de respostas. | Essencial |
 | **RF19** | Enviar notificações push remotas para dispositivos cadastrados, por público/unidade, utilizando serviço de entrega externo configurado. | Posterior |
 | **RF20** | Validar online, em interface de portaria simulada, QR Code de carteirinha ou autorização de convidado; registrar decisão, motivo, data, hora, unidade e operador. Sem hardware de catraca. | Essencial |
 | **RF21** | Disponibilizar painel com ocupação de espaços, faturas pagas/em aberto/vencidas, inscrições e totais por unidade/período. | Essencial (básico) |
 | **RF22** | Registrar auditoria de eventos críticos: alterações de associados, reservas, faturas, permissões e validações de acesso. | Essencial |
 | **RF23** | Permitir consulta de histórico de acessos e reservas, filtrado pelos direitos do usuário. | Essencial |
 | **RF24** | Permitir que o titular escolha, até imediatamente antes do início do uso do espaço, quitar a taxa de locação de forma simulada **ou** transferi-la para a próxima mensalidade elegível, com acréscimo simples e único de **10%** sobre o valor original. Registrar a escolha e a competência de destino. Disponível para todos os espaços pagos. | Essencial; aprovado |
+| **RF25** | Administrar separadamente os tipos de vínculo Associado/Fundador (com direito a voto), Convidado e Simpatizante (sem direito a voto), sem confundi-los com categorias associativas ou perfis de acesso. | Essencial; aprovado em 09/11/2026 |
+| **RF26** | Receber pedidos de adesão de Convidados e Simpatizantes pelo Mobile, analisar na Web por Presidente do clube de origem ou Administrador Geral e registrar status e decisão. | Essencial; aprovado em 09/11/2026 |
+| **RF27** | Cadastrar e consultar eventos sociais por clube, com início/fim, descrição, situação e público-alvo de associados ou público geral. | Essencial; aprovado em 09/11/2026 |
+| **RF28** | Exibir na Web calendário/agenda de locações, incluindo reservas de períodos que atravessam datas e a finalidade da utilização; preservar privacidade dos responsáveis. | Essencial; aprovado em 09/11/2026 |
+| **RF29** | Registrar e consultar interesses múltiplos dos associados, além dos dados pessoais complementares exigidos no cadastro. | Essencial; aprovado em 09/11/2026 |
 
 ## 6. Regras de negócio
 
@@ -152,6 +174,12 @@ Toda autorização é conferida pela API; ocultar botões na interface não subs
 | **RN21** | Se uma reserva com locação transferida for cancelada antes do uso, ajustar os itens de uma mensalidade ainda aberta, zerando a cobrança no prazo de reembolso integral ou mantendo apenas a multa cabível. Se a fatura já estiver quitada, registrar crédito simulado para compensação futura sem alterar o histórico quitado. | Aprovado |
 | **RN22** | O QR Code da carteirinha expira **24 horas** após a emissão. Quando online, o Mobile renova a credencial; quando offline, pode exibir a última credencial e seu estado, mas não indicará uma credencial vencida como válida. | Aprovado |
 | **RN23** | Torneios esportivos na primeira versão funcionam como eventos com inscrição e limite de vagas. Chaves, placares, classificação e arbitragem ficam para evolução futura. | Aprovado |
+| **RN24** | Para a administração do sistema, cada unidade representa um clube da mesma organização. O cadastro associativo é centralizado; o Presidente e o Tesoureiro atuam somente no(s) clube(s) atribuído(s), e o Administrador Geral tem escopo global. | Aprovado em 09/11/2026 |
+| **RN25** | Tipo de vínculo, categoria de benefícios e perfil de acesso são independentes. Somente Associado/Fundador possui direito a voto. O tipo de vínculo não concede, por si, desconto, isenção ou acesso administrativo. Não há módulo de votação na primeira versão. | Aprovado em 09/11/2026 |
+| **RN26** | Autoinscrição pelo aplicativo é permitida inicialmente apenas para Convidado e Simpatizante; Associado/Fundador é cadastrado pela administração. Pedido pendente não ativa associação. Somente Presidente do clube solicitado ou Administrador Geral decide, com registro de auditoria. | Aprovado em 09/11/2026 |
+| **RN27** | Reserva que atravesse dois meses-calendário conta apenas para a cota de **3 reservas** do mês da **data local de início**, no fuso horário do clube onde ocorrerá a utilização; cancelar libera a cota desse mês. | Aprovado em 09/11/2026; complemento de RN01 |
+| **RN28** | Eventos sociais podem ser destinados somente a associados ou ao público geral. Evento aberto não equivale a liberação automática de entrada: eventual conferência de visitante continua sujeita à API online e não há liberação manual sem validação. | Aprovado em 09/11/2026 |
+| **RN29** | A duração de uma reserva pode atravessar a meia-noite e datas diferentes, desde que `Fim > Início` e sejam respeitadas disponibilidade, funcionamento, política e fuso da unidade. A agenda Web apresenta ocupação sem divulgar dados pessoais indevidos. | Aprovado em 09/11/2026 |
 
 ### 6.1 Cálculo de atraso aprovado
 
@@ -207,27 +235,30 @@ Se a reserva for cancelada depois de transferida, mas antes do uso, uma fatura a
 | **RNF10 — Recuperação** | Procedimento documentado de backup e restauração do MySQL e configuração reprodutível do projeto. | Restaurar cópia em ambiente de teste. |
 | **RNF11 — Manutenibilidade** | Organização por camadas/projetos, migrações SQL versionadas, documentação e Git. | Nova instalação a partir do README. |
 | **RNF12 — Portabilidade** | Mobile Android físico; versão mínima do Android e versão final do .NET definidas conforme ambiente de desenvolvimento disponível. | Compilação e instalação no aparelho escolhido. |
-| **RNF13 — Privacidade** | Coletar somente dados pessoais necessários; limitar leitura por perfil e definir retenção de documentos, convidados e logs. | Revisão das telas, endpoints e tabelas. |
+| **RNF13 — Privacidade** | Coletar somente dados pessoais necessários, inclusive CPF, endereço, sexo, estado civil e interesses previstos no cadastro; limitar leitura por perfil e definir retenção de documentos, solicitações de adesão, convidados e logs. | Revisão das telas, endpoints e tabelas. |
 | **RNF14 — Datas e horários** | Guardar instantes com referência de fuso e interpretar agendas na hora local de cada unidade. | Testes com unidades em fusos distintos. |
 
 ## 8. Modelagem lógica inicial validada
 
 **Identidade e organização**
 
-- `Unidade`: Id, Nome, Endereco, Municipio, UF, FusoHorario, Status.
-- `Pessoa`: Id, Nome, DataNascimento, DocumentoIdentificacao, Telefone, Email, Status.
+- `Unidade` (clube): Id, Nome, Sigla, Endereco, Bairro, Municipio, UF, Telefone, Email, FusoHorario, Status.
+- `Pessoa`: Id, Nome, DataNascimento, DocumentoIdentificacao/CPF, Endereco, Bairro, Cidade, UF, Sexo, EstadoCivil, Telefone, Email, Status.
 - `Usuario`: Id, PessoaId, Login, SenhaHash, Ativo.
-- `PapelUsuario`: UsuarioId, Papel, UnidadeIdOpcional (escopo do funcionário/porteiro).
+- `PapelUsuario`: UsuarioId, Papel, UnidadeIdOpcional (escopo de funcionário, porteiro, presidente e tesoureiro).
 - `CategoriaAssociativa`: Id, Nome, RegrasBeneficios, Ativa.
-- `Associacao`: Id, TitularPessoaId, CategoriaId, UnidadeOrigemId, Matricula, Status, DataInicio.
+- `TipoVinculoAssociativo`: Id, Nome, DireitoVoto, Ativo (iniciais: Associado/Fundador, Convidado e Simpatizante).
+- `Associacao`: Id, TitularPessoaId, CategoriaId, TipoVinculoId, UnidadeOrigemId, Matricula, Status, DataInicio.
 - `DependenteAssociacao`: Id, AssociacaoId, DependentePessoaId, Ativo, Autorizacoes.
+- `Interesse`: Id, Nome, Ativo; `PessoaInteresse`: PessoaId, InteresseId (múltiplos interesses por pessoa).
+- `SolicitacaoAdesao`: Id, PessoaId, UnidadePretendidaId, TipoVinculoId, Status, SolicitadaEm, AnalisadaEmOpcional, AnalisadaPorUsuarioIdOpcional, MotivoOpcional. A pessoa pode existir com situação cadastral pendente, sem associação ativa.
 
 **Instalações e reservas**
 
 - `Espaco`: Id, UnidadeId, Nome, Tipo, Capacidade, TaxaBase, Ativo.
 - `HorarioEspaco`: Id, EspacoId, DiaSemana, Inicio, Fim.
 - `IndisponibilidadeEspaco`: Id, EspacoId, Inicio, Fim, Motivo.
-- `Reserva`: Id, EspacoId, AssociacaoId, ResponsavelPessoaId, Inicio, Fim, ValorContratado, Status, CriadaEm.
+- `Reserva`: Id, EspacoId, AssociacaoId, ResponsavelPessoaId, Inicio, Fim, FinalidadeOpcional, ValorContratado, Status, CriadaEm. O mês da cota de RN01 é o da data local de início.
 - `ConvidadoReserva`: Id, ReservaId, Nome, IdentificacaoMinima, Situacao.
 - `AutorizacaoResponsavel`: Id, ReservaId, TitularPessoaId, DataAutorizacao, Status (se necessário para dependentes).
 
@@ -244,8 +275,9 @@ Se a reserva for cancelada depois de transferida, mas antes do uso, uma fatura a
 - `Atividade`: Id, Nome, Descricao, Tipo.
 - `Turma`: Id, AtividadeId, UnidadeId, InstrutorPessoaIdOpcional, Inicio, Fim, Capacidade, Status.
 - `InscricaoTurma`: Id, TurmaId, PessoaId, Status, InscritaEm, PosicaoEsperaOpcional.
+- `EventoSocial`: Id, UnidadeId, Nome, Descricao, Inicio, Fim, PublicoAlvo (SomenteAssociados/PublicoGeral), Status.
 - `Aviso`: Id, UnidadeIdOpcional (nulo = geral), Titulo, Corpo, Inicio, Fim, AutorUsuarioId.
-- `ChamadoOuvidoria`: Id, PessoaId, UnidadeIdOpcional, Assunto, Descricao, Status, CriadoEm.
+- `ChamadoOuvidoria`: Id, PessoaId, UnidadeIdOpcional, Tipo (Solicitacao/Reclamacao), Assunto, Descricao, Status, CriadoEm.
 - `RespostaChamado`: Id, ChamadoId, AutorUsuarioId, Conteudo, DataHora.
 
 **Portaria, notificações e auditoria**
@@ -270,6 +302,12 @@ Se a reserva for cancelada depois de transferida, mas antes do uso, uma fatura a
 - Inscrições em lista de espera devem conservar ordem de entrada e registrar o funcionário que promoveu o associado após liberação de vaga.
 - Cada pessoa poderá figurar como titular de **no máximo uma associação ativa** e como dependente de **no máximo uma associação ativa**, com regras de exclusividade verificadas na API e no banco conforme possível.
 - Cada reserva paga terá uma cobrança principal identificável e idempotente; se transferida, o principal e o acréscimo de 10% devem aparecer nos itens da fatura de destino sem débito paralelo.
+- Preservar as sete tabelas já criadas no Componente 1 e evoluir o banco com novos scripts versionados; os nomes e restrições das novas estruturas serão confirmados após inspeção de `001_identidade_associativa.sql`, sem reescrever o script histórico.
+- Garantir identificação consistente de CPF, sigla de clube e matrícula, com unicidade pertinente; os interesses serão vinculados por relacionamento múltiplo, evitando concatenar valores em texto.
+- `TipoVinculoAssociativo` não substitui `CategoriaAssociativa` nem `PapelUsuario`. Somente Associado/Fundador terá o indicador `DireitoVoto`; esse indicador não autoriza funções administrativas.
+- Solicitação de adesão pendente/rejeitada não pode gerar associação ativa, autorização de entrada ou acesso aos serviços exclusivos de associado. A decisão deve ser autorizada para o clube pretendido e auditada.
+- Ao aplicar RN01, considerar a **data local de início** da reserva, inclusive em períodos que atravessem meses, preservando bloqueio de conflitos pelo intervalo completo.
+- Diferenciar eventos sociais de turmas esportivas; visitantes de eventos abertos não são automaticamente associados, e a portaria continua online.
 
 ### 8.2 Relacionamentos consolidados
 
@@ -277,10 +315,14 @@ Se a reserva for cancelada depois de transferida, mas antes do uso, uma fatura a
 |---|---|---|---|
 | `Unidade` | 1:N | `Espaco`, `Turma` | Espaços e turmas pertencem à unidade onde são oferecidos. |
 | `Unidade` | 1:N | `Associacao` | Unidade de origem; não restringe reservas em outras unidades. |
+| `Unidade` | 1:N | `EventoSocial`, `SolicitacaoAdesao` | Eventos e pedidos de adesão pertencem ao clube responsável/pretendido. |
 | `Pessoa` | 1:0..1 | `Usuario` | Pessoas com acesso ao sistema recebem credenciais e papel(is) definidos. |
+| `Pessoa` | N:N | `Interesse` (`PessoaInteresse`) | A pessoa pode registrar vários interesses e cada interesse pode servir a várias pessoas. |
+| `Pessoa` | 1:N | `SolicitacaoAdesao` | Histórico de pedidos pendentes, aprovados e rejeitados, sem ativação automática. |
 | `Associacao` | N:1 | `Pessoa` titular | Uma associação possui um titular e o titular tem, no máximo, uma associação ativa. |
 | `Associacao` | 1:N | `DependenteAssociacao` | Cada vínculo referencia uma pessoa dependente e não pode coexistir em duas associações ativas. |
 | `Associacao` | N:1 | `CategoriaAssociativa` | A categoria define regras e preço-base configuráveis. |
+| `Associacao` | N:1 | `TipoVinculoAssociativo` | Tipo de vínculo define condição associativa e direito a voto, sem substituir categoria ou perfil. |
 | `Associacao` | 1:N | `Reserva`, `Fatura` | Cota de reservas e cobranças são controladas pelo grupo associativo. |
 | `Espaco` | 1:N | `Reserva` | Reservas confirmadas do mesmo espaço não podem se sobrepor no tempo. |
 | `Reserva` | 0..1:1 | `CobrancaReserva` | Reservas gratuitas não exigem cobrança; locações pagas possuem uma. |
@@ -298,25 +340,25 @@ As cardinalidades descrevem o **modelo lógico**. A implementação definirá no
 
 ### 9.1 Mobile — Sócio titular/dependente
 
-1. Login.
+1. Solicitação de adesão (Convidado/Simpatizante) e acompanhamento de situação, sem acesso associativo antecipado; login para contas autorizadas.
 2. Início: status associativo, unidade preferida, avisos e próximas reservas.
 3. Minha carteirinha: QR Code com validade de 24 horas, renovação automática quando online e aviso de expiração quando sem rede.
-4. Unidades e espaços: filtros, disponibilidade, detalhes e reserva.
+4. Clubes/unidades e espaços: filtros, disponibilidade, detalhes e reserva, com finalidade e períodos de início/fim.
 5. Minhas reservas: consultar/cancelar, convidados, autorizações pendentes e escolha do titular entre quitação simulada ou transferência da taxa à mensalidade com 10%.
-6. Atividades: turmas, inscrições e lista de espera.
+6. Atividades e eventos: turmas, inscrições, lista de espera e divulgação de eventos sociais por público-alvo.
 7. Financeiro: faturas discriminadas, vencimentos, locações transferidas e histórico de quitações simuladas (titular).
-8. Ouvidoria: abrir/acompanhar chamado.
+8. Ouvidoria: abrir/acompanhar solicitações e reclamações.
 9. Dependentes: consulta e aprovações (titular).
 
 ### 9.2 Web — Administração/funcionário
 
-1. Login e painel por escopo.
-2. Unidades e funcionários.
-3. Associados, dependentes e categorias.
-4. Espaços, agendas, manutenções e reservas.
-5. Turmas e inscrições/lista de espera.
-6. Financeiro: emitir faturas itemizadas, simular quitação, conferir inadimplência, locações transferidas e acréscimos de 10%.
-7. Avisos e ouvidoria.
+1. Login e painel por escopo (Administrador Geral, Presidente de clube, Tesoureiro e demais perfis autorizados).
+2. Clubes/unidades, funcionários, presidentes e tesoureiros com suas atribuições.
+3. Associados, dependentes, categorias, tipos de vínculo, interesses e análise de pedidos de adesão por clube.
+4. Espaços, calendário de locações, manutenções e reservas com início/fim mesmo em datas distintas.
+5. Turmas, inscrições/lista de espera e gestão de eventos sociais por público-alvo.
+6. Financeiro: emitir faturas itemizadas, simular quitação, conferir inadimplência, locações transferidas e acréscimos de 10%; Tesoureiro com escopo autorizado.
+7. Avisos e ouvidoria com solicitação/reclamação.
 8. Acessos, convidados, relatórios e auditoria.
 
 ### 9.3 Portaria
@@ -361,19 +403,30 @@ As cardinalidades descrevem o **modelo lógico**. A implementação definirá no
 | T28 | Associado tenta alterar convidados após o prazo de 24 horas. | Alteração impedida sem exceção. |
 | T29 | Mesmo associado tenta matricular-se em duas turmas com horários sobrepostos. | Segunda inscrição é rejeitada com indicação do conflito. |
 | T30 | Titular/dependente tenta manter vínculo ativo em duas associações. | Segundo vínculo ativo é rejeitado. |
+| T31 | Administrador Geral cadastra clubes Foz 2 e Guaíra 2, cada um com sigla e contatos; Presidente do Foz 2 tenta administrar o Guaíra 2. | Ambos cadastrados sob uma organização; ação fora do escopo do presidente rejeitada na API. |
+| T32 | Registrar pessoa com CPF, endereço, sexo, estado civil e vários interesses; consultar por outro associado sem permissão. | Dados persistidos e recuperados pelos perfis autorizados; acesso indevido negado. |
+| T33 | Criar associações com tipos Fundador, Convidado e Simpatizante, além de categorias associativas distintas. | Apenas Fundador possui indicador de voto; categoria/tipo/perfil permanecem independentes e não geram desconto automático. |
+| T34 | Enviar pedido Mobile de adesão como Convidado/Simpatizante e tentar usar serviço exclusivo enquanto pendente. | Solicitação registrada; associação não ativada e acesso exclusivo rejeitado antes da aprovação. |
+| T35 | Presidente do clube de origem aprova solicitação; Presidente de outra unidade tenta aprovar; Administrador Geral avalia qualquer clube. | Apenas os aprovadores com escopo correto concluem a decisão; auditoria registra operação. |
+| T36 | Tentar autoinscrição como Fundador pelo aplicativo e cadastrar Fundador pela administração. | Autoinscrição indisponível; cadastro administrativo permitido. |
+| T37 | Tesoureiro de um clube consulta/atua nas operações financeiras de seu escopo e tenta acessar dados financeiros fora dele. | Permissões financeiras locais respeitadas pela API; Administrador Geral mantém escopo global. |
+| T38 | Reservar espaço de 31/10 18h a 01/11 02h, no fuso da unidade, e consultar cota de outubro e novembro. | Reserva válida se elegível; consome uma cota de outubro apenas; conflito é verificado durante todo o período. |
+| T39 | Consultar agenda Web com locações em dias distintos e finalidade de uso informada. | Calendário mostra ocupação correta sem expor dados pessoais indevidos. |
+| T40 | Publicar eventos sociais para somente associados e público geral; tentar liberar visitante sem validação online. | Público-alvo respeitado; nenhum visitante é liberado automaticamente sem API. |
+| T41 | Abrir e acompanhar chamados como Solicitação e Reclamação. | Tipo, status e histórico preservados com autorização por perfil. |
 
 ## 11. Proposta de componentes de desenvolvimento
 
-**Nenhum componente está implementado nesta etapa.** Iniciar somente mediante autorização explícita do usuário para o respectivo componente.
+**Estado em 09/11/2026:** Componente 1 concluído conforme testes relatados em 06/11/2026; demais componentes ainda não implementados. O Componente 2 aguarda autorização explícita. Esta documentação define escopo e não comprova funcionalidades desenvolvidas.
 
-1. **Fundação:** solução, projetos, schema MySQL, configuração segura, README e build inicial.
-2. **Autenticação e cadastros:** perfis, unidades, titular, dependentes e staff; Web de administração.
-3. **Espaços e reservas:** horários, manutenção, elegibilidade, regras e concorrência.
-4. **Financeiro simulado:** geração de mensalidades itemizadas e taxas, quitação, transferência de locações com acréscimo de 10%, inadimplência e integração com reservas/acesso.
-5. **Carteirinha e portaria online:** emissão, leitura/verificação, bloqueios e auditoria.
-6. **Atividades e turmas:** inscrições, vagas e lista de espera.
-7. **Comunicação e relatórios:** avisos, ouvidoria e indicadores principais.
-8. **Mobile Android e integração:** navegação, cache SQLite, teste em aparelho e fluxos ponta a ponta.
+1. **Fundação (concluído por relato):** solução, projetos, schema MySQL, configuração segura, README e build inicial.
+2. **Autenticação e cadastros (não iniciado):** sete perfis, clubes/unidades, titulares, dependentes, categorias, tipos de vínculo, interesses, solicitações de adesão e aprovação por Presidente/Administrador Geral; Web de administração e preparação dos endpoints para Mobile.
+3. **Espaços e reservas:** horários, manutenção, finalidade de locação, agenda Web, intervalos entre datas, contagem mensal por data local de início, elegibilidade, regras e concorrência.
+4. **Financeiro simulado:** geração de mensalidades itemizadas e taxas, quitação, transferência de locações com acréscimo de 10%, inadimplência e acesso do Tesoureiro limitado ao escopo autorizado.
+5. **Carteirinha e portaria online:** emissão, leitura/verificação, bloqueios e auditoria; considerar visitantes de eventos públicos sem dispensar conferência online.
+6. **Atividades, turmas e eventos sociais:** inscrições, vagas, lista de espera, eventos com público-alvo de associados ou público geral.
+7. **Comunicação e relatórios:** avisos, ouvidoria separando solicitação/reclamação e indicadores principais.
+8. **Mobile Android e integração:** solicitação de adesão de Convidados/Simpatizantes, acompanhamento, navegação, cache SQLite, teste em aparelho e fluxos ponta a ponta.
 9. **Possíveis evoluções futuras (não incluídas na primeira entrega):** validação offline na portaria, notificações push remotas e integração física de acesso. A catraca real não é necessária ao projeto.
 
 Após cada componente: informar arquivos alterados, instruções de execução, `dotnet build`, testes mínimos observados e pendências; atualizar documento de continuidade. Não declarar testes aprovados sem evidência. Preservar módulos que já funcionam e esperar aprovação antes de iniciar o próximo componente.
@@ -421,6 +474,25 @@ Após cada componente: informar arquivos alterados, instruções de execução, 
 
 **Validação concluída:** decisões P01–P14, F01–F05 e M01–M04 aprovadas. Detalhes técnicos de implementação, valores fictícios iniciais e versões de ferramentas podem ser definidos nos respectivos componentes sem alterar as regras de negócio.
 
+### 12.3 Complementações do enunciado do professor — aprovadas em 09/11/2026
+
+O professor descreveu um conjunto de clubes (exemplos: Foz 2, Guaíra 2), associados com cadastro detalhado e interesses, tipos de vínculo e direito a voto, administração local e superadministrador, tesoureiro, eventos sociais, solicitações/reclamações, adesão via aplicativo com aprovação, agenda de locações e consulta financeira. O usuário aprovou as complementações abaixo, mantendo o escopo anterior quando não houver conflito.
+
+| Referência | Decisão aprovada |
+|---|---|
+| **PC01 — Clubes** | **Opção A:** cada unidade é um clube da mesma organização; cadastro associativo central e possibilidade de serviços entre clubes preservados (D01). |
+| **PC02 — Dados cadastrais** | Acrescentar sigla/bairro/telefone/e-mail ao clube e CPF, endereço, sexo, estado civil e interesses múltiplos ao associado; respeitar privacidade. |
+| **PC03 — Classificações** | Criar `TipoVinculoAssociativo`: Associado/Fundador com voto, Convidado e Simpatizante sem voto. Não substituir Familiar/Individual/Atleta nem os perfis; sem benefícios financeiros presumidos. |
+| **PC04 — Administração** | Administrador Geral equivale a superadministrador; Presidente administra seu clube e Tesoureiro atua nas finanças autorizadas por unidade. |
+| **PC05 — Aprovação** | **Opção A:** Presidente do clube de origem e Administrador Geral podem aprovar/rejeitar adesões, respeitando escopo e auditoria. |
+| **PC06 — Cadastro Mobile** | **Opção A:** Convidado e Simpatizante solicitam adesão pelo aplicativo; Associado/Fundador é cadastrado pela administração. Pendência não ativa associação. |
+| **PC07 — Reservas entre meses** | **Opção A:** reserva que começa em outubro e termina em novembro conta só na cota de outubro, determinada pela data local de início da utilização na unidade. |
+| **PC08 — Salão e agenda** | Reservas possuem data/hora de início e fim, inclusive atravessando datas, finalidade de uso e calendário de locações na Web. |
+| **PC09 — Eventos** | Eventos sociais específicos por clube e público-alvo (somente associados ou público geral), separados de turmas esportivas. |
+| **PC10 — Ouvidoria** | Distinguir solicitações e reclamações, preservando histórico e autorização. |
+
+**Detalhamentos técnicos futuros, sem mudança de requisito:** obrigatoriedade de cada campo de formulário, benefícios específicos de categorias, forma de acompanhamento da adesão pelo Mobile, identificação de visitantes em eventos abertos e acesso financeiro do Tesoureiro em transações entre clubes. Esses pontos serão definidos antes dos respectivos componentes, sem presumir novas regras de negócio.
+
 ## 13. Instruções iniciais sugeridas para o ChatGPT Project
 
 > Você atuará como analista de requisitos, arquiteto e assistente de desenvolvimento do projeto acadêmico ClickClub. A fonte de verdade é este documento **aprovado**, complementado pelo arquivo `INSTRUCTIONS_PROJECT_CLICKCLUB.md`. O sistema usa MySQL centralizado, API ASP.NET Core, Web ASP.NET Core MVC e Mobile .NET MAUI Android com SQLite local quando necessário. A Web e o Mobile só se comunicam com a API; a API concentra autenticação, autorização, regras, transações e auditoria.
@@ -436,4 +508,4 @@ Após cada componente: informar arquivos alterados, instruções de execução, 
 
 ---
 
-**Próximo passo:** configurar o ChatGPT Project com `DOCUMENTACAO_CLICKCLUB.md`, `INSTRUCTIONS_PROJECT_CLICKCLUB.md` e `CONTINUIDADE_CLICKCLUB.md`. O Componente 1 permanece pendente até autorização explícita.
+**Próximo passo (09/11/2026):** sincronizar esta documentação e a continuidade no repositório, inspecionar os arquivos reais do Componente 1 e apresentar/confirmar o plano de testes do Componente 2. **O Componente 2 não foi iniciado e exige autorização explícita para implementar.**
