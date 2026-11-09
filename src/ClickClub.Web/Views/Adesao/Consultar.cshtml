@@ -1,0 +1,39 @@
+@model ConsultaAdesaoFormulario
+@{
+    ViewData["Title"] = "Consultar adesão";
+}
+
+<h1>Consultar solicitação de adesão</h1>
+
+<form asp-action="Consultar" method="post" class="mb-4">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="mb-3">
+        <label asp-for="Codigo" class="form-label">Código privado de 43 caracteres</label>
+        <input asp-for="Codigo" class="form-control font-monospace" autocomplete="off" />
+    </div>
+    <button type="submit" class="btn btn-primary">Consultar</button>
+</form>
+
+@if (Model.Resultado is not null)
+{
+    <div class="card">
+        <div class="card-body">
+            <h2 class="h5">Protocolo nº @Model.Resultado.Id</h2>
+            <dl class="row mb-0">
+                <dt class="col-sm-4">Status</dt><dd class="col-sm-8">@Model.Resultado.Status</dd>
+                <dt class="col-sm-4">Clube</dt><dd class="col-sm-8">@Model.Resultado.Clube</dd>
+                <dt class="col-sm-4">Vínculo</dt><dd class="col-sm-8">@Model.Resultado.TipoVinculo</dd>
+                <dt class="col-sm-4">Solicitada em (UTC)</dt><dd class="col-sm-8">@Model.Resultado.SolicitadaEmUtc.ToString("dd/MM/yyyy HH:mm")</dd>
+                @if (Model.Resultado.AnalisadaEmUtc.HasValue)
+                {
+                    <dt class="col-sm-4">Analisada em (UTC)</dt><dd class="col-sm-8">@Model.Resultado.AnalisadaEmUtc.Value.ToString("dd/MM/yyyy HH:mm")</dd>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.Resultado.Motivo))
+                {
+                    <dt class="col-sm-4">Motivo</dt><dd class="col-sm-8">@Model.Resultado.Motivo</dd>
+                }
+            </dl>
+        </div>
+    </div>
+}

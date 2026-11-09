@@ -1,0 +1,53 @@
+@model IReadOnlyList<EquipeUsuarioApi>
+@{
+    ViewData["Title"] = "Equipe dos clubes";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Equipe e permissões</h1>
+    <a asp-action="Criar" class="btn btn-primary">Cadastrar funcionário</a>
+</div>
+
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success" role="status">@sucesso</div>
+}
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-danger" role="alert">@erro</div>
+}
+@if (ViewBag.Erro is string erroConsulta)
+{
+    <div class="alert alert-danger" role="alert">@erroConsulta</div>
+}
+
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Login</th>
+                <th>Situação</th>
+                <th>Atribuições</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Nome</td>
+                    <td>@item.Login</td>
+                    <td>@(item.Ativo ? "Ativa" : "Inativa")</td>
+                    <td>@item.Atribuicoes.Count</td>
+                    <td><a asp-action="Detalhes" asp-route-id="@item.Id"
+                           class="btn btn-sm btn-outline-primary">Gerenciar permissões</a></td>
+                </tr>
+            }
+            @if (Model.Count == 0)
+            {
+                <tr><td colspan="5">Nenhuma conta funcional cadastrada.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

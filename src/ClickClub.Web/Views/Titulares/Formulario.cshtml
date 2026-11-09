@@ -1,0 +1,146 @@
+@model TitularFormulario
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Cadastrar titular" : "Editar titular";
+}
+
+<h1 class="h3 mb-3">@ViewData["Title"]</h1>
+
+<form asp-controller="Titulares" asp-action="Salvar" method="post" class="row g-3">
+    @Html.AntiForgeryToken()
+    <input asp-for="Id" type="hidden" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <h2 class="h5">Dados pessoais</h2>
+    <div class="col-md-8">
+        <label asp-for="Nome" class="form-label">Nome completo</label>
+        <input asp-for="Nome" class="form-control" maxlength="150" />
+        <span asp-validation-for="Nome" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Cpf" class="form-label">CPF (11 dígitos)</label>
+        <input asp-for="Cpf" class="form-control" maxlength="11" minlength="11"
+               inputmode="numeric" autocomplete="off" />
+        <span asp-validation-for="Cpf" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="DataNascimento" class="form-label">Data de nascimento (opcional)</label>
+        <input asp-for="DataNascimento" type="date" class="form-control" />
+        <span asp-validation-for="DataNascimento" class="text-danger"></span>
+    </div>
+    <div class="col-md-8">
+        <label asp-for="Endereco" class="form-label">Endereço (opcional)</label>
+        <input asp-for="Endereco" class="form-control" maxlength="255" />
+        <span asp-validation-for="Endereco" class="text-danger"></span>
+    </div>
+    <div class="col-md-5">
+        <label asp-for="Bairro" class="form-label">Bairro (opcional)</label>
+        <input asp-for="Bairro" class="form-control" maxlength="120" />
+        <span asp-validation-for="Bairro" class="text-danger"></span>
+    </div>
+    <div class="col-md-5">
+        <label asp-for="Cidade" class="form-label">Cidade (opcional)</label>
+        <input asp-for="Cidade" class="form-control" maxlength="120" />
+        <span asp-validation-for="Cidade" class="text-danger"></span>
+    </div>
+    <div class="col-md-2">
+        <label asp-for="Uf" class="form-label">UF (opcional)</label>
+        <input asp-for="Uf" class="form-control" maxlength="2" />
+        <span asp-validation-for="Uf" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Sexo" class="form-label">Sexo (opcional)</label>
+        <input asp-for="Sexo" class="form-control" maxlength="40" />
+        <span asp-validation-for="Sexo" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="EstadoCivil" class="form-label">Estado civil (opcional)</label>
+        <input asp-for="EstadoCivil" class="form-control" maxlength="40" />
+        <span asp-validation-for="EstadoCivil" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Telefone" class="form-label">Telefone (opcional)</label>
+        <input asp-for="Telefone" class="form-control" maxlength="30" />
+        <span asp-validation-for="Telefone" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Email" class="form-label">E-mail (opcional)</label>
+        <input asp-for="Email" class="form-control" type="email" maxlength="254" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <h2 class="h5 mt-4">Vínculo associativo</h2>
+    <div class="col-md-5">
+        <label asp-for="Matricula" class="form-label">Matrícula única</label>
+        <input asp-for="Matricula" class="form-control" maxlength="30" />
+        <span asp-validation-for="Matricula" class="text-danger"></span>
+    </div>
+    <div class="col-md-7">
+        <label asp-for="UnidadeOrigemId" class="form-label">Clube de origem</label>
+        <select asp-for="UnidadeOrigemId" class="form-select">
+            <option value="0">Selecione o clube...</option>
+            @if (Model.Opcoes is not null)
+            {
+                @foreach (var unidade in Model.Opcoes.Unidades)
+                {
+                    <option value="@unidade.Id">
+                        @unidade.Nome @(unidade.Status == "Ativa" ? "" : "(Inativa)")
+                    </option>
+                }
+            }
+        </select>
+        <span asp-validation-for="UnidadeOrigemId" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="CategoriaId" class="form-label">Categoria associativa</label>
+        <select asp-for="CategoriaId" class="form-select">
+            <option value="0">Selecione a categoria...</option>
+            @if (Model.Opcoes is not null)
+            {
+                @foreach (var categoria in Model.Opcoes.Categorias)
+                {
+                    <option value="@categoria.Id">
+                        @categoria.Nome @(categoria.Ativa ? "" : "(Inativa)")
+                    </option>
+                }
+            }
+        </select>
+        <span asp-validation-for="CategoriaId" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="TipoVinculoId" class="form-label">Tipo de vínculo</label>
+        <select asp-for="TipoVinculoId" class="form-select">
+            <option value="0">Selecione o vínculo...</option>
+            @if (Model.Opcoes is not null)
+            {
+                @foreach (var tipo in Model.Opcoes.TiposVinculo)
+                {
+                    <option value="@tipo.Id">
+                        @tipo.Nome @(tipo.Ativo ? "" : "(Inativo)")
+                    </option>
+                }
+            }
+        </select>
+        <span asp-validation-for="TipoVinculoId" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="DataInicio" class="form-label">Data de início da associação</label>
+        <input asp-for="DataInicio" type="date" class="form-control" />
+        <span asp-validation-for="DataInicio" class="text-danger"></span>
+    </div>
+    <div class="col-12">
+        <label asp-for="InteressesTexto" class="form-label">Interesses (opcional)</label>
+        <textarea asp-for="InteressesTexto" class="form-control" rows="2" maxlength="1500"
+                  placeholder="Pesca, Comida, Esportes"></textarea>
+        <div class="form-text">Separe os interesses por vírgula. Cada interesse será relacionado individualmente ao cadastro.</div>
+        <span asp-validation-for="InteressesTexto" class="text-danger"></span>
+    </div>
+
+    <div class="col-12 d-flex gap-2 my-3">
+        <button type="submit" class="btn btn-primary">Salvar titular</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

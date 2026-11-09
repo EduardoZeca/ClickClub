@@ -1,0 +1,73 @@
+@model EquipeCriacaoFormulario
+@{
+    ViewData["Title"] = "Cadastrar funcionário";
+}
+
+<h1 class="h3 mb-3">Cadastrar conta funcional</h1>
+<p class="text-muted">Selecione o primeiro papel e clube. Outras atribuições poderão ser adicionadas depois do cadastro.</p>
+
+<form asp-action="Criar" method="post" class="row g-3" autocomplete="off">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="col-md-8">
+        <label asp-for="Nome" class="form-label">Nome completo</label>
+        <input asp-for="Nome" class="form-control" maxlength="150" />
+        <span asp-validation-for="Nome" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Telefone" class="form-label">Telefone (opcional)</label>
+        <input asp-for="Telefone" class="form-control" maxlength="30" />
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Email" class="form-label">E-mail (opcional)</label>
+        <input asp-for="Email" type="email" class="form-control" maxlength="254" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Login" class="form-label">Login</label>
+        <input asp-for="Login" class="form-control" maxlength="100" autocomplete="off" />
+        <span asp-validation-for="Login" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Papel" class="form-label">Papel inicial</label>
+        <select asp-for="Papel" class="form-select">
+            <option value="">Selecione...</option>
+            <option value="FuncionarioUnidade">Funcionário da unidade</option>
+            <option value="Porteiro">Porteiro</option>
+            <option value="PresidenteClube">Presidente do clube</option>
+            <option value="Tesoureiro">Tesoureiro</option>
+        </select>
+        <span asp-validation-for="Papel" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="UnidadeId" class="form-label">Clube de atuação</label>
+        <select asp-for="UnidadeId" class="form-select">
+            <option value="0">Selecione...</option>
+            @foreach (var unidade in Model.Unidades.Where(x => x.Status == "Ativa"))
+            {
+                <option value="@unidade.Id">@unidade.Nome</option>
+            }
+        </select>
+        <span asp-validation-for="UnidadeId" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Senha" class="form-label">Senha inicial (mínimo de 12 caracteres)</label>
+        <input asp-for="Senha" type="password" class="form-control" maxlength="128" autocomplete="new-password" />
+        <span asp-validation-for="Senha" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="ConfirmarSenha" class="form-label">Confirmar senha</label>
+        <input asp-for="ConfirmarSenha" type="password" class="form-control" maxlength="128" autocomplete="new-password" />
+        <span asp-validation-for="ConfirmarSenha" class="text-danger"></span>
+    </div>
+
+    <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Cadastrar</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,35 @@
+@model EquipeSenhaFormulario
+@{
+    ViewData["Title"] = "Redefinir senha funcional";
+}
+
+<h1 class="h3 mb-3">Redefinir senha funcional</h1>
+
+<form asp-action="SalvarSenha" method="post" class="row g-3" autocomplete="off">
+    @Html.AntiForgeryToken()
+    <input asp-for="UsuarioId" type="hidden" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="col-md-6">
+        <label asp-for="NovaSenha" class="form-label">Nova senha (mínimo de 12 caracteres)</label>
+        <input asp-for="NovaSenha" type="password" class="form-control"
+               autocomplete="new-password" maxlength="128" />
+        <span asp-validation-for="NovaSenha" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="ConfirmarNovaSenha" class="form-label">Confirmar nova senha</label>
+        <input asp-for="ConfirmarNovaSenha" type="password" class="form-control"
+               autocomplete="new-password" maxlength="128" />
+        <span asp-validation-for="ConfirmarNovaSenha" class="text-danger"></span>
+    </div>
+
+    <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Redefinir senha</button>
+        <a asp-action="Detalhes" asp-route-id="@Model.UsuarioId"
+           class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

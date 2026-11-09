@@ -1,0 +1,16 @@
+@model ClubeAtribuidoApi
+@{
+    ViewData["Title"] = "Detalhes do clube";
+}
+
+<h1 class="h3 mb-3">@Model.Nome</h1>
+<dl class="row">
+    <dt class="col-sm-3">Sigla</dt>
+    <dd class="col-sm-9">@(Model.Sigla ?? "Não informada")</dd>
+    <dt class="col-sm-3">Município / UF</dt>
+    <dd class="col-sm-9">@Model.Municipio / @Model.Uf</dd>
+    <dt class="col-sm-3">Situação</dt>
+    <dd class="col-sm-9">@Model.Status</dd>
+</dl>
+
+<a asp-action="Index" class="btn btn-outline-secondary">Voltar</a>

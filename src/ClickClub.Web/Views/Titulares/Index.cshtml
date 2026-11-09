@@ -1,0 +1,82 @@
+@model IReadOnlyList<TitularResumoApi>
+@{
+    ViewData["Title"] = "Titulares";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Titulares e associações</h1>
+    <a asp-action="Criar" class="btn btn-primary">Cadastrar titular</a>
+</div>
+
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success" role="status">@sucesso</div>
+}
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-danger" role="alert">@erro</div>
+}
+@if (ViewBag.Erro is string erroConsulta)
+{
+    <div class="alert alert-danger" role="alert">@erroConsulta</div>
+}
+
+<p class="text-muted">Dados pessoais completos estão disponíveis apenas na edição autorizada.</p>
+
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>CPF final</th>
+                <th>Matrícula</th>
+                <th>Clube de origem</th>
+                <th>Categoria / vínculo</th>
+                <th>Situação</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var titular in Model)
+            {
+                <tr>
+                    <td>@titular.Nome</td>
+                    <td>***.@titular.CpfFinal</td>
+                    <td>@titular.Matricula</td>
+                    <td>@titular.ClubeOrigem</td>
+                    <td>@titular.Categoria / @titular.TipoVinculo</td>
+                    <td>@titular.Status</td>
+                    <td>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a asp-action="Editar" asp-route-id="@titular.Id"
+                               class="btn btn-sm btn-outline-primary">Editar</a>
+                            <a asp-controller="Dependentes" asp-action="Index"
+                               asp-route-associacaoId="@titular.Id"
+                               class="btn btn-sm btn-outline-primary">Dependentes</a>
+                            <a asp-controller="Contas" asp-action="Index"
+                               asp-route-associacaoId="@titular.Id"
+                               asp-route-papel="Titular"
+                               class="btn btn-sm btn-outline-primary">Conta</a>
+                            @if (titular.Status != "Cancelada")
+                            {
+                                var ativar = titular.Status != "Ativa";
+                                <form asp-action="AlterarSituacao" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@titular.Id" />
+                                    <input type="hidden" name="ativar" value="@(ativar ? "true" : "false")" />
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                        @(ativar ? "Reativar" : "Suspender")
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+            @if (Model.Count == 0)
+            {
+                <tr><td colspan="7">Nenhuma associação cadastrada.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

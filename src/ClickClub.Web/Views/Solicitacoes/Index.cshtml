@@ -1,0 +1,38 @@
+@model IReadOnlyList<AdesaoResumoApi>
+@{
+    ViewData["Title"] = "Solicitações de adesão";
+}
+
+<h1>Solicitações de adesão</h1>
+<p>Presidentes visualizam somente solicitações de seus clubes. O Administrador Geral visualiza todas.</p>
+
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success">@sucesso</div>
+}
+
+@if (Model.Count == 0)
+{
+    <p>Nenhuma solicitação disponível para seu perfil.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr><th>Protocolo</th><th>Nome</th><th>CPF (final)</th><th>Clube</th><th>Vínculo</th><th>Status</th><th>Enviada (UTC)</th><th></th></tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Id</td><td>@item.Nome</td><td>****@item.CpfFinal</td>
+                    <td>@item.Clube</td><td>@item.TipoVinculo</td><td>@item.Status</td>
+                    <td>@item.SolicitadaEmUtc.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td><a asp-action="Detalhes" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Analisar</a></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}

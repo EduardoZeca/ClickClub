@@ -1,0 +1,44 @@
+@model ContaCriacaoFormulario
+@{
+    ViewData["Title"] = "Criar conta associativa";
+    var controllerVoltar = Model.Papel == "Titular" ? "Titulares" : "Dependentes";
+}
+
+<h1 class="h3 mb-3">Criar conta de @Model.Papel</h1>
+<p class="text-muted">A senha será armazenada somente como hash no banco. Compartilhe a senha inicial diretamente com o usuário por um meio seguro.</p>
+
+<form asp-controller="Contas" asp-action="Criar" method="post" class="row g-3" autocomplete="off">
+    @Html.AntiForgeryToken()
+    <input asp-for="PessoaId" type="hidden" />
+    <input asp-for="AssociacaoId" type="hidden" />
+    <input asp-for="Papel" type="hidden" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="col-md-6">
+        <label asp-for="Login" class="form-label">Login</label>
+        <input asp-for="Login" class="form-control" maxlength="100" autocomplete="off" />
+        <span asp-validation-for="Login" class="text-danger"></span>
+    </div>
+    <div class="col-12"></div>
+    <div class="col-md-6">
+        <label asp-for="Senha" class="form-label">Senha inicial (mínimo de 12 caracteres)</label>
+        <input asp-for="Senha" type="password" class="form-control" maxlength="128" autocomplete="new-password" />
+        <span asp-validation-for="Senha" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="ConfirmarSenha" class="form-label">Confirmar senha</label>
+        <input asp-for="ConfirmarSenha" type="password" class="form-control" maxlength="128" autocomplete="new-password" />
+        <span asp-validation-for="ConfirmarSenha" class="text-danger"></span>
+    </div>
+    <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Criar conta</button>
+        <a asp-controller="@controllerVoltar"
+           asp-action="Index"
+           asp-route-associacaoId="@(Model.Papel == "Dependente" ? Model.AssociacaoId : (long?)null)"
+           class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

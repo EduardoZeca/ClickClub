@@ -1,0 +1,60 @@
+@model ContaAssociativaApi
+@{
+    ViewData["Title"] = "Conta associativa";
+    long associacaoId = ViewBag.AssociacaoId;
+    string papel = ViewBag.Papel;
+    var controllerVoltar = papel == "Titular" ? "Titulares" : "Dependentes";
+}
+
+<h1 class="h3 mb-3">Conta associativa</h1>
+
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success" role="status">@sucesso</div>
+}
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-danger" role="alert">@erro</div>
+}
+
+<dl class="row">
+    <dt class="col-sm-3">Login</dt>
+    <dd class="col-sm-9">@Model.Login</dd>
+    <dt class="col-sm-3">Perfil</dt>
+    <dd class="col-sm-9">@Model.Papel</dd>
+    <dt class="col-sm-3">Situação da conta</dt>
+    <dd class="col-sm-9">@(Model.Ativo ? "Ativa" : "Inativa")</dd>
+</dl>
+
+@if (Model.Papel == "Outro")
+{
+    <div class="alert alert-warning">A pessoa já possui uma conta de outro perfil. O gerenciamento de múltiplos papéis ficará para uma etapa posterior.</div>
+    <a asp-controller="@controllerVoltar" asp-action="Index"
+       asp-route-associacaoId="@(papel == "Dependente" ? associacaoId : (long?)null)"
+       class="btn btn-outline-secondary">Voltar</a>
+}
+else
+{
+<div class="d-flex flex-wrap gap-2">
+    <form asp-controller="Contas" asp-action="AlterarSituacao" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="usuarioId" value="@Model.UsuarioId" />
+        <input type="hidden" name="pessoaId" value="@Model.PessoaId" />
+        <input type="hidden" name="associacaoId" value="@associacaoId" />
+        <input type="hidden" name="papel" value="@papel" />
+        <input type="hidden" name="ativo" value="@(Model.Ativo ? "false" : "true")" />
+        <button type="submit" class="btn btn-outline-secondary">
+            @(Model.Ativo ? "Desativar conta" : "Reativar conta")
+        </button>
+    </form>
+    <a asp-controller="Contas" asp-action="Senha"
+       asp-route-usuarioId="@Model.UsuarioId"
+       asp-route-pessoaId="@Model.PessoaId"
+       asp-route-associacaoId="@associacaoId"
+       asp-route-papel="@papel" class="btn btn-outline-primary">Redefinir senha</a>
+    <a asp-controller="@controllerVoltar"
+       asp-action="Index"
+       asp-route-associacaoId="@(papel == "Dependente" ? associacaoId : (long?)null)"
+       class="btn btn-outline-secondary">Voltar</a>
+</div>
+}

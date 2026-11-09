@@ -1,0 +1,69 @@
+@model UnidadeFormulario
+@{
+    var edicao = Model.Id > 0;
+    ViewData["Title"] = edicao ? "Editar clube" : "Cadastrar clube";
+}
+
+<h1 class="h3 mb-3">@ViewData["Title"]</h1>
+
+<form asp-controller="Unidades" asp-action="Salvar" method="post" class="row g-3">
+    @Html.AntiForgeryToken()
+    <input asp-for="Id" type="hidden" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="col-md-8">
+        <label asp-for="Nome" class="form-label">Nome do clube</label>
+        <input asp-for="Nome" class="form-control" maxlength="150" />
+        <span asp-validation-for="Nome" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Sigla" class="form-label">Sigla</label>
+        <input asp-for="Sigla" class="form-control" maxlength="20" />
+        <span asp-validation-for="Sigla" class="text-danger"></span>
+    </div>
+    <div class="col-md-8">
+        <label asp-for="Endereco" class="form-label">Endereço</label>
+        <input asp-for="Endereco" class="form-control" maxlength="255" />
+        <span asp-validation-for="Endereco" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Bairro" class="form-label">Bairro (opcional)</label>
+        <input asp-for="Bairro" class="form-control" maxlength="120" />
+        <span asp-validation-for="Bairro" class="text-danger"></span>
+    </div>
+    <div class="col-md-8">
+        <label asp-for="Municipio" class="form-label">Município</label>
+        <input asp-for="Municipio" class="form-control" maxlength="120" />
+        <span asp-validation-for="Municipio" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Uf" class="form-label">UF</label>
+        <input asp-for="Uf" class="form-control" maxlength="2" placeholder="PR" />
+        <span asp-validation-for="Uf" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Telefone" class="form-label">Telefone (opcional)</label>
+        <input asp-for="Telefone" class="form-control" maxlength="30" />
+        <span asp-validation-for="Telefone" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Email" class="form-label">E-mail (opcional)</label>
+        <input asp-for="Email" type="email" class="form-control" maxlength="254" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="FusoHorario" class="form-label">Fuso horário</label>
+        <input asp-for="FusoHorario" class="form-control" maxlength="64" />
+        <span asp-validation-for="FusoHorario" class="text-danger"></span>
+        <div class="form-text">Exemplo: America/Sao_Paulo</div>
+    </div>
+
+    <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

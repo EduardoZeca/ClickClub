@@ -1,0 +1,38 @@
+@model ContaSenhaFormulario
+@{
+    ViewData["Title"] = "Redefinir senha";
+}
+
+<h1 class="h3 mb-3">Redefinir senha associativa</h1>
+
+<form asp-controller="Contas" asp-action="SalvarSenha" method="post" class="row g-3" autocomplete="off">
+    @Html.AntiForgeryToken()
+    <input asp-for="UsuarioId" type="hidden" />
+    <input asp-for="PessoaId" type="hidden" />
+    <input asp-for="AssociacaoId" type="hidden" />
+    <input asp-for="Papel" type="hidden" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="col-md-6">
+        <label asp-for="NovaSenha" class="form-label">Nova senha (mínimo de 12 caracteres)</label>
+        <input asp-for="NovaSenha" type="password" class="form-control" maxlength="128" autocomplete="new-password" />
+        <span asp-validation-for="NovaSenha" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="ConfirmarNovaSenha" class="form-label">Confirmar nova senha</label>
+        <input asp-for="ConfirmarNovaSenha" type="password" class="form-control" maxlength="128" autocomplete="new-password" />
+        <span asp-validation-for="ConfirmarNovaSenha" class="text-danger"></span>
+    </div>
+    <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Redefinir senha</button>
+        <a asp-controller="Contas" asp-action="Index"
+           asp-route-pessoaId="@Model.PessoaId"
+           asp-route-associacaoId="@Model.AssociacaoId"
+           asp-route-papel="@Model.Papel"
+           class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

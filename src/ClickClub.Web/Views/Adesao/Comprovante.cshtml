@@ -1,0 +1,18 @@
+@model AdesaoCriadaApi
+@{
+    ViewData["Title"] = "Comprovante de adesão";
+}
+
+<h1>Solicitação recebida</h1>
+<div class="alert alert-success">Protocolo nº @Model.Id, status: @Model.Status.</div>
+
+<div class="card my-3">
+    <div class="card-body">
+        <h2 class="h5">Código privado para acompanhamento</h2>
+        <p class="font-monospace text-break user-select-all">@Model.CodigoConsulta</p>
+        <p class="mb-0"><strong>Copie e guarde este código agora.</strong> Ele é exibido somente neste momento. Quem tiver acesso a ele poderá consultar o resultado da solicitação. Não o compartilhe publicamente.</p>
+    </div>
+</div>
+
+<p>A solicitação será analisada pelo Presidente do clube escolhido ou pelo Administrador Geral. Nenhuma associação ou acesso de sócio foi ativado neste momento.</p>
+<a asp-action="Consultar" class="btn btn-outline-primary">Consultar andamento</a>

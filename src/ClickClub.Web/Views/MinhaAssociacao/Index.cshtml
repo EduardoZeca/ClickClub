@@ -1,0 +1,23 @@
+@model MinhaAssociacaoApi
+@{
+    ViewData["Title"] = "Minha associação";
+}
+
+<h1 class="h3 mb-3">Minha associação</h1>
+
+<dl class="row">
+    <dt class="col-sm-3">Nome</dt>
+    <dd class="col-sm-9">@Model.Nome</dd>
+    <dt class="col-sm-3">Perfil</dt>
+    <dd class="col-sm-9">@Model.Perfil</dd>
+    <dt class="col-sm-3">Matrícula</dt>
+    <dd class="col-sm-9">@Model.Matricula</dd>
+    <dt class="col-sm-3">Clube de origem</dt>
+    <dd class="col-sm-9">@Model.ClubeOrigem</dd>
+    <dt class="col-sm-3">Categoria</dt>
+    <dd class="col-sm-9">@Model.Categoria</dd>
+    <dt class="col-sm-3">Situação associativa</dt>
+    <dd class="col-sm-9">@Model.Status</dd>
+</dl>
+
+<p class="text-muted">Esta consulta não permite visualizar dados ou informações financeiras de outros associados.</p>

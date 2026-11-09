@@ -1,0 +1,29 @@
+@model IReadOnlyList<ClubeAtribuidoApi>
+@{
+    ViewData["Title"] = "Meus clubes";
+}
+
+<h1 class="h3 mb-3">Meus clubes</h1>
+<p class="text-muted">A consulta apresenta somente os clubes vinculados aos seus papéis de acesso. O Administrador Geral consulta todos.</p>
+
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead><tr><th>Clube</th><th>Município/UF</th><th>Situação</th><th>Ação</th></tr></thead>
+        <tbody>
+            @foreach (var clube in Model)
+            {
+                <tr>
+                    <td>@clube.Nome (@(clube.Sigla ?? "—"))</td>
+                    <td>@clube.Municipio / @clube.Uf</td>
+                    <td>@clube.Status</td>
+                    <td><a asp-action="Detalhes" asp-route-id="@clube.Id"
+                           class="btn btn-sm btn-outline-primary">Consultar</a></td>
+                </tr>
+            }
+            @if (Model.Count == 0)
+            {
+                <tr><td colspan="4">Nenhum clube atribuído.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,77 @@
+@model IReadOnlyList<DependenteResumoApi>
+@{
+    ViewData["Title"] = "Dependentes";
+    long associacaoId = ViewBag.AssociacaoId;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Dependentes da associação #@associacaoId</h1>
+    <a asp-action="Criar" asp-route-associacaoId="@associacaoId"
+       class="btn btn-primary">Adicionar dependente</a>
+</div>
+
+<p><a asp-controller="Titulares" asp-action="Index">Voltar aos titulares</a></p>
+
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success" role="status">@sucesso</div>
+}
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-danger" role="alert">@erro</div>
+}
+@if (ViewBag.Erro is string erroConsulta)
+{
+    <div class="alert alert-danger" role="alert">@erroConsulta</div>
+}
+
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>CPF final</th>
+                <th>Nascimento</th>
+                <th>Situação</th>
+                <th>Login</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Nome</td>
+                    <td>@(item.CpfFinal is null ? "Não informado" : $"***.{item.CpfFinal}")</td>
+                    <td>@(item.DataNascimento?.ToString("dd/MM/yyyy") ?? "Não informada")</td>
+                    <td>@(item.Ativo ? "Ativo" : "Inativo")</td>
+                    <td>@(item.Login ?? "Não criado")</td>
+                    <td>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a asp-action="Editar" asp-route-id="@item.Id"
+                               class="btn btn-sm btn-outline-primary">Editar</a>
+                            <a asp-controller="Contas" asp-action="Index"
+                               asp-route-pessoaId="@item.PessoaId"
+                               asp-route-associacaoId="@associacaoId"
+                               asp-route-papel="Dependente"
+                               class="btn btn-sm btn-outline-primary">Conta</a>
+                            <form asp-action="AlterarSituacao" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <input type="hidden" name="associacaoId" value="@associacaoId" />
+                                <input type="hidden" name="ativo" value="@(item.Ativo ? "false" : "true")" />
+                                <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                    @(item.Ativo ? "Desvincular" : "Reativar")
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+            @if (Model.Count == 0)
+            {
+                <tr><td colspan="6">Nenhum dependente vinculado.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

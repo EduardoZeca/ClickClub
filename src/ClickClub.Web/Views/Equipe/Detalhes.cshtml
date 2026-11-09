@@ -1,0 +1,91 @@
+@model EquipeDetalhesPagina
+@{
+    ViewData["Title"] = "Permissões da equipe";
+}
+
+<h1 class="h3 mb-3">Permissões de @Model.Usuario.Nome</h1>
+
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success" role="status">@sucesso</div>
+}
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-danger" role="alert">@erro</div>
+}
+
+<p>Login: <strong>@Model.Usuario.Login</strong> — Conta @(Model.Usuario.Ativo ? "ativa" : "inativa")</p>
+
+<form asp-action="AlterarSituacao" method="post" class="mb-4">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@Model.Usuario.Id" />
+    <input type="hidden" name="ativo" value="@(Model.Usuario.Ativo ? "false" : "true")" />
+    <button type="submit" class="btn btn-outline-secondary">
+        @(Model.Usuario.Ativo ? "Desativar conta" : "Reativar conta")
+    </button>
+</form>
+
+<p>
+    <a asp-action="Senha" asp-route-id="@Model.Usuario.Id"
+       class="btn btn-outline-primary btn-sm">Redefinir senha funcional</a>
+</p>
+
+<h2 class="h5">Atribuições existentes</h2>
+<div class="table-responsive mb-4">
+    <table class="table table-striped align-middle">
+        <thead><tr><th>Clube</th><th>Papel</th><th>Ação</th></tr></thead>
+        <tbody>
+            @foreach (var atribuicao in Model.Usuario.Atribuicoes)
+            {
+                <tr>
+                    <td>@atribuicao.UnidadeNome</td>
+                    <td>@NomesPapeis.Exibir(atribuicao.Papel)</td>
+                    <td>
+                        <form asp-action="Revogar" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="UsuarioId" value="@Model.Usuario.Id" />
+                            <input type="hidden" name="UnidadeId" value="@atribuicao.UnidadeId" />
+                            <input type="hidden" name="Papel" value="@atribuicao.Papel" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Revogar</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            @if (Model.Usuario.Atribuicoes.Count == 0)
+            {
+                <tr><td colspan="3">Nenhuma atribuição ativa. A conta não terá acesso funcional.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<h2 class="h5">Adicionar atribuição</h2>
+<form asp-action="Atribuir" method="post" class="row g-3 mb-4">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="UsuarioId" value="@Model.Usuario.Id" />
+    <div class="col-md-5">
+        <label for="Papel" class="form-label">Papel</label>
+        <select name="Papel" id="Papel" class="form-select" required>
+            <option value="">Selecione...</option>
+            <option value="FuncionarioUnidade">Funcionário da unidade</option>
+            <option value="Porteiro">Porteiro</option>
+            <option value="PresidenteClube">Presidente do clube</option>
+            <option value="Tesoureiro">Tesoureiro</option>
+        </select>
+    </div>
+    <div class="col-md-5">
+        <label for="UnidadeId" class="form-label">Clube</label>
+        <select name="UnidadeId" id="UnidadeId" class="form-select" required>
+            <option value="0">Selecione...</option>
+            @foreach (var unidade in Model.Unidades.Where(x => x.Status == "Ativa"))
+            {
+                <option value="@unidade.Id">@unidade.Nome</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary">Adicionar</button>
+    </div>
+</form>
+
+<a asp-action="Index" class="btn btn-outline-secondary">Voltar à equipe</a>

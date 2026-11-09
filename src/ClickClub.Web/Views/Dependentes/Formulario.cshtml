@@ -1,0 +1,80 @@
+@model DependenteFormulario
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Cadastrar dependente" : "Editar dependente";
+}
+
+<h1 class="h3 mb-3">@ViewData["Title"]</h1>
+<p class="text-muted">Associação #@Model.AssociacaoId. O cadastro não cria uma cobrança adicional.</p>
+
+<form asp-controller="Dependentes" asp-action="Salvar" method="post" class="row g-3">
+    @Html.AntiForgeryToken()
+    <input asp-for="Id" type="hidden" />
+    <input asp-for="AssociacaoId" type="hidden" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="col-md-8">
+        <label asp-for="Nome" class="form-label">Nome completo</label>
+        <input asp-for="Nome" class="form-control" maxlength="150" />
+        <span asp-validation-for="Nome" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Cpf" class="form-label">CPF (opcional)</label>
+        <input asp-for="Cpf" class="form-control" maxlength="11" inputmode="numeric" autocomplete="off" />
+        <span asp-validation-for="Cpf" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="DataNascimento" class="form-label">Data de nascimento</label>
+        <input asp-for="DataNascimento" type="date" class="form-control" />
+        <span asp-validation-for="DataNascimento" class="text-danger"></span>
+    </div>
+    <div class="col-md-8">
+        <label asp-for="Endereco" class="form-label">Endereço (opcional)</label>
+        <input asp-for="Endereco" class="form-control" maxlength="255" />
+        <span asp-validation-for="Endereco" class="text-danger"></span>
+    </div>
+    <div class="col-md-5">
+        <label asp-for="Bairro" class="form-label">Bairro (opcional)</label>
+        <input asp-for="Bairro" class="form-control" maxlength="120" />
+        <span asp-validation-for="Bairro" class="text-danger"></span>
+    </div>
+    <div class="col-md-5">
+        <label asp-for="Cidade" class="form-label">Cidade (opcional)</label>
+        <input asp-for="Cidade" class="form-control" maxlength="120" />
+        <span asp-validation-for="Cidade" class="text-danger"></span>
+    </div>
+    <div class="col-md-2">
+        <label asp-for="Uf" class="form-label">UF (opcional)</label>
+        <input asp-for="Uf" class="form-control" maxlength="2" />
+        <span asp-validation-for="Uf" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Sexo" class="form-label">Sexo (opcional)</label>
+        <input asp-for="Sexo" class="form-control" maxlength="40" />
+        <span asp-validation-for="Sexo" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="EstadoCivil" class="form-label">Estado civil (opcional)</label>
+        <input asp-for="EstadoCivil" class="form-control" maxlength="40" />
+        <span asp-validation-for="EstadoCivil" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Telefone" class="form-label">Telefone (opcional)</label>
+        <input asp-for="Telefone" class="form-control" maxlength="30" />
+        <span asp-validation-for="Telefone" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Email" class="form-label">E-mail (opcional)</label>
+        <input asp-for="Email" type="email" class="form-control" maxlength="254" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="col-12 d-flex gap-2 mt-3">
+        <button type="submit" class="btn btn-primary">Salvar dependente</button>
+        <a asp-action="Index" asp-route-associacaoId="@Model.AssociacaoId"
+           class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
