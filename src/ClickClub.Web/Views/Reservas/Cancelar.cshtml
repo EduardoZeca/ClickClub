@@ -1,0 +1,45 @@
+@model ReservaApi
+@{
+    ViewData["Title"] = "Cancelar reserva";
+}
+
+<h1>Cancelar reserva #@Model.Id</h1>
+
+<div class="alert alert-warning">
+    Esta ação cancela a reserva e libera a cota mensal correspondente.
+    O registro permanecerá no histórico. A operação financeira é simulada.
+</div>
+
+<dl class="row">
+    <dt class="col-sm-3">Responsável</dt>
+    <dd class="col-sm-9">@Model.Responsavel</dd>
+    <dt class="col-sm-3">Clube e espaço</dt>
+    <dd class="col-sm-9">@Model.Clube — @Model.Espaco</dd>
+    <dt class="col-sm-3">Início (horário do clube)</dt>
+    <dd class="col-sm-9">@Model.InicioLocal.ToString("dd/MM/yyyy HH:mm")</dd>
+    <dt class="col-sm-3">Fim (horário do clube)</dt>
+    <dd class="col-sm-9">@Model.FimLocal.ToString("dd/MM/yyyy HH:mm")</dd>
+    <dt class="col-sm-3">Taxa original</dt>
+    <dd class="col-sm-9">@Model.ValorContratado.ToString("C", new System.Globalization.CultureInfo("pt-BR"))</dd>
+    <dt class="col-sm-3">Situação da taxa</dt>
+    <dd class="col-sm-9">@Model.SituacaoTaxa</dd>
+</dl>
+
+@if (Model.Tipo == "SalaoFestas")
+{
+    <p>Salões: com 24 horas exatas ou mais de antecedência, não há multa. Com menos de 24 horas, a multa simulada será o menor valor entre R$ 50,00 e a taxa original.</p>
+}
+else
+{
+    <p>Para este tipo de espaço, não foi definida multa de cancelamento na primeira versão.</p>
+}
+
+<p>Se a taxa ainda estiver em aberto, ela será encerrada e somente eventual multa permanecerá pendente. Se já tiver sido quitada de forma simulada, o saldo restituível será registrado como crédito pendente.</p>
+<p>O cálculo definitivo é efetuado pela API no instante da confirmação. Não é possível cancelar uma utilização já iniciada.</p>
+
+<form asp-action="ConfirmarCancelamento" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="reservaId" value="@Model.Id" />
+    <button type="submit" class="btn btn-danger">Confirmar cancelamento</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Voltar sem cancelar</a>
+</form>

@@ -1,0 +1,58 @@
+@model ReservaFormulario
+@{
+    ViewData["Title"] = "Nova reserva";
+}
+
+<h1>Nova reserva</h1>
+<p>Reservas disponíveis para quadras, salões de festas e churrasqueiras, inclusive em outros clubes habilitados.</p>
+<p>Informe o início e o fim usando o <strong>horário local do clube escolhido</strong>, indicado na lista. O valor mostrado é a taxa simulada atual do espaço.</p>
+<p>Salões exigem pelo menos 24 horas exatas de antecedência. As listas de convidados de salões e churrasqueiras só podem ser alteradas até 24 horas antes do início.</p>
+@if (User.IsInRole("Dependente") && !User.IsInRole("Titular"))
+{
+    <p>Dependentes menores de 18 anos precisam da permissão geral do titular para reservar espaços pagos. Reservas gratuitas não exigem essa permissão.</p>
+}
+
+<form asp-action="Criar" method="post" class="row g-3">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="col-12">
+        <label asp-for="EspacoId" class="form-label">Clube e espaço</label>
+        <select asp-for="EspacoId" class="form-select">
+            <option value="0">Selecione o espaço</option>
+            @foreach (var espaco in Model.Espacos)
+            {
+                <option value="@espaco.Id">@espaco.Clube — @espaco.Nome (@espaco.Tipo; capacidade @espaco.Capacidade; @espaco.TaxaBase.ToString("C", new System.Globalization.CultureInfo("pt-BR")); @espaco.FusoHorario)</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="InicioLocal" class="form-label">Início (horário local)</label>
+        <input asp-for="InicioLocal" type="datetime-local" class="form-control" />
+    </div>
+    <div class="col-md-6">
+        <label asp-for="FimLocal" class="form-label">Fim (horário local)</label>
+        <input asp-for="FimLocal" type="datetime-local" class="form-control" />
+    </div>
+    <div class="col-12">
+        <label asp-for="QuantidadeParticipantes" class="form-label">Quantidade de participantes</label>
+        <input asp-for="QuantidadeParticipantes" type="number" min="1" max="10000" class="form-control" />
+    </div>
+    <div class="col-12">
+        <label asp-for="Finalidade" class="form-label">Finalidade (opcional)</label>
+        <input asp-for="Finalidade" class="form-control" maxlength="250" placeholder="Treino, confraternização..." />
+    </div>
+    <div class="col-12">
+        <label asp-for="ConvidadosTexto" class="form-label">Convidados (salão ou churrasqueira)</label>
+        <textarea asp-for="ConvidadosTexto" class="form-control" rows="4" maxlength="8000" placeholder="Maria Silva - RG 1234&#10;João Silva | RG 5678"></textarea>
+        <div class="form-text">Uma pessoa por linha, usando <strong>Nome | Identificação</strong> ou <strong>Nome - Identificação</strong>. A quantidade de participantes inclui o titular; informe no máximo participantes menos um convidados. Para quadras, deixe este campo vazio.</div>
+    </div>
+    <div class="col-12 form-check ms-2">
+        <input asp-for="ListaConvidadosCompleta" class="form-check-input" />
+        <label asp-for="ListaConvidadosCompleta" class="form-check-label">Confirmo que a lista inicial está completa (obrigatório se a reserva começar em até 24 horas).</label>
+    </div>
+    <div class="col-12">
+        <button class="btn btn-primary" type="submit">Confirmar reserva</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+</form>

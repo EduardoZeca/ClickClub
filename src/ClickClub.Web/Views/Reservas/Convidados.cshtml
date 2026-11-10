@@ -1,0 +1,63 @@
+@model ConvidadosReservaFormulario
+@{
+    ViewData["Title"] = "Convidados da reserva";
+    var reserva = Model.Reserva!;
+    var lista = Model.EstadoConvidados!;
+}
+
+<h1>Convidados da reserva #@reserva.Id</h1>
+<dl class="row">
+    <dt class="col-sm-3">Clube e espaço</dt>
+    <dd class="col-sm-9">@reserva.Clube — @reserva.Espaco</dd>
+    <dt class="col-sm-3">Início (horário do clube)</dt>
+    <dd class="col-sm-9">@reserva.InicioLocal.ToString("dd/MM/yyyy HH:mm")</dd>
+    <dt class="col-sm-3">Participantes (inclui titular)</dt>
+    <dd class="col-sm-9">@reserva.QuantidadeParticipantes</dd>
+    <dt class="col-sm-3">Prazo final para alterações</dt>
+    <dd class="col-sm-9">@lista.LimiteEdicaoUtc.ToString("dd/MM/yyyy HH:mm") UTC</dd>
+</dl>
+
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success">@sucesso</div>
+}
+
+<h2 class="h4">Lista atual</h2>
+@if (lista.Itens.Count == 0)
+{
+    <p>Nenhum convidado cadastrado.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead><tr><th>Nome</th><th>Identificação mínima</th></tr></thead>
+        <tbody>
+            @foreach (var convidado in lista.Itens)
+            {
+                <tr><td>@convidado.Nome</td><td>@convidado.IdentificacaoMinima</td></tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (lista.PodeAlterar)
+{
+    <h2 class="h4">Substituir lista de convidados</h2>
+    <p>A lista enviada substitui todos os convidados atuais. Informe uma pessoa por linha, usando <strong>Nome | Identificação</strong> ou <strong>Nome - Identificação</strong>.</p>
+    <form asp-action="SalvarConvidados" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="ReservaId" />
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="mb-3">
+            <label asp-for="ConvidadosTexto" class="form-label">Convidados</label>
+            <textarea asp-for="ConvidadosTexto" class="form-control" rows="8" maxlength="8000"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Salvar lista</button>
+    </form>
+}
+else
+{
+    <div class="alert alert-secondary">Lista fechada: não são permitidas inclusões, alterações ou exclusões nas últimas 24 horas antes do início ou após o cancelamento.</div>
+}
+
+<a asp-action="Index" class="btn btn-outline-secondary mt-3">Voltar às reservas</a>

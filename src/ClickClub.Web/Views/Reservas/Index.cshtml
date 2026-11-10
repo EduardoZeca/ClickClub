@@ -1,0 +1,72 @@
+@model IReadOnlyList<ReservaApi>
+@{
+    ViewData["Title"] = "Minhas reservas";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Minhas reservas</h1>
+    <div>
+        @if (User.IsInRole("Titular"))
+        {
+            <a asp-action="Permissoes" class="btn btn-outline-secondary">Permissões de dependentes</a>
+        }
+        <a asp-action="Criar" class="btn btn-primary">Nova reserva</a>
+    </div>
+</div>
+
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success">@sucesso</div>
+}
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-danger">@erro</div>
+}
+
+<p>As taxas de locação são simuladas. A quitação e a transferência para mensalidades serão habilitadas no componente financeiro.</p>
+@if (User.IsInRole("Dependente") && !User.IsInRole("Titular"))
+{
+    <p>Esta lista mostra somente as reservas feitas por você. O titular pode consultar todas as reservas da associação.</p>
+}
+
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr><th>Protocolo</th><th>Responsável</th><th>Clube</th><th>Espaço</th><th>Início local</th><th>Fim local</th><th>Participantes</th><th>Finalidade</th><th>Valor</th><th>Situação</th><th>Taxa</th><th>Convidados</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+        @foreach (var reserva in Model)
+        {
+            <tr>
+                <td>@reserva.Id</td>
+                <td>@reserva.Responsavel</td>
+                <td>@reserva.Clube</td>
+                <td>@reserva.Espaco</td>
+                <td>@reserva.InicioLocal.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@reserva.FimLocal.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@reserva.QuantidadeParticipantes</td>
+                <td>@(reserva.Finalidade ?? "—")</td>
+                <td>@reserva.ValorContratado.ToString("C", new System.Globalization.CultureInfo("pt-BR"))</td>
+                <td>@reserva.Status</td>
+                <td>@reserva.SituacaoTaxa</td>
+                <td>
+                    @if (reserva.Tipo is "SalaoFestas" or "Churrasqueira")
+                    {
+                        <a asp-action="Convidados" asp-route-id="@reserva.Id" class="btn btn-outline-primary btn-sm">Consultar / editar</a>
+                    }
+                </td>
+                <td>
+                    @if (reserva.Status == "Confirmada")
+                    {
+                        <a asp-action="Cancelar" asp-route-id="@reserva.Id" class="btn btn-outline-danger btn-sm">Cancelar</a>
+                    }
+                </td>
+            </tr>
+        }
+        @if (Model.Count == 0)
+        {
+            <tr><td colspan="13">Nenhuma reserva registrada.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,199 @@
+@model AgendaEspacoPagina
+@{
+    ViewData["Title"] = "Agenda do espaço";
+    var dias = new[] { "Segunda-feira", "Terça-feira", "Quarta-feira",
+        "Quinta-feira", "Sexta-feira", "Sábado", "Domingo" };
+    var primeiroMes = new DateTime(Model.Ano, Model.Mes, 1);
+    var anterior = primeiroMes.AddMonths(-1);
+    var proximo = primeiroMes.AddMonths(1);
+    var primeiraSegunda = primeiroMes.AddDays(-(((int)primeiroMes.DayOfWeek + 6) % 7));
+    var ultimoDia = primeiroMes.AddMonths(1).AddDays(-1);
+    var ultimoDomingo = ultimoDia.AddDays(6 - (((int)ultimoDia.DayOfWeek + 6) % 7));
+    var cultura = new System.Globalization.CultureInfo("pt-BR");
+}
+
+<h1>Agenda: @Model.Espaco.Nome</h1>
+<p><strong>Clube:</strong> @Model.Espaco.Clube</p>
+<p>Os horários e as datas dos formulários seguem o fuso horário cadastrado para este clube.</p>
+<a asp-controller="Espacos" asp-action="Index">Voltar aos espaços</a>
+
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success mt-3">@sucesso</div>
+}
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-danger mt-3">@erro</div>
+}
+
+<hr />
+<h2 class="h4">Calendário de locações e manutenções</h2>
+<p>O calendário mostra reservas confirmadas e manutenções ativas, inclusive quando atravessam datas. Não exibe dados pessoais dos associados.</p>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <a asp-action="Detalhes" asp-route-id="@Model.Espaco.Id" asp-route-ano="@anterior.Year" asp-route-mes="@anterior.Month"
+       class="btn btn-outline-secondary">Mês anterior</a>
+    <h3 class="h5 mb-0">@primeiroMes.ToString("MMMM yyyy", cultura)</h3>
+    <a asp-action="Detalhes" asp-route-id="@Model.Espaco.Id" asp-route-ano="@proximo.Year" asp-route-mes="@proximo.Month"
+       class="btn btn-outline-secondary">Próximo mês</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered" style="table-layout: fixed; min-width: 950px;">
+        <thead class="table-light">
+            <tr>
+                @foreach (var diaSemana in dias)
+                {
+                    <th scope="col">@diaSemana</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+        @for (var segunda = primeiraSegunda; segunda <= ultimoDomingo; segunda = segunda.AddDays(7))
+        {
+            <tr>
+                @for (var coluna = 0; coluna < 7; coluna++)
+                {
+                    var dia = segunda.AddDays(coluna);
+                    <td class="align-top @(dia.Month == Model.Mes ? "" : "table-secondary")" style="height: 115px;">
+                        <strong>@dia.Day</strong>
+                        @foreach (var ocupacao in Model.Ocupacoes.Where(x =>
+                            x.InicioLocal < dia.AddDays(1) && x.FimLocal > dia))
+                        {
+                            <div class="small border rounded p-1 mt-1 text-break @(ocupacao.Tipo == "Reserva" ? "bg-info-subtle" : "bg-warning-subtle")">
+                                <strong>@(ocupacao.Tipo == "Reserva" ? "Reservado" : "Manutenção")</strong>
+                                <div>@ocupacao.InicioLocal.ToString("dd/MM HH:mm") até @ocupacao.FimLocal.ToString("dd/MM HH:mm")</div>
+                                <div>@ocupacao.Descricao</div>
+                            </div>
+                        }
+                    </td>
+                }
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+<hr />
+<h2 class="h4">Horários de funcionamento semanais</h2>
+<p>Exemplo: sexta-feira das 18:00 às 02:00 do sábado — marque “Termina no dia seguinte”. Horários ativos não podem se sobrepor.</p>
+
+<form asp-controller="EspacosAgenda" asp-action="CriarHorario" method="post" class="row g-3 mb-3">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="EspacoId" value="@Model.Espaco.Id" />
+    <div class="col-md-4">
+        <label class="form-label" for="DiaSemana">Dia da semana</label>
+        <select class="form-select" name="DiaSemana" id="DiaSemana" required>
+            <option value="">Selecione</option>
+            @for (var dia = 1; dia <= 7; dia++)
+            {
+                <option value="@dia">@dias[dia - 1]</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label class="form-label" for="Inicio">Abertura</label>
+        <input name="Inicio" id="Inicio" type="time" class="form-control" required />
+    </div>
+    <div class="col-md-3">
+        <label class="form-label" for="Fim">Fechamento</label>
+        <input name="Fim" id="Fim" type="time" class="form-control" required />
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+        <label class="form-check-label mb-2">
+            <input class="form-check-input" name="FimDiaSeguinte" type="checkbox" value="true" />
+            Termina no dia seguinte
+        </label>
+    </div>
+    <div class="col-12">
+        <button class="btn btn-primary" type="submit">Adicionar horário</button>
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-sm table-striped align-middle">
+        <thead><tr><th>Dia</th><th>Início</th><th>Fim</th><th>Situação</th><th>Ações</th></tr></thead>
+        <tbody>
+        @foreach (var horario in Model.Horarios)
+        {
+            <tr>
+                <td>@dias[horario.DiaSemana - 1]</td>
+                <td>@horario.Inicio</td>
+                <td>@horario.Fim @(horario.FimDiaSeguinte ? "(dia seguinte)" : "")</td>
+                <td>@(horario.Ativo ? "Ativo" : "Inativo")</td>
+                <td>
+                    <form asp-controller="EspacosAgenda" asp-action="AlterarHorario" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="espacoId" value="@Model.Espaco.Id" />
+                        <input type="hidden" name="horarioId" value="@horario.Id" />
+                        <input type="hidden" name="ativo" value="@(horario.Ativo ? "false" : "true")" />
+                        <button class="btn btn-sm btn-outline-secondary" type="submit">
+                            @(horario.Ativo ? "Desativar" : "Reativar")
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+        @if (Model.Horarios.Count == 0)
+        {
+            <tr><td colspan="5">Nenhum horário cadastrado.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+<hr />
+<h2 class="h4">Bloqueios por manutenção</h2>
+<p>O período pode atravessar a meia-noite ou durar vários dias. Não é possível cadastrar ou reativar manutenção sobre uma reserva confirmada.</p>
+
+<form asp-controller="EspacosAgenda" asp-action="CriarManutencao" method="post" class="row g-3 mb-3">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="EspacoId" value="@Model.Espaco.Id" />
+    <div class="col-md-4">
+        <label class="form-label" for="InicioLocal">Início local</label>
+        <input name="InicioLocal" id="InicioLocal" type="datetime-local" class="form-control" required />
+    </div>
+    <div class="col-md-4">
+        <label class="form-label" for="FimLocal">Fim local</label>
+        <input name="FimLocal" id="FimLocal" type="datetime-local" class="form-control" required />
+    </div>
+    <div class="col-md-4">
+        <label class="form-label" for="Motivo">Motivo</label>
+        <input name="Motivo" id="Motivo" class="form-control" maxlength="500" required />
+    </div>
+    <div class="col-12">
+        <button class="btn btn-primary" type="submit">Cadastrar bloqueio</button>
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-sm table-striped align-middle">
+        <thead><tr><th>Início local</th><th>Fim local</th><th>Motivo</th><th>Situação</th><th>Ações</th></tr></thead>
+        <tbody>
+        @foreach (var manutencao in Model.Manutencoes)
+        {
+            <tr>
+                <td>@manutencao.InicioLocal.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@manutencao.FimLocal.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@manutencao.Motivo</td>
+                <td>@(manutencao.Ativo ? "Ativo" : "Inativo")</td>
+                <td>
+                    <form asp-controller="EspacosAgenda" asp-action="AlterarManutencao" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="espacoId" value="@Model.Espaco.Id" />
+                        <input type="hidden" name="manutencaoId" value="@manutencao.Id" />
+                        <input type="hidden" name="ativo" value="@(manutencao.Ativo ? "false" : "true")" />
+                        <button class="btn btn-sm btn-outline-secondary" type="submit">
+                            @(manutencao.Ativo ? "Desativar" : "Reativar")
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+        @if (Model.Manutencoes.Count == 0)
+        {
+            <tr><td colspan="5">Nenhum bloqueio cadastrado.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>

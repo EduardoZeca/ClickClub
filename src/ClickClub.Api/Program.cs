@@ -24,6 +24,12 @@ builder.Services.AddScoped<ContaAdministrativaRepositorio>();
 builder.Services.AddScoped<MinhaAssociacaoRepositorio>();
 builder.Services.AddScoped<EquipeRepositorio>();
 builder.Services.AddScoped<AdesaoRepositorio>();
+builder.Services.AddScoped<EspacoRepositorio>();
+builder.Services.AddScoped<AgendaEspacoRepositorio>();
+builder.Services.AddScoped<ReservaRepositorio>();
+builder.Services.AddScoped<ConvidadosReservaRepositorio>();
+builder.Services.AddScoped<CancelamentoReservaRepositorio>();
+builder.Services.AddScoped<PermissaoReservaDependenteRepositorio>();
 builder.Services.AddScoped<AutenticacaoServico>();
 builder.Services.AddSingleton<IPasswordHasher<ContaAcesso>, PasswordHasher<ContaAcesso>>();
 

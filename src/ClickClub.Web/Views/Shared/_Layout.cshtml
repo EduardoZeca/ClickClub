@@ -60,10 +60,24 @@
                                 <a class="nav-link text-dark" asp-controller="Solicitacoes" asp-action="Index">Solicitações</a>
                             </li>
                         }
+                        @if (User.IsInRole("AdministradorGeral") ||
+                             User.IsInRole("FuncionarioUnidade") ||
+                             User.IsInRole("PresidenteClube"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Espacos" asp-action="Index">Espaços</a>
+                            </li>
+                        }
                         @if (User.IsInRole("Titular") || User.IsInRole("Dependente"))
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="MinhaAssociacao" asp-action="Index">Minha associação</a>
+                            </li>
+                        }
+                        @if (User.IsInRole("Titular") || User.IsInRole("Dependente"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Reservas" asp-action="Index">Reservas</a>
                             </li>
                         }
                     </ul>

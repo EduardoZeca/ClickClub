@@ -1,0 +1,58 @@
+@model IReadOnlyList<EspacoApi>
+@{
+    ViewData["Title"] = "Espaços";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Espaços dos clubes</h1>
+    <a asp-action="Criar" class="btn btn-primary">Cadastrar espaço</a>
+</div>
+
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success">@sucesso</div>
+}
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-danger">@erro</div>
+}
+
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr><th>Clube</th><th>Espaço</th><th>Tipo</th><th>Capacidade</th><th>Taxa base</th><th>Situação</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Clube</td>
+                <td>@item.Nome</td>
+                <td>@(item.Tipo switch { "SalaoFestas" => "Salão de Festas", "Churrasqueira" => "Churrasqueira", _ => "Quadra" })</td>
+                <td>@item.Capacidade</td>
+                <td>@item.TaxaBase.ToString("C", new System.Globalization.CultureInfo("pt-BR"))</td>
+                <td>@(item.Ativo ? "Ativo" : "Inativo")</td>
+                <td>
+                    <div class="d-flex gap-2">
+                        <a asp-controller="EspacosAgenda" asp-action="Detalhes"
+                           asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Agenda</a>
+                        <a asp-action="Editar" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Editar</a>
+                        <form asp-action="AlterarSituacao" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="hidden" name="ativo" value="@(item.Ativo ? "false" : "true")" />
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                @(item.Ativo ? "Desativar" : "Reativar")
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        }
+        @if (Model.Count == 0)
+        {
+            <tr><td colspan="7">Nenhum espaço cadastrado nos clubes autorizados.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>
