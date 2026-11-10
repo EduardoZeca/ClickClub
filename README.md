@@ -39,6 +39,11 @@ database/scripts/
 Execute-os em ordem numérica com um usuário MySQL
 que possua permissões de criação de tabelas.
 
+O esquema versionado atual possui os scripts `001` a `009`.
+Em um banco novo, execute-os na ordem, verificando antes
+os avisos de cada script. **Não execute novamente migrações
+`ALTER TABLE` já aplicadas** no banco existente.
+
 A API utiliza o usuário clickclub_api com permissões
 restritas ao banco ClickClub.
 
@@ -85,8 +90,38 @@ aprovados e o histórico de desenvolvimento.
 
 ## Estado atual
 
-Componente 1 — Fundação em desenvolvimento.
+**Componentes 1 a 3 concluídos segundo os testes realizados
+e relatados pelo desenvolvedor:**
 
-Os módulos de autenticação, reservas, financeiro,
-portaria, atividades e Mobile serão implementados
-gradualmente.
+1. Fundação: solução, acesso à API/MySQL, configuração
+   segura, scripts iniciais e backup/restauração.
+2. Autenticação e Cadastros: login por nome de usuário,
+   sete perfis, clubes/unidades, titulares, dependentes,
+   categorias, equipe e análise de solicitações de adesão.
+3. Espaços e Reservas: cadastros, agenda, manutenção,
+   concorrência, convidados, cancelamentos, limite de
+   três reservas mensais por associação e permissão geral
+   para dependentes menores em reservas pagas.
+
+**Próximo componente:** 4 — Financeiro Simulado.
+Ainda não iniciado nem autorizado para implementação.
+Abrange mensalidades, quitação simulada, inadimplência,
+taxas de reserva e transferência para mensalidade futura
+com acréscimo único de 10%.
+
+**Ajustes de escopo aprovados e ainda não implementados:**
+ficha associativa simplificada (sem contrato anual) e
+autenticação por nome de usuário ou e-mail. Os parâmetros
+de multas/juros de mensalidades atrasadas ainda precisam
+ser definidos; não são equivalentes ao acréscimo de 10%
+das locações transferidas.
+
+**Etapas futuras:** carteirinha QR/portaria online,
+atividades e eventos, avisos/ouvidoria/relatórios e
+aplicativo Android com testes físicos de integração.
+
+O histórico e as decisões estão em
+`docs/DOCUMENTACAO_CLICKCLUB.md` (v1.3) e
+`docs/CONTINUIDADE_CLICKCLUB.md`. Os testes citados
+acima foram informados pelo desenvolvedor; esta revisão
+documental não executou compilação, testes ou migrações.

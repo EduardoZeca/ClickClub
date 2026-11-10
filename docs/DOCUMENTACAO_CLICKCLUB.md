@@ -1,8 +1,9 @@
 # ClickClub — Documento de Requisitos e Planejamento
 
-**Versão:** 1.1 — Documentação funcional e modelagem inicial com complementações do enunciado do professor  
-**Data:** 09/11/2026  
-**Estado:** Requisitos iniciais aprovados em 05/11/2026 e complementações aprovadas em 09/11/2026. Componente 1 (Fundação) concluído segundo testes relatados pelo usuário em 06/11/2026; Componente 2 ainda não iniciado nem autorizado. Os registros de implementação e testes estão em `CONTINUIDADE_CLICKCLUB.md`.
+**Versão:** 1.3 — Consolidação das decisões de escopo após análise das observações do professor
+**Data:** 10/11/2026
+
+**Estado:** Requisitos e decisões anteriores preservados; decisões de 10/11/2026 sobre ficha associativa simplificada, login híbrido e exclusões de escopo incorporadas. Componentes 1, 2 e 3 concluídos conforme testes relatados pelo usuário; Componente 4 ainda não iniciado nem autorizado. A implementação e os testes informados estão registrados em `CONTINUIDADE_CLICKCLUB.md`.
 
 ## 1. Visão geral
 
@@ -42,6 +43,8 @@ O objetivo inicial é um **projeto acadêmico funcional e demonstrável**, com a
 - Integração física ou testes com catracas, leitores dedicados, sistemas bancários ou emissão fiscal: **fora do escopo**.
 - Torneios com chaves, resultados, classificação e arbitragem: **fora do escopo inicial**; inicialmente podem ser eventos com inscrições e vagas.
 - Aplicativo iOS, armazenamento em nuvem obrigatório, gateway de pagamento e múltiplas organizações/franquias juridicamente independentes: **fora do escopo inicial**.
+- **Contrato associativo formal anual**, gestão de vigência/renovação contratual, assinatura digital de contrato e módulo de eleições ou mandatos presidenciais de dois anos: **não serão implementados na primeira versão**. A ficha associativa simplificada é uma consulta do vínculo, não um contrato jurídico.
+- Divulgação automática de eventos via WhatsApp, e-mail ou publicação em redes sociais e seleção obrigatória de clube na tela de login: **não serão implementadas**. Os avisos internos continuam previstos.
 
 ## 3. Conceitos e decisões estruturais
 
@@ -65,7 +68,7 @@ Categoria associativa, tipo de vínculo e perfil de acesso **são classificaçõ
 
 **Tipos de vínculo iniciais aprovados em 09/11/2026:** Associado/Fundador, Convidado e Simpatizante. A inclusão desses tipos não gera descontos, isenções ou benefícios financeiros automáticos. Elegibilidade e valores continuam sujeitos às políticas associativas configuráveis. Dados cadastrais de pessoas devem contemplar CPF, endereço, bairro, cidade, UF, sexo, estado civil e interesses (múltiplos), além dos campos existentes. O acesso a dados pessoais permanece restrito por perfil e necessidade.
 
-**Decisão aprovada (D04):** dependentes podem possuir login próprio, com limitações conforme idade e direitos. Um dependente não recebe acesso ao financeiro do titular nem autorização automática para assumir despesas.
+**Decisão aprovada (D04; complementada por D14):** dependentes podem possuir login próprio. Para **novas reservas de espaços pagos**, o dependente menor de 18 anos precisa de uma **permissão geral, individual e revogável**, concedida pelo titular da associação; não é exigida aprovação para cada reserva. Sem permissão ativa, a API bloqueia essa operação. Dependentes maiores de idade e reservas gratuitas não dependem dessa autorização. A revogação impede novas reservas pagas pelo menor, mas não cancela as já confirmadas. A cobrança simulada pertence à associação e a escolha de quitação ou transferência para mensalidade permanece exclusiva do titular; o dependente não obtém acesso ao financeiro do titular.
 
 ### 3.3 Cobrança e bloqueio
 
@@ -98,6 +101,14 @@ Uma futura validação offline na portaria exigirá dispositivo de porteiro com 
 ### 3.7 Eventos sociais (complementação de 09/11/2026)
 
 Além de atividades esportivas, cada clube poderá cadastrar eventos sociais, como almoços, jantares e cafés, com descrição, início, término, situação e público-alvo `SomenteAssociados` ou `PublicoGeral`. Eventos abertos ao público não dispensam controle de acesso: a identificação de visitantes será detalhada no componente específico, preservando a validação online pela API e a proibição de liberação manual quando a API estiver indisponível. Não haverá bilheteria, venda de ingressos ou transações financeiras reais por iniciativa própria.
+
+### 3.8 Ficha associativa, login e limites adicionais (decisões de 10/11/2026)
+
+- **Ficha associativa simplificada, aprovada:** aproveitar `Pessoa`, `Associacao`, `DependenteAssociacao`, `CategoriaAssociativa` e demais dados existentes para exibir matrícula, titular, clube de origem, categoria, tipo de vínculo, data de início, status e dependentes. Quando o Componente 4 estiver implementado, a ficha poderá apresentar um resumo das mensalidades e seus vencimentos. Não criar uma entidade de contrato anual nem automatizar vencimento ou renovação contratual. A ficha não representa documento contratual formal.
+- **Login híbrido, aprovado como ampliação futura:** a mesma conta poderá ser autenticada pelo login já cadastrado **ou** por seu e-mail, sempre com a senha existente. Preservar os logins atuais e não tornar e-mail obrigatório para contas existentes. A API só poderá usar o e-mail como identificador se ele determinar uma única conta elegível; colisões entre e-mails e nomes de usuário devem ser tratadas antes da ativação do recurso, sem autenticar arbitrariamente uma conta. A autorização por papel e clube permanece na API. Não exigir escolha prévia de clube no login.
+- **Administração e divulgação:** preservar o perfil `PresidenteClube` e sua vinculação às unidades, sem controle de mandato bienal; não acrescentar integrações automáticas com WhatsApp, e-mail e mídias sociais. Utilizar o mural interno de avisos planejado.
+- **Pontos ainda propostos, sem autorização de implementação:** profissão/qualificação, grau de parentesco, data/hora de cadastro e consulta da última alteração e responsável; filtro por sexo/gênero; possibilidade de novos tipos de espaços, incluindo quiosque; associação de eventos sociais à disponibilidade/ocupação de espaços no Componente 6; eventual cadastro de diretores. Detalhar escopo, permissões e impacto antes de convertê-los em requisitos aprovados.
+- **Finanças ainda indefinidas:** percentuais e critérios de multa/juros por mensalidade atrasada, incluindo termo inicial e periodicidade. Não presumir esses parâmetros. O bloqueio após o 10º dia e o acréscimo único de 10% por transferência de locação são regras **distintas e já aprovadas**.
 
 ## 4. Perfis e permissões
 
@@ -146,6 +157,8 @@ Toda autorização é conferida pela API; ocultar botões na interface não subs
 | **RF27** | Cadastrar e consultar eventos sociais por clube, com início/fim, descrição, situação e público-alvo de associados ou público geral. | Essencial; aprovado em 09/11/2026 |
 | **RF28** | Exibir na Web calendário/agenda de locações, incluindo reservas de períodos que atravessam datas e a finalidade da utilização; preservar privacidade dos responsáveis. | Essencial; aprovado em 09/11/2026 |
 | **RF29** | Registrar e consultar interesses múltiplos dos associados, além dos dados pessoais complementares exigidos no cadastro. | Essencial; aprovado em 09/11/2026 |
+| **RF30** | Disponibilizar ficha associativa simplificada com matrícula, situação, titular, categoria, clube de origem, início do vínculo e dependentes; acrescentar consulta resumida do financeiro quando esse componente existir. Não emitir ou renovar contrato anual. | Aprovado em 10/11/2026; implementação pendente |
+| **RF31** | Aceitar autenticação pelo login existente ou pelo e-mail da mesma conta, preservando senha e perfis; rejeitar identificadores de e-mail ambíguos e não exigir seleção de clube no login. | Aprovado em 10/11/2026; implementação pendente |
 
 ## 6. Regras de negócio
 
@@ -154,7 +167,7 @@ Toda autorização é conferida pela API; ocultar botões na interface não subs
 | **RN01** | Cada titular/associação possui limite de **3 reservas confirmadas para datas de utilização no mesmo mês-calendário**, somando titular, dependentes e todas as unidades. Reservas canceladas liberam a cota. | Aprovado |
 | **RN02** | Reserva de salão exige pelo menos **24 horas exatas** de antecedência (X=1 dia). Cancelamento com pelo menos **24 horas exatas** antes do início (Y=1 dia) resulta em reembolso integral simulado; após esse marco, a multa simulada é o **menor valor entre R$ 50 e a taxa original da locação**, sem saldo negativo. | Aprovado |
 | **RN03** | Convidados de salões/churrasqueiras devem estar cadastrados até 24 horas antes do evento. Se a reserva for feita exatamente no limite de antecedência, a lista completa deverá ser incluída na confirmação. **Não são permitidas inclusões/alterações após o prazo**, sem exceções na primeira versão. | Aprovado |
-| **RN04** | Dependente menor não pode assumir locação paga ou responsabilidade financeira sem autorização prévia registrada pelo titular. | Aprovado; fluxo de autorização no componente de reservas |
+| **RN04** | Dependente menor de 18 anos só pode confirmar **nova reserva paga** se houver **permissão geral ativa do titular para aquele vínculo associativo**, registrada na API; a autorização é revogável e **não exige aprovação por reserva**. A ausência de data de nascimento exige autorização por precaução. Reservas gratuitas e reservas de dependentes maiores de idade não exigem essa permissão. Revogação não cancela reservas já confirmadas. A cobrança pertence à associação, e a gestão financeira continua exclusiva do titular. | Aprovado em 09/11/2026 — Opção B |
 | **RN05** | Associado ativo pode solicitar serviços de outra unidade, respeitando bloqueios, categoria, idade, capacidade e regras locais. | Aprovado |
 | **RN06** | A mensalidade é única por associação/titular e este responde por cobranças próprias e dos dependentes; evitar mensalidades duplicadas de um mesmo grupo familiar. | Aprovado |
 | **RN07** | Mensalidade com **mais de 10 dias de atraso** bloqueia o titular e os dependentes vinculados; registro de pagamento simulado da mensalidade regulariza o bloqueio. Taxas avulsas ainda não incorporadas à mensalidade não causam esse bloqueio associativo. | Aprovado |
@@ -180,6 +193,8 @@ Toda autorização é conferida pela API; ocultar botões na interface não subs
 | **RN27** | Reserva que atravesse dois meses-calendário conta apenas para a cota de **3 reservas** do mês da **data local de início**, no fuso horário do clube onde ocorrerá a utilização; cancelar libera a cota desse mês. | Aprovado em 09/11/2026; complemento de RN01 |
 | **RN28** | Eventos sociais podem ser destinados somente a associados ou ao público geral. Evento aberto não equivale a liberação automática de entrada: eventual conferência de visitante continua sujeita à API online e não há liberação manual sem validação. | Aprovado em 09/11/2026 |
 | **RN29** | A duração de uma reserva pode atravessar a meia-noite e datas diferentes, desde que `Fim > Início` e sejam respeitadas disponibilidade, funcionamento, política e fuso da unidade. A agenda Web apresenta ocupação sem divulgar dados pessoais indevidos. | Aprovado em 09/11/2026 |
+| **RN30** | A ficha associativa é uma apresentação dos dados do vínculo existente, sem criar contrato formal, número contratual autônomo, vigência anual ou obrigação de renovação. A matrícula continua sendo o identificador associativo. | Aprovado em 10/11/2026 |
+| **RN31** | No login híbrido, um e-mail informado precisa identificar inequivocamente uma conta; nomes de usuário existentes continuam válidos. A API não pode resolver colisão entre identificadores por escolha arbitrária. O escopo de clube é determinado por papéis e atribuições após autenticação. | Aprovado em 10/11/2026 |
 
 ### 6.1 Cálculo de atraso aprovado
 
@@ -187,12 +202,12 @@ Calcular `diasEmAtraso` a partir da **data local do vencimento**, sem arredondar
 
 ### 6.2 Fluxo proposto das reservas
 
-1. Usuário escolhe unidade, espaço, dia e horário; interface consulta disponibilidade.
-2. API valida perfil, associação, inadimplência, horário, limites e conflitos dentro de transação.
+1. Titular ou dependente autenticado escolhe unidade, espaço, dia e horário; interface consulta disponibilidade.
+2. API valida perfil, associação, autorização geral para menor em espaço pago (RN04), inadimplência quando o módulo financeiro estiver integrado, horário, limites e conflitos dentro de transação.
 3. **Decisão aprovada (D09):** reserva é confirmada imediatamente, com preço e política registrados, e é criada taxa simulada em aberto quando cabível. A confirmação não aguarda quitação simulada.
 4. Até imediatamente antes do início da utilização, o titular registra quitação simulada ou solicita transferência da locação para a mensalidade elegível com acréscimo único de 10%.
-5. Titular consulta e pode cancelar; a API calcula eventual multa/reembolso simulado e libera o horário.
-6. Em salões/churrasqueiras, titular informa convidados até 24 horas antes; no limite da reserva, a lista completa é exigida na confirmação.
+5. Titular consulta e pode cancelar reservas da própria associação; cada dependente consulta e pode cancelar apenas as reservas feitas por si. A API calcula eventual multa/reembolso simulado e libera o horário.
+6. Em salões/churrasqueiras, o titular ou o dependente responsável informa convidados até 24 horas antes; no limite da reserva, a lista completa é exigida na confirmação. O titular também pode administrar os convidados das reservas da associação.
 
 **Regra de uso aprovada:** taxa de locação em aberto não impede a confirmação inicial. Até antes do início do evento, o acesso **ao espaço reservado** exige quitação simulada ou transferência registrada; isso é diferente do acesso geral ao clube, que depende da situação associativa e da mensalidade. Se houver mensalidade vencida por mais de 10 dias, aplica-se o bloqueio geral.
 
@@ -249,7 +264,8 @@ Se a reserva for cancelada depois de transferida, mas antes do uso, uma fatura a
 - `CategoriaAssociativa`: Id, Nome, RegrasBeneficios, Ativa.
 - `TipoVinculoAssociativo`: Id, Nome, DireitoVoto, Ativo (iniciais: Associado/Fundador, Convidado e Simpatizante).
 - `Associacao`: Id, TitularPessoaId, CategoriaId, TipoVinculoId, UnidadeOrigemId, Matricula, Status, DataInicio.
-- `DependenteAssociacao`: Id, AssociacaoId, DependentePessoaId, Ativo, Autorizacoes.
+- `DependenteAssociacao`: Id, AssociacaoId, DependentePessoaId, Ativo.
+- `FichaAssociativa` **não é tabela**: visualização composta a partir da associação e de seus relacionamentos. O login híbrido reaproveita `Usuario.Login` e `Pessoa.Email`; a estratégia de unicidade/colisões será implementada e testada em ajuste autorizado, sem modificar automaticamente os cadastros existentes.
 - `Interesse`: Id, Nome, Ativo; `PessoaInteresse`: PessoaId, InteresseId (múltiplos interesses por pessoa).
 - `SolicitacaoAdesao`: Id, PessoaId, UnidadePretendidaId, TipoVinculoId, Status, SolicitadaEm, AnalisadaEmOpcional, AnalisadaPorUsuarioIdOpcional, MotivoOpcional. A pessoa pode existir com situação cadastral pendente, sem associação ativa.
 
@@ -260,7 +276,7 @@ Se a reserva for cancelada depois de transferida, mas antes do uso, uma fatura a
 - `IndisponibilidadeEspaco`: Id, EspacoId, Inicio, Fim, Motivo.
 - `Reserva`: Id, EspacoId, AssociacaoId, ResponsavelPessoaId, Inicio, Fim, FinalidadeOpcional, ValorContratado, Status, CriadaEm. O mês da cota de RN01 é o da data local de início.
 - `ConvidadoReserva`: Id, ReservaId, Nome, IdentificacaoMinima, Situacao.
-- `AutorizacaoResponsavel`: Id, ReservaId, TitularPessoaId, DataAutorizacao, Status (se necessário para dependentes).
+- `AutorizacaoReservaDependente`: Id, DependenteAssociacaoId (único), PermitirReservaPaga, TitularUsuarioId, AtualizadoEmUtc. Permissão geral do vínculo, não vinculada a uma reserva específica; histórico de concessão e revogação registrado em auditoria.
 
 **Financeiro**
 
@@ -349,6 +365,7 @@ As cardinalidades descrevem o **modelo lógico**. A implementação definirá no
 7. Financeiro: faturas discriminadas, vencimentos, locações transferidas e histórico de quitações simuladas (titular).
 8. Ouvidoria: abrir/acompanhar solicitações e reclamações.
 9. Dependentes: consulta e aprovações (titular).
+10. Ficha associativa: matrícula, situação, titular, categoria, clube de origem, data de início e dependentes; resumo financeiro após o Componente 4.
 
 ### 9.2 Web — Administração/funcionário
 
@@ -360,6 +377,7 @@ As cardinalidades descrevem o **modelo lógico**. A implementação definirá no
 6. Financeiro: emitir faturas itemizadas, simular quitação, conferir inadimplência, locações transferidas e acréscimos de 10%; Tesoureiro com escopo autorizado.
 7. Avisos e ouvidoria com solicitação/reclamação.
 8. Acessos, convidados, relatórios e auditoria.
+9. Ficha associativa simplificada e autenticação por usuário ou e-mail, quando os ajustes correspondentes forem autorizados e implementados.
 
 ### 9.3 Portaria
 
@@ -381,7 +399,7 @@ As cardinalidades descrevem o **modelo lógico**. A implementação definirá no
 | T06 | Gerar duas vezes a mensalidade da mesma competência. | Sem duplicação indevida. |
 | T07 | Fatura aberta no prazo, fatura vencida dentro da tolerância e fatura acima do limite. | Bloqueio apenas no último caso. |
 | T08 | Registrar quitação simulada após bloqueio. | Próxima validação online reconhece regularização. |
-| T09 | Dependente menor solicita espaço pago sem aprovação. | Não confirma sem autorização. |
+| T09 | Dependente menor solicita espaço pago sem permissão geral ativa do titular. | Não confirma; recebe orientação de solicitar habilitação ao titular. |
 | T10 | Inscrições atingem lotação de turma; próxima inscrição entra em espera. | Sem exceder capacidade. |
 | T11 | Lista de convidados editada depois das 24 horas anteriores ao evento. | Alteração rejeitada pela API, sem exceção na primeira versão. |
 | T12 | Porteiro lê QR válido, expirado e revogado. | Decisões corretas online. |
@@ -414,17 +432,23 @@ As cardinalidades descrevem o **modelo lógico**. A implementação definirá no
 | T39 | Consultar agenda Web com locações em dias distintos e finalidade de uso informada. | Calendário mostra ocupação correta sem expor dados pessoais indevidos. |
 | T40 | Publicar eventos sociais para somente associados e público geral; tentar liberar visitante sem validação online. | Público-alvo respeitado; nenhum visitante é liberado automaticamente sem API. |
 | T41 | Abrir e acompanhar chamados como Solicitação e Reclamação. | Tipo, status e histórico preservados com autorização por perfil. |
+| T42 | Titular autoriza dependente menor para reservas pagas, revoga a permissão e o menor tenta novamente. | Permissão ativa libera novas reservas pagas; revogação bloqueia novas reservas sem cancelar as anteriores. |
+| T43 | Dependente maior de idade solicita reserva paga sem permissão; menor solicita reserva gratuita. | Ambos podem reservar, se as demais regras forem atendidas. |
+| T44 | Titular consulta reservas familiares; dependente tenta consultar, alterar convidados ou cancelar reserva de outro membro. | Titular vê e administra reservas da associação; dependente só acessa as próprias. |
+| T45 | Autenticar a mesma conta pelo login cadastrado e por um e-mail único associado a ela. | Ambos identificam a mesma conta e aplicam as mesmas permissões e validação de senha. |
+| T46 | Tentar login por e-mail ausente, compartilhado por contas diferentes ou coincidente com o login de outra conta. | Não autenticar por correspondência ambígua; retornar falha segura e preservar logins antigos não conflitantes. |
+| T47 | Titular abre sua ficha associativa e tenta visualizar dados financeiros ainda não disponibilizados ou de outra associação. | Exibe somente dados autorizados e já implementados; não apresenta contrato anual fictício ou informações financeiras inexistentes. |
 
 ## 11. Proposta de componentes de desenvolvimento
 
-**Estado em 09/11/2026:** Componente 1 concluído conforme testes relatados em 06/11/2026; demais componentes ainda não implementados. O Componente 2 aguarda autorização explícita. Esta documentação define escopo e não comprova funcionalidades desenvolvidas.
+**Estado em 09/11/2026:** Componentes 1 (Fundação), 2 (Autenticação e cadastros) e 3 (Espaços e reservas) concluídos por relato de compilação e testes do usuário. O Componente 4 permanece não iniciado e requer autorização explícita. Resultados e limites de verificação constam da Continuidade; o escopo restante continua planejado.
 
 1. **Fundação (concluído por relato):** solução, projetos, schema MySQL, configuração segura, README e build inicial.
-2. **Autenticação e cadastros (não iniciado):** sete perfis, clubes/unidades, titulares, dependentes, categorias, tipos de vínculo, interesses, solicitações de adesão e aprovação por Presidente/Administrador Geral; Web de administração e preparação dos endpoints para Mobile.
-3. **Espaços e reservas:** horários, manutenção, finalidade de locação, agenda Web, intervalos entre datas, contagem mensal por data local de início, elegibilidade, regras e concorrência.
+2. **Autenticação e cadastros (concluído por relato):** sete perfis, clubes/unidades, titulares, dependentes, categorias, tipos de vínculo, interesses, solicitações de adesão e aprovação por Presidente/Administrador Geral; Web de administração e preparação dos endpoints para Mobile. **Ajustes posteriores ainda não implementados:** login híbrido por usuário/e-mail e ficha associativa simplificada.
+3. **Espaços e reservas (concluído por relato):** horários, manutenção, finalidade de locação, agenda Web, intervalos entre datas, contagem mensal por data local de início, convidados, cancelamentos, autorização geral para dependentes menores, regras e concorrência. O acerto financeiro completo das taxas fica no Componente 4.
 4. **Financeiro simulado:** geração de mensalidades itemizadas e taxas, quitação, transferência de locações com acréscimo de 10%, inadimplência e acesso do Tesoureiro limitado ao escopo autorizado.
 5. **Carteirinha e portaria online:** emissão, leitura/verificação, bloqueios e auditoria; considerar visitantes de eventos públicos sem dispensar conferência online.
-6. **Atividades, turmas e eventos sociais:** inscrições, vagas, lista de espera, eventos com público-alvo de associados ou público geral.
+6. **Atividades, turmas e eventos sociais:** inscrições, vagas, lista de espera, eventos com público-alvo de associados ou público geral. Avaliar, antes da implementação, a proposta de vincular eventos à ocupação dos espaços e à agenda do Componente 3.
 7. **Comunicação e relatórios:** avisos, ouvidoria separando solicitação/reclamação e indicadores principais.
 8. **Mobile Android e integração:** solicitação de adesão de Convidados/Simpatizantes, acompanhamento, navegação, cache SQLite, teste em aparelho e fluxos ponta a ponta.
 9. **Possíveis evoluções futuras (não incluídas na primeira entrega):** validação offline na portaria, notificações push remotas e integração física de acesso. A catraca real não é necessária ao projeto.
@@ -440,6 +464,7 @@ Após cada componente: informar arquivos alterados, instruções de execução, 
 | **D01** | Um único clube com várias unidades e cadastro associativo centralizado. |
 | **D02** | Uma mensalidade por associação/titular/grupo, sem multiplicação automática por unidade visitada. |
 | **D04** | Dependentes podem ter login próprio, sujeito às restrições de idade/perfil. |
+| **D14 — Reservas pagas por menores** | **Opção B:** o titular concede uma permissão geral individual e revogável para o dependente menor confirmar futuras reservas pagas, sem aprovação por reserva. Revogar não cancela reservas anteriores; maiores e reservas gratuitas dispensam essa permissão. A obrigação financeira permanece na associação/titular. |
 | **D06 — Limite de reservas** | **N = 3** reservas confirmadas para utilização no mesmo mês-calendário, somando toda a associação e unidades; canceladas liberam a cota. |
 | **D07 — Cancelamento** | **X = Y = 24 horas exatas**; multa simulada é limitada ao menor entre **R$ 50** e o valor da locação. |
 | **D08 — Inadimplência** | **D = 10 dias** após vencimento; bloquear titular e dependentes a partir do **11º dia**, somente por mensalidade vencida. |
@@ -493,6 +518,19 @@ O professor descreveu um conjunto de clubes (exemplos: Foz 2, Guaíra 2), associ
 
 **Detalhamentos técnicos futuros, sem mudança de requisito:** obrigatoriedade de cada campo de formulário, benefícios específicos de categorias, forma de acompanhamento da adesão pelo Mobile, identificação de visitantes em eventos abertos e acesso financeiro do Tesoureiro em transações entre clubes. Esses pontos serão definidos antes dos respectivos componentes, sem presumir novas regras de negócio.
 
+### 12.4 Decisões posteriores às observações do professor — 10/11/2026
+
+As anotações de correção de **outro projeto** foram tratadas como referência, não como exigências automaticamente aplicáveis ao ClickClub. O usuário confirmou as decisões abaixo; elas não significam alterações já implementadas em API, Web, SQL ou Mobile.
+
+| Referência | Decisão | Estado |
+|---|---|---|
+| **PC11 — Ficha associativa** | Criar uma consulta simplificada baseada em matrícula, situação e dados associativos existentes, com financeiro resumido quando disponível. Não construir módulo de contratos anuais, renovação, assinatura ou novos estados contratuais. | Aprovada; implementação futura |
+| **PC12 — Login híbrido** | Preservar login e senha atuais e adicionar autenticação pelo e-mail quando houver identificação inequívoca da conta. Não exigir seleção de clube no login. | Aprovada; implementação futura |
+| **PC13 — Divulgação** | Não integrar envio automático por WhatsApp, e-mail ou publicação em redes sociais; manter mural de avisos previsto. | Aprovada; exclusão de escopo |
+| **PC14 — Presidência** | Manter Presidente com escopo local, sem mandato obrigatório de dois anos ou módulo de eleições. | Aprovada; exclusão de escopo |
+
+**Melhorias não convertidas em requisitos aprovados:** profissão, parentesco, data de cadastro e histórico visual de alterações, filtro por gênero, novos tipos de espaços, vínculo de evento a espaço/agenda, diretores e eventual limite por tipo de ambiente. O usuário considerou as sugestões pertinentes, mas ainda não foram detalhadas nem autorizadas para implementação. A regra de três reservas mensais continua intacta. Taxa/juros de mensalidade vencida também **não têm parâmetros aprovados**; precisam de decisão antes do Componente 4.
+
 ## 13. Instruções iniciais sugeridas para o ChatGPT Project
 
 > Você atuará como analista de requisitos, arquiteto e assistente de desenvolvimento do projeto acadêmico ClickClub. A fonte de verdade é este documento **aprovado**, complementado pelo arquivo `INSTRUCTIONS_PROJECT_CLICKCLUB.md`. O sistema usa MySQL centralizado, API ASP.NET Core, Web ASP.NET Core MVC e Mobile .NET MAUI Android com SQLite local quando necessário. A Web e o Mobile só se comunicam com a API; a API concentra autenticação, autorização, regras, transações e auditoria.
@@ -508,4 +546,4 @@ O professor descreveu um conjunto de clubes (exemplos: Foz 2, Guaíra 2), associ
 
 ---
 
-**Próximo passo (09/11/2026):** sincronizar esta documentação e a continuidade no repositório, inspecionar os arquivos reais do Componente 1 e apresentar/confirmar o plano de testes do Componente 2. **O Componente 2 não foi iniciado e exige autorização explícita para implementar.**
+**Próximo passo (10/11/2026):** sincronizar esta documentação v1.3, a continuidade e o README no repositório; planejar e validar os testes mínimos do **Componente 4 — Financeiro simulado**, inclusive parâmetros ainda indefinidos para encargos de atraso. **O Componente 4 não foi iniciado e requer autorização explícita para implementação.** Login híbrido e ficha associativa são ajustes aprovados de escopo, mas ainda não implementados. Os testes Android e a integração ponta a ponta permanecem futuros.
