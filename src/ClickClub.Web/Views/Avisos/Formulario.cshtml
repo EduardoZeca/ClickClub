@@ -1,0 +1,62 @@
+@model AvisoFormulario
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Novo aviso" : "Editar aviso";
+    var admin = User.IsInRole("AdministradorGeral");
+    var destino = Model.UnidadeId.HasValue
+        ? (Model.Clubes.FirstOrDefault(c => c.Id == Model.UnidadeId)?.Nome ?? $"Clube {Model.UnidadeId}")
+        : "Geral";
+}
+
+<h1 class="h3">@ViewData["Title"]</h1>
+<form asp-action="Salvar" method="post" class="row g-3">
+    @Html.AntiForgeryToken()
+    <input asp-for="Id" type="hidden" />
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="col-md-6">
+        <label asp-for="UnidadeId" class="form-label">Destinação</label>
+        @if (Model.Id != 0)
+        {
+            <input asp-for="UnidadeId" type="hidden" />
+            <input value="@destino" class="form-control" readonly />
+        }
+        else
+        {
+            <select asp-for="UnidadeId" class="form-select">
+                @if (admin)
+                {
+                    <option value="">Geral — todos os clubes</option>
+                }
+                else
+                {
+                    <option value="">Selecione um clube atribuído</option>
+                }
+                @foreach (var clube in Model.Clubes)
+                {
+                    <option value="@clube.Id">@clube.Nome</option>
+                }
+            </select>
+        }
+        <div class="form-text">Somente o Administrador Geral publica avisos gerais.</div>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Titulo" class="form-label">Título</label>
+        <input asp-for="Titulo" class="form-control" maxlength="150" required />
+    </div>
+    <div class="col-12">
+        <label asp-for="Corpo" class="form-label">Texto do aviso</label>
+        <textarea asp-for="Corpo" class="form-control" rows="5" maxlength="4000" required></textarea>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="InicioUtc" class="form-label">Início da exibição (UTC)</label>
+        <input asp-for="InicioUtc" asp-format="{0:yyyy-MM-ddTHH:mm}" type="datetime-local" class="form-control" required />
+    </div>
+    <div class="col-md-6">
+        <label asp-for="FimUtc" class="form-label">Fim da exibição (UTC)</label>
+        <input asp-for="FimUtc" asp-format="{0:yyyy-MM-ddTHH:mm}" type="datetime-local" class="form-control" required />
+    </div>
+    <div class="col-12 small text-muted">Utilize horários UTC; por exemplo, 15:00 UTC corresponde a 12:00 em Brasília (UTC−3). Avisos fora do período não aparecem no mural, mas continuam na gestão.</div>
+    <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Salvar aviso</button>
+        <a asp-action="Gerenciar" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+</form>

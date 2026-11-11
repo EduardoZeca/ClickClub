@@ -1,0 +1,147 @@
+@model PortariaPaginaViewModel
+@{
+    ViewData["Title"] = "Portaria online";
+}
+
+<h1 class="h3 mb-3">Portaria online</h1>
+<p class="text-muted">A decisão de entrada depende da API. Sem conexão ou com acesso negado, não há liberação manual. Confira também o documento de identificação do visitante.</p>
+
+@if (Model.Erro is not null)
+{
+    <div class="alert alert-danger" role="alert">@Model.Erro</div>
+}
+
+@if (Model.Unidades.Count > 0)
+{
+    <form asp-action="Index" method="get" class="mb-3">
+        <label for="unidadeId" class="form-label">Clube da portaria</label>
+        <div class="d-flex flex-wrap gap-2">
+            <select id="unidadeId" name="unidadeId" class="form-select" style="max-width: 360px">
+                @foreach (var clube in Model.Unidades)
+                {
+                    <option value="@clube.Id" selected="@(clube.Id == Model.UnidadeSelecionadaId)">@clube.Nome @(clube.Sigla is null ? "" : $"({clube.Sigla})")</option>
+                }
+            </select>
+            <button class="btn btn-outline-primary" type="submit">Selecionar clube</button>
+        </div>
+    </form>
+
+    @if (Model.Resultado is not null)
+    {
+        <div class="alert @(Model.Resultado.Permitido ? "alert-success" : "alert-danger")" role="alert">
+            <strong>@(Model.Resultado.Permitido ? "Entrada permitida" : "Entrada negada")</strong>
+            <div>@Model.Resultado.Mensagem</div>
+            @if (!string.IsNullOrWhiteSpace(Model.Resultado.NomeIdentificado))
+            {
+                <div>Identificação: @Model.Resultado.NomeIdentificado</div>
+            }
+            <small>Registro #@Model.Resultado.RegistroId — @Model.Resultado.ValidadoEmUtc.ToString("dd/MM/yyyy HH:mm:ss") UTC</small>
+        </div>
+    }
+
+    <div class="row g-3 mb-4">
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h5">Validar carteirinha</h2>
+                    <form asp-action="ValidarQr" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="UnidadeId" value="@Model.UnidadeSelecionadaId" />
+                        <div class="mb-3">
+                            <label for="CodigoQr" class="form-label">Conteúdo do QR Code</label>
+                            <textarea id="CodigoQr" name="CodigoQr" class="form-control font-monospace" rows="3" maxlength="1024" required></textarea>
+                            <div class="form-text">Cole o código obtido da carteirinha do próprio associado.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="TipoAcesso" class="form-label">Tipo de conferência</label>
+                            <select id="TipoAcesso" name="TipoAcesso" class="form-select">
+                                <option value="EntradaGeral">Entrada geral no clube</option>
+                                <option value="UsoReserva">Uso de espaço reservado</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ReservaIdQr" class="form-label">ID da reserva (somente para uso de espaço)</label>
+                            <input id="ReservaIdQr" name="ReservaId" type="number" min="1" class="form-control" />
+                        </div>
+                        <button class="btn btn-primary" type="submit">Validar online</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h5">Convidado de reserva</h2>
+                    <p class="small text-muted">Somente convidados cadastrados em reservas confirmadas de salão ou churrasqueira, dentro do horário autorizado.</p>
+                    <form asp-action="ValidarConvidado" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="UnidadeId" value="@Model.UnidadeSelecionadaId" />
+                        <div class="mb-3">
+                            <label for="ReservaIdConvidado" class="form-label">ID da reserva</label>
+                            <input id="ReservaIdConvidado" name="ReservaId" type="number" min="1" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="IdentificacaoMinima" class="form-label">Identificação cadastrada do convidado</label>
+                            <input id="IdentificacaoMinima" name="IdentificacaoMinima" type="text" minlength="3" maxlength="60" class="form-control" required />
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" id="IdentidadeConferida" name="IdentidadeConferida" type="checkbox" value="true" />
+                            <label class="form-check-label" for="IdentidadeConferida">Conferi presencialmente o documento de identificação</label>
+                        </div>
+                        <button class="btn btn-outline-primary" type="submit">Conferir convidado online</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h5">Visitante de evento público</h2>
+                    <p class="small text-muted">O visitante deve ter cadastro prévio no evento e apresentar documento presencialmente. Evento publicado não libera entrada automaticamente.</p>
+                    <form asp-action="ValidarVisitanteEvento" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="UnidadeId" value="@Model.UnidadeSelecionadaId" />
+                        <div class="mb-3">
+                            <label for="EventoIdPortaria" class="form-label">ID do evento</label>
+                            <input id="EventoIdPortaria" name="EventoId" type="number" min="1" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="IdentificacaoVisitanteEvento" class="form-label">Identificação cadastrada</label>
+                            <input id="IdentificacaoVisitanteEvento" name="IdentificacaoMinima" type="text" minlength="3" maxlength="60" class="form-control" required />
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" id="IdentidadeConferidaEvento" name="IdentidadeConferida" type="checkbox" value="true" />
+                            <label class="form-check-label" for="IdentidadeConferidaEvento">Conferi o documento do visitante</label>
+                        </div>
+                        <button class="btn btn-outline-primary" type="submit">Validar visitante online</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="h5">Últimas verificações deste clube</h2>
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr><th>Data/hora (UTC)</th><th>Identificação</th><th>Tipo</th><th>Resultado</th><th>Motivo</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var registro in Model.Historico)
+                {
+                    <tr>
+                        <td>@registro.DataHoraUtc.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                        <td>@(registro.NomePessoa ?? "Não identificada")</td>
+                        <td>@(registro.TipoAcesso switch { "EntradaGeral" => "Entrada geral", "EventoPublico" => "Evento público", _ => "Uso de reserva" })</td>
+                        <td><span class="badge @(registro.Resultado == "Permitido" ? "bg-success" : "bg-danger")">@registro.Resultado</span></td>
+                        <td>@registro.MotivoCodigo</td>
+                    </tr>
+                }
+                @if (Model.Historico.Count == 0)
+                {
+                    <tr><td colspan="5">Nenhuma validação registrada nesta unidade.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

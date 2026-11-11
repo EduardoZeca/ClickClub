@@ -1,0 +1,45 @@
+@model ChamadoOuvidoriaFormulario
+@{
+    ViewData["Title"] = "Novo chamado de ouvidoria";
+}
+
+<h1 class="h3">Novo chamado de ouvidoria</h1>
+<p class="text-muted">Utilize este formulário para registrar solicitações ou reclamações. A equipe autorizada responderá pelo próprio sistema.</p>
+<form asp-action="Salvar" method="post" class="row g-3">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="col-md-6">
+        <label asp-for="UnidadeId" class="form-label">Destinação</label>
+        <select asp-for="UnidadeId" class="form-select">
+            <option value="">Ouvidoria geral (Administrador Geral)</option>
+            @foreach (var clube in Model.Clubes)
+            {
+                <option value="@clube.Id">@clube.Nome</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Tipo" class="form-label">Tipo</label>
+        <select asp-for="Tipo" class="form-select" required>
+            <option value="Solicitacao">Solicitação</option>
+            <option value="Reclamacao">Reclamação</option>
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Categoria" class="form-label">Categoria</label>
+        <input asp-for="Categoria" class="form-control" maxlength="80"
+               placeholder="Ex.: Instalações, atendimento, financeiro" required />
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Assunto" class="form-label">Assunto</label>
+        <input asp-for="Assunto" class="form-control" maxlength="150" required />
+    </div>
+    <div class="col-12">
+        <label asp-for="Descricao" class="form-label">Descrição</label>
+        <textarea asp-for="Descricao" class="form-control" rows="6" maxlength="4000" required></textarea>
+    </div>
+    <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Abrir chamado</button>
+        <a asp-action="Minhas" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+</form>

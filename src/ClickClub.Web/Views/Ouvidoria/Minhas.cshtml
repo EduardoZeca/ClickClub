@@ -1,0 +1,40 @@
+@model IReadOnlyList<ChamadoOuvidoriaApi>
+@{
+    ViewData["Title"] = "Meus chamados de ouvidoria";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Meus chamados de ouvidoria</h1>
+    <a asp-action="Criar" class="btn btn-primary">Novo chamado</a>
+</div>
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success">@sucesso</div>
+}
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-danger">@erro</div>
+}
+<p class="text-muted">Você pode acompanhar suas solicitações e reclamações e ler as respostas dos responsáveis. Chamados de outras pessoas não são exibidos.</p>
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead><tr><th>Registro</th><th>Tipo</th><th>Assunto</th><th>Destinação</th><th>Situação</th><th>Ação</th></tr></thead>
+        <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>#@item.Id<div class="small text-muted">@item.CriadoEmUtc.ToString("dd/MM/yyyy HH:mm") UTC</div></td>
+                <td>@(item.Tipo == "Reclamacao" ? "Reclamação" : "Solicitação")</td>
+                <td>@item.Assunto</td>
+                <td>@(item.UnidadeId.HasValue ? item.Clube : "Ouvidoria geral")</td>
+                <td>@item.Status</td>
+                <td><a asp-action="Detalhes" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Acompanhar</a></td>
+            </tr>
+        }
+        @if (Model.Count == 0)
+        {
+            <tr><td colspan="6">Você ainda não abriu chamados.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>

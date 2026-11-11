@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
 using ClickClub.Api.Dados;
 using ClickClub.Api.Seguranca;
 using Microsoft.AspNetCore.RateLimiting;
@@ -6,6 +7,15 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Threading.RateLimiting;
+
+// Gera a chave privada ECDSA no próprio computador do desenvolvedor.
+// A saída deve ser direcionada para User Secrets, nunca versionada no Git.
+if (args.Contains("--gerar-chave-carteirinha", StringComparer.OrdinalIgnoreCase))
+{
+    using var chave = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+    Console.WriteLine(Convert.ToBase64String(chave.ExportPkcs8PrivateKey()));
+    return;
+}
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +45,19 @@ builder.Services.AddScoped<FaturaRepositorio>();
 builder.Services.AddScoped<QuitacaoMensalidadeRepositorio>();
 builder.Services.AddScoped<CobrancaLocacaoRepositorio>();
 builder.Services.AddScoped<FinanceiroLocacoesRepositorio>();
+builder.Services.AddScoped<CarteirinhaRepositorio>();
+builder.Services.AddScoped<PortariaRepositorio>();
+builder.Services.AddScoped<AtividadeRepositorio>();
+builder.Services.AddScoped<TurmaRepositorio>();
+builder.Services.AddScoped<InscricaoTurmaRepositorio>();
+builder.Services.AddScoped<EventoSocialRepositorio>();
+builder.Services.AddScoped<InscricaoEventoRepositorio>();
+builder.Services.AddScoped<VisitanteEventoRepositorio>();
+builder.Services.AddScoped<PortariaEventoRepositorio>();
+builder.Services.AddScoped<AvisoRepositorio>();
+builder.Services.AddScoped<OuvidoriaRepositorio>();
+builder.Services.AddScoped<DashboardRepositorio>();
+builder.Services.AddSingleton<CarteirinhaAssinaturaServico>();
 builder.Services.AddScoped<AutenticacaoServico>();
 builder.Services.AddSingleton<IPasswordHasher<ContaAcesso>, PasswordHasher<ContaAcesso>>();
 

@@ -1,0 +1,66 @@
+@model TurmaFormulario
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Cadastrar turma" : "Editar turma";
+    var clubeAtual = Model.Clubes.FirstOrDefault(c => c.Id == Model.UnidadeId)?.Nome
+        ?? $"Clube nº {Model.UnidadeId}";
+}
+
+<h1 class="h3">@ViewData["Title"]</h1>
+<form asp-action="Salvar" method="post" class="row g-3">
+    @Html.AntiForgeryToken()
+    <input asp-for="Id" type="hidden" />
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="col-md-6">
+        <label asp-for="UnidadeId" class="form-label">Clube</label>
+        @if (Model.Id != 0)
+        {
+            <input asp-for="UnidadeId" type="hidden" />
+            <input class="form-control" value="@clubeAtual" readonly />
+        }
+        else
+        {
+            <select asp-for="UnidadeId" class="form-select">
+                <option value="0">Selecione um clube atribuído</option>
+                @foreach (var clube in Model.Clubes)
+                {
+                    <option value="@clube.Id">@clube.Nome (@clube.FusoHorario)</option>
+                }
+            </select>
+        }
+    </div>
+    <div class="col-md-6">
+        <label asp-for="AtividadeId" class="form-label">Atividade</label>
+        <select asp-for="AtividadeId" class="form-select">
+            <option value="0">Selecione a atividade</option>
+            @foreach (var atividade in Model.Atividades)
+            {
+                <option value="@atividade.Id">@atividade.Nome — @atividade.Tipo</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="InicioLocal" class="form-label">Início (horário local do clube)</label>
+        <input asp-for="InicioLocal" asp-format="{0:yyyy-MM-ddTHH:mm}" type="datetime-local" class="form-control" required />
+    </div>
+    <div class="col-md-6">
+        <label asp-for="FimLocal" class="form-label">Fim (horário local do clube)</label>
+        <input asp-for="FimLocal" asp-format="{0:yyyy-MM-ddTHH:mm}" type="datetime-local" class="form-control" required />
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Capacidade" class="form-label">Vagas</label>
+        <input asp-for="Capacidade" type="number" min="1" max="10000" class="form-control" />
+    </div>
+    <div class="col-md-6">
+        <label asp-for="InstrutorPessoaId" class="form-label">ID da pessoa instrutora (opcional)</label>
+        <input asp-for="InstrutorPessoaId" type="number" min="1" class="form-control" />
+        <div class="form-text">Utilize o ID de uma pessoa ativa já cadastrada.</div>
+    </div>
+    @if (Model.Id != 0)
+    {
+        <div class="col-12 text-muted small">Turmas com inscrições ativas não podem mudar de período ou atividade, nem reduzir vagas abaixo dos confirmados.</div>
+    }
+    <div class="col-12 d-flex gap-2">
+        <button class="btn btn-primary" type="submit">Salvar turma</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+</form>

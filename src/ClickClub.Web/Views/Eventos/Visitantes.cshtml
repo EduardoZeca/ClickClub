@@ -1,0 +1,65 @@
+@model VisitantesEventoWeb
+@{
+    ViewData["Title"] = "Visitantes do evento";
+}
+
+<h1 class="h3">Visitantes — @Model.Evento.Nome</h1>
+<p>@Model.Evento.Clube — @Model.Evento.InicioLocal.ToString("dd/MM/yyyy HH:mm") a @Model.Evento.FimLocal.ToString("dd/MM/yyyy HH:mm")</p>
+<p class="text-muted">Esta lista é uma pré-autorização por evento. A entrada exige conferência de documento e validação online na portaria; não há liberação manual.</p>
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success">@sucesso</div>
+}
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-danger">@erro</div>
+}
+<div class="card mb-3">
+    <div class="card-body">
+        <h2 class="h5">Cadastrar visitante do evento público</h2>
+        <form asp-action="CadastrarVisitante" method="post" class="row g-3">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="EventoId" value="@Model.Evento.Id" />
+            <div class="col-md-5">
+                <label class="form-label" for="NomeVisitante">Nome</label>
+                <input id="NomeVisitante" type="text" name="Nome" minlength="2" maxlength="150" class="form-control" required />
+            </div>
+            <div class="col-md-5">
+                <label class="form-label" for="IdVisitante">Identificação mínima</label>
+                <input id="IdVisitante" type="text" name="IdentificacaoMinima" minlength="3" maxlength="60" class="form-control" required />
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button class="btn btn-primary w-100" type="submit">Cadastrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+<a asp-action="Gerenciar" class="btn btn-outline-secondary mb-3">Voltar</a>
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead><tr><th>Nome</th><th>Identificação cadastrada</th><th>Situação</th><th>Ação</th></tr></thead>
+        <tbody>
+        @foreach (var item in Model.Visitantes)
+        {
+            <tr>
+                <td>@item.Nome</td><td>@item.IdentificacaoMinima</td><td>@item.Situacao</td>
+                <td>
+                    <form asp-action="AlterarVisitante" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="eventoId" value="@Model.Evento.Id" />
+                        <input type="hidden" name="visitanteId" value="@item.Id" />
+                        <input type="hidden" name="situacao" value="@(item.Situacao == "Autorizado" ? "Revogado" : "Autorizado")" />
+                        <button class="btn btn-sm @(item.Situacao == "Autorizado" ? "btn-outline-danger" : "btn-outline-primary")">
+                            @(item.Situacao == "Autorizado" ? "Revogar" : "Reautorizar")
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+        @if (Model.Visitantes.Count == 0)
+        {
+            <tr><td colspan="4">Nenhum visitante cadastrado neste evento.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>

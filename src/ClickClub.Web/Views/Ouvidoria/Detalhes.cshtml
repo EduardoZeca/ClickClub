@@ -1,0 +1,71 @@
+@model ChamadoOuvidoriaDetalheApi
+@{
+    ViewData["Title"] = "Chamado de ouvidoria";
+    var chamado = Model.Chamado;
+    var gestor = User.IsInRole("AdministradorGeral") ||
+        User.IsInRole("PresidenteClube") || User.IsInRole("FuncionarioUnidade");
+}
+
+<h1 class="h3">Chamado #@chamado.Id — @chamado.Assunto</h1>
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success">@sucesso</div>
+}
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-danger">@erro</div>
+}
+<div class="card mb-3">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Solicitante</dt><dd class="col-sm-9">@chamado.Solicitante</dd>
+            <dt class="col-sm-3">Destino</dt><dd class="col-sm-9">@(chamado.UnidadeId.HasValue ? chamado.Clube : "Ouvidoria geral")</dd>
+            <dt class="col-sm-3">Tipo e categoria</dt><dd class="col-sm-9">@(chamado.Tipo == "Reclamacao" ? "Reclamação" : "Solicitação") — @chamado.Categoria</dd>
+            <dt class="col-sm-3">Situação</dt><dd class="col-sm-9">@chamado.Status</dd>
+            <dt class="col-sm-3">Abertura</dt><dd class="col-sm-9">@chamado.CriadoEmUtc.ToString("dd/MM/yyyy HH:mm:ss") UTC</dd>
+            @if (chamado.EncerradoEmUtc.HasValue)
+            {
+                <dt class="col-sm-3">Encerramento</dt><dd class="col-sm-9">@chamado.EncerradoEmUtc.Value.ToString("dd/MM/yyyy HH:mm:ss") UTC</dd>
+            }
+            <dt class="col-sm-3">Descrição</dt>
+            <dd class="col-sm-9" style="white-space:pre-wrap">@chamado.Descricao</dd>
+        </dl>
+    </div>
+</div>
+<h2 class="h5">Histórico de respostas</h2>
+@foreach (var item in Model.Respostas)
+{
+    <div class="card mb-2">
+        <div class="card-body">
+            <p class="small text-muted mb-2">@item.Autor — @item.DataHoraUtc.ToString("dd/MM/yyyy HH:mm:ss") UTC</p>
+            <p class="mb-0" style="white-space:pre-wrap">@item.Conteudo</p>
+        </div>
+    </div>
+}
+@if (Model.Respostas.Count == 0)
+{
+    <p class="text-muted">Este chamado ainda não recebeu resposta.</p>
+}
+@if (gestor && chamado.Status != "Encerrado")
+{
+    <div class="card mt-3 mb-3">
+        <div class="card-body">
+            <h2 class="h5">Responder</h2>
+            <form asp-action="Responder" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Id" value="@chamado.Id" />
+                <textarea name="Conteudo" class="form-control mb-2" rows="4" minlength="2" maxlength="4000" required></textarea>
+                <button type="submit" class="btn btn-primary">Registrar resposta</button>
+            </form>
+            @if (Model.Respostas.Count > 0)
+            {
+                <form asp-action="Encerrar" method="post" class="mt-2">
+                    @Html.AntiForgeryToken()
+                    <input name="id" type="hidden" value="@chamado.Id" />
+                    <button type="submit" class="btn btn-outline-secondary">Encerrar chamado</button>
+                </form>
+            }
+        </div>
+    </div>
+}
+<a asp-action="@(gestor ? "Gerenciar" : "Minhas")" class="btn btn-outline-secondary">Voltar</a>

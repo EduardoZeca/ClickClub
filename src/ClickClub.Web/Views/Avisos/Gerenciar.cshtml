@@ -1,0 +1,57 @@
+@model IReadOnlyList<AvisoApi>
+@{
+    ViewData["Title"] = "Administrar avisos";
+    var agora = DateTime.UtcNow;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Administrar avisos</h1>
+    <div class="d-flex gap-2">
+        <a asp-action="Index" class="btn btn-outline-secondary">Voltar ao mural</a>
+        <a asp-action="Criar" class="btn btn-primary">Novo aviso</a>
+    </div>
+</div>
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success">@sucesso</div>
+}
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-danger">@erro</div>
+}
+<p class="text-muted">Avisos agendados e encerrados continuam registrados. Retirar um aviso não apaga seu histórico.</p>
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr><th>Destinação</th><th>Título</th><th>Período (UTC)</th><th>Situação</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+        @foreach (var aviso in Model)
+        {
+            <tr>
+                <td>@(aviso.UnidadeId.HasValue ? aviso.Clube : "Geral")</td>
+                <td>@aviso.Titulo</td>
+                <td>@aviso.InicioUtc.ToString("dd/MM/yyyy HH:mm") até @aviso.FimUtc.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@(!aviso.Ativo ? "Retirado" : aviso.InicioUtc > agora ? "Agendado" : aviso.FimUtc <= agora ? "Encerrado" : "Visível")</td>
+                <td>
+                    <div class="d-flex gap-2">
+                        <a asp-action="Editar" asp-route-id="@aviso.Id" class="btn btn-sm btn-outline-primary">Editar</a>
+                        <form asp-action="AlterarSituacao" method="post">
+                            @Html.AntiForgeryToken()
+                            <input name="id" value="@aviso.Id" type="hidden" />
+                            <input name="ativo" value="@(aviso.Ativo ? "false" : "true")" type="hidden" />
+                            <button type="submit" class="btn btn-sm @(aviso.Ativo ? "btn-outline-danger" : "btn-outline-success")">
+                                @(aviso.Ativo ? "Retirar" : "Reativar")
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        }
+        @if (Model.Count == 0)
+        {
+            <tr><td colspan="5">Nenhum aviso sob sua gestão.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>

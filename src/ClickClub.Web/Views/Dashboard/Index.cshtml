@@ -1,0 +1,117 @@
+@using System.Globalization
+@model DashboardPagina
+@{
+    ViewData["Title"] = "Dashboard";
+    var br = CultureInfo.GetCultureInfo("pt-BR");
+}
+
+<h1 class="h3 mb-3">Dashboard dos clubes</h1>
+<p class="text-muted">Indicadores por clube e período, consultados diretamente na API. Datas consideradas em UTC.</p>
+
+<form asp-action="Index" method="get" class="row g-3 align-items-end mb-4">
+    <div class="col-12 col-sm-4 col-md-3">
+        <label for="inicio" class="form-label">De (UTC)</label>
+        <input id="inicio" name="inicio" type="date" class="form-control"
+               value="@Model.Inicio.ToString("yyyy-MM-dd")" required />
+    </div>
+    <div class="col-12 col-sm-4 col-md-3">
+        <label for="fim" class="form-label">Até (UTC)</label>
+        <input id="fim" name="fim" type="date" class="form-control"
+               value="@Model.Fim.ToString("yyyy-MM-dd")" required />
+    </div>
+    <div class="col-12 col-sm-4 col-md-3">
+        <label for="unidadeId" class="form-label">ID do clube (opcional)</label>
+        <input id="unidadeId" name="unidadeId" type="number" min="1" class="form-control"
+               value="@Model.UnidadeId" placeholder="Todos permitidos" />
+    </div>
+    <div class="col-12 col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Consultar</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Limpar</a>
+    </div>
+</form>
+
+@if (!string.IsNullOrEmpty(Model.Erro))
+{
+    <div class="alert alert-danger" role="alert">@Model.Erro</div>
+}
+else if (Model.Resumo is not null)
+{
+    <p class="small text-muted">
+        Período selecionado: @Model.Resumo.Inicio.ToString("dd/MM/yyyy") a
+        @Model.Resumo.Fim.ToString("dd/MM/yyyy") (inclusive).
+        Ocupação corresponde a espaços ativos com reserva confirmada sobreposta ao período;
+        não representa percentual de utilização horária.
+    </p>
+    @if (Model.Resumo.Unidades.Count == 0)
+    {
+        <div class="alert alert-info">Nenhum clube está disponível no seu escopo.</div>
+    }
+    @foreach (var unidade in Model.Resumo.Unidades)
+    {
+        <section class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="h5 mb-0">@unidade.UnidadeNome <small class="text-muted">#@unidade.UnidadeId</small></h2>
+                <a asp-action="Index" asp-route-inicio="@Model.Inicio.ToString("yyyy-MM-dd")"
+                   asp-route-fim="@Model.Fim.ToString("yyyy-MM-dd")"
+                   asp-route-unidadeId="@unidade.UnidadeId"
+                   class="btn btn-outline-primary btn-sm">Filtrar este clube</a>
+            </div>
+            <div class="card-body">
+                <h3 class="h6">Reservas e ocupação</h3>
+                <div class="row g-3 mb-4">
+                    <div class="col-sm-4"><div class="border rounded p-3 h-100">
+                        <div class="small text-muted">Espaços ativos</div><div class="h4 mb-0">@unidade.EspacosAtivos</div>
+                    </div></div>
+                    <div class="col-sm-4"><div class="border rounded p-3 h-100">
+                        <div class="small text-muted">Espaços ocupados no período</div><div class="h4 mb-0">@unidade.EspacosOcupados</div>
+                    </div></div>
+                    <div class="col-sm-4"><div class="border rounded p-3 h-100">
+                        <div class="small text-muted">Reservas confirmadas</div><div class="h4 mb-0">@unidade.ReservasConfirmadas</div>
+                    </div></div>
+                </div>
+
+                <h3 class="h6">Inscrições em atividades e eventos</h3>
+                <div class="row g-3 mb-4">
+                    <div class="col-sm-4"><div class="border rounded p-3 h-100">
+                        <div class="small text-muted">Turmas: confirmadas</div><div class="h4 mb-0">@unidade.InscricoesTurmasConfirmadas</div>
+                    </div></div>
+                    <div class="col-sm-4"><div class="border rounded p-3 h-100">
+                        <div class="small text-muted">Turmas: em espera</div><div class="h4 mb-0">@unidade.InscricoesTurmasEmEspera</div>
+                    </div></div>
+                    <div class="col-sm-4"><div class="border rounded p-3 h-100">
+                        <div class="small text-muted">Eventos: confirmadas</div><div class="h4 mb-0">@unidade.InscricoesEventosConfirmadas</div>
+                    </div></div>
+                </div>
+
+                @if (unidade.Financeiro is { } financeiro)
+                {
+                    <h3 class="h6">Financeiro simulado (competência no período)</h3>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered mb-2">
+                            <thead><tr><th>Situação da fatura</th><th>Quantidade</th><th>Total simulado</th></tr></thead>
+                            <tbody>
+                                <tr><td>Quitadas</td><td>@financeiro.FaturasQuitadas</td>
+                                    <td>@financeiro.ValorQuitado.ToString("C", br)</td></tr>
+                                <tr><td>Em aberto (ainda não vencidas)</td><td>@financeiro.FaturasEmAberto</td>
+                                    <td>@financeiro.ValorEmAberto.ToString("C", br)</td></tr>
+                                <tr><td>Vencidas e não quitadas</td><td>@financeiro.FaturasVencidas</td>
+                                    <td>@financeiro.ValorVencido.ToString("C", br)</td></tr>
+                                <tr><td>Em preparação</td><td>@financeiro.FaturasEmPreparacao</td>
+                                    <td>Não emitidas</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="small text-muted mb-0">
+                        Faturas vinculadas ao clube de origem da associação. Vencida significa prazo de pagamento ultrapassado,
+                        não necessariamente associação bloqueada. Valores não são recebimentos reais.
+                    </p>
+                }
+                else
+                {
+                    <p class="small text-muted mb-0">Resumo financeiro restrito ao Administrador Geral e ao Tesoureiro atribuído a este clube.</p>
+                }
+            </div>
+        </section>
+    }
+    <p class="small text-muted">As contagens de reservas e inscrições consideram o período de realização, e não a data de cadastro. Registros cancelados não são somados.</p>
+}

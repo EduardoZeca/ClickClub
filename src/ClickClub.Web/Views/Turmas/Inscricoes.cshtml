@@ -1,0 +1,48 @@
+@model TurmaGestaoWeb
+@{
+    ViewData["Title"] = "Inscrições da turma";
+}
+
+<h1 class="h3">@Model.Turma.Atividade — @Model.Turma.Clube</h1>
+<p>@Model.Turma.InicioLocal.ToString("dd/MM/yyyy HH:mm") até @Model.Turma.FimLocal.ToString("dd/MM/yyyy HH:mm") — Situação: @Model.Turma.Status</p>
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success">@sucesso</div>
+}
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-danger">@erro</div>
+}
+<div class="d-flex align-items-center gap-3 mb-3">
+    <span>Confirmados: @(Model.Vagas?.Confirmadas.ToString() ?? "—") / @Model.Turma.Capacidade</span>
+    <span>Na espera: @(Model.Vagas?.EmEspera.ToString() ?? "—")</span>
+    @if (Model.Turma.Status == "Aberta" && Model.Vagas is { EmEspera: > 0, VagasDisponiveis: > 0 })
+    {
+        <form asp-action="Promover" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Turma.Id" />
+            <button type="submit" class="btn btn-primary">Promover primeiro elegível</button>
+        </form>
+    }
+    <a asp-action="Index" class="btn btn-outline-secondary">Voltar</a>
+</div>
+<p class="text-muted">Não há promoção automática. O servidor confere associação, mensalidade e conflitos antes de confirmar a próxima vaga.</p>
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead><tr><th>Nome</th><th>Situação</th><th>Inscrição (UTC)</th><th>Posição na espera</th></tr></thead>
+        <tbody>
+        @foreach (var item in Model.Inscricoes)
+        {
+            <tr>
+                <td>@item.NomePessoa</td><td>@item.Status</td>
+                <td>@item.InscritaEmUtc.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                <td>@(item.PosicaoEspera?.ToString() ?? "—")</td>
+            </tr>
+        }
+        @if (Model.Inscricoes.Count == 0)
+        {
+            <tr><td colspan="4">Nenhuma inscrição nesta turma.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>

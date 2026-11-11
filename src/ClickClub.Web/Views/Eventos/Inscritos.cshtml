@@ -1,0 +1,24 @@
+@model EventoInscritosWeb
+@{
+    ViewData["Title"] = "Inscritos no evento";
+}
+
+<h1 class="h3">Inscritos — @Model.Evento.Nome</h1>
+<p>@Model.Evento.Clube — @Model.Evento.InicioLocal.ToString("dd/MM/yyyy HH:mm")</p>
+<p>Ocupação total: @Model.Evento.Inscritos @(Model.Evento.Capacidade.HasValue ? $"/ {Model.Evento.Capacidade}" : "/ sem limite"). Em eventos públicos, a ocupação inclui também visitantes pré-autorizados.</p>
+<a asp-action="Gerenciar" class="btn btn-outline-secondary mb-3">Voltar</a>
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead><tr><th>Nome do associado</th><th>Situação</th><th>Inscrição (UTC)</th></tr></thead>
+        <tbody>
+        @foreach (var item in Model.Inscricoes)
+        {
+            <tr><td>@item.NomePessoa</td><td>@item.Status</td><td>@item.InscritaEmUtc.ToString("dd/MM/yyyy HH:mm:ss")</td></tr>
+        }
+        @if (Model.Inscricoes.Count == 0)
+        {
+            <tr><td colspan="3">Nenhuma inscrição nominal de associado.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>

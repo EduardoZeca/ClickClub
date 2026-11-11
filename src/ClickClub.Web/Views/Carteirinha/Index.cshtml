@@ -1,0 +1,75 @@
+@model CarteirinhaPaginaViewModel
+@{
+    ViewData["Title"] = "Minha carteirinha";
+}
+
+<h1 class="h3 mb-3">Minha carteirinha</h1>
+<p class="text-muted">O QR Code é pessoal e dura 24 horas. A portaria precisa consultar a API online antes de autorizar qualquer entrada.</p>
+
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success" role="status">@sucesso</div>
+}
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-danger" role="alert">@erro</div>
+}
+@if (Model.Erro is not null)
+{
+    <div class="alert alert-warning" role="alert">@Model.Erro</div>
+}
+
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="row g-3 align-items-start">
+            <div class="col-md-5 text-center">
+                @if (Model.CredencialValida && Model.ImagemQrBase64 is not null)
+                {
+                    <img class="img-fluid border rounded p-2 bg-white" style="max-width: 340px"
+                         src="data:image/png;base64,@Model.ImagemQrBase64"
+                         alt="QR Code da carteirinha do associado" />
+                    <p class="text-success mt-2 mb-0">QR disponível para validação online</p>
+                }
+                else
+                {
+                    <div class="border rounded bg-light text-muted p-5">Nenhum QR válido disponível</div>
+                }
+            </div>
+            <div class="col-md-7">
+                <dl class="row mb-3">
+                    <dt class="col-sm-5">Associado</dt>
+                    <dd class="col-sm-7">@(Model.Associacao?.Nome ?? User.Identity?.Name ?? "Não identificado")</dd>
+                    <dt class="col-sm-5">Perfil</dt>
+                    <dd class="col-sm-7">@(Model.Associacao?.Perfil ?? "Associado")</dd>
+                    <dt class="col-sm-5">Matrícula</dt>
+                    <dd class="col-sm-7">@(Model.Associacao?.Matricula ?? "—")</dd>
+                    <dt class="col-sm-5">Clube de origem</dt>
+                    <dd class="col-sm-7">@(Model.Associacao?.ClubeOrigem ?? "—")</dd>
+                    <dt class="col-sm-5">Situação</dt>
+                    <dd class="col-sm-7">@(Model.Associacao?.Status ?? "Não informada")</dd>
+                    @if (Model.Credencial is not null)
+                    {
+                        <dt class="col-sm-5">Validade</dt>
+                        <dd class="col-sm-7">@Model.Credencial.ValidaAteUtc.ToString("dd/MM/yyyy HH:mm") UTC</dd>
+                    }
+                </dl>
+                <form asp-action="Renovar" method="post">
+                    @Html.AntiForgeryToken()
+                    <button class="btn btn-primary" type="submit">Emitir ou renovar carteirinha</button>
+                </form>
+                <p class="small text-muted mt-2">Renova quando estiver perto do vencimento. Não libera entrada se houver bloqueio associativo ou financeiro.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.CredencialValida && Model.Credencial is not null)
+{
+    <div class="card">
+        <div class="card-body">
+            <h2 class="h5">Código para demonstração da leitura</h2>
+            <p class="small text-muted">Na primeira versão da portaria Web, copie este código para o campo de validação. Não compartilhe o código publicamente.</p>
+            <textarea class="form-control font-monospace" rows="3" readonly aria-label="Código QR assinado">@Model.Credencial.CodigoQr</textarea>
+        </div>
+    </div>
+}

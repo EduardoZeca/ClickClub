@@ -1,0 +1,46 @@
+@model IReadOnlyList<MinhaInscricaoTurmaApi>
+@{
+    ViewData["Title"] = "Minhas inscrições em turmas";
+}
+
+<h1 class="h3">Minhas inscrições em turmas</h1>
+<p>Inscrições confirmadas ocupam vagas. A espera é ordenada cronologicamente e a promoção depende de ação de um funcionário.</p>
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success">@sucesso</div>
+}
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-danger">@erro</div>
+}
+<a asp-action="Index" class="btn btn-outline-primary mb-3">Consultar turmas</a>
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead><tr><th>Atividade</th><th>Clube</th><th>Período</th><th>Situação</th><th>Espera</th><th>Ação</th></tr></thead>
+        <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Atividade</td><td>@item.Clube</td>
+                <td>@item.InicioLocal.ToString("dd/MM/yyyy HH:mm") a @item.FimLocal.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@item.Status</td>
+                <td>@(item.PosicaoEspera.HasValue ? $"Posição {item.PosicaoEspera}" : "—")</td>
+                <td>
+                    @if (item.Status is "Confirmada" or "EmEspera")
+                    {
+                        <form asp-action="Cancelar" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@item.TurmaId" />
+                            <button class="btn btn-sm btn-outline-danger">Cancelar inscrição</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+        @if (Model.Count == 0)
+        {
+            <tr><td colspan="6">Nenhuma inscrição registrada.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>

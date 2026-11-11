@@ -1,0 +1,44 @@
+@model IReadOnlyList<MinhaInscricaoEventoApi>
+@{
+    ViewData["Title"] = "Minhas inscrições em eventos";
+}
+
+<h1 class="h3">Minhas inscrições em eventos</h1>
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success">@sucesso</div>
+}
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-danger">@erro</div>
+}
+<a asp-action="Index" class="btn btn-outline-primary mb-3">Ver eventos</a>
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead><tr><th>Evento</th><th>Clube</th><th>Início</th><th>Situação</th><th>Ação</th></tr></thead>
+        <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Evento</td><td>@item.Clube</td>
+                <td>@item.InicioLocal.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@item.Status</td>
+                <td>
+                    @if (item.Status == "Confirmada")
+                    {
+                        <form asp-action="Cancelar" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@item.EventoId" />
+                            <button class="btn btn-sm btn-outline-danger">Cancelar inscrição</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+        @if (Model.Count == 0)
+        {
+            <tr><td colspan="5">Nenhuma inscrição em eventos.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>

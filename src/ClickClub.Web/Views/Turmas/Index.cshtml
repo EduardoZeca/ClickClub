@@ -1,0 +1,95 @@
+@model IReadOnlyList<TurmaLinhaWeb>
+@{
+    ViewData["Title"] = "Turmas";
+    var gestor = User.IsInRole("AdministradorGeral") || User.IsInRole("FuncionarioUnidade");
+    var associado = User.IsInRole("Titular") || User.IsInRole("Dependente");
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Turmas e vagas</h1>
+    <div class="d-flex gap-2">
+        @if (associado)
+        {
+            <a asp-action="Minhas" class="btn btn-outline-primary">Minhas inscrições</a>
+        }
+        @if (gestor)
+        {
+            <a asp-controller="Atividades" asp-action="Index" class="btn btn-outline-secondary">Atividades</a>
+            <a asp-action="Criar" class="btn btn-primary">Nova turma</a>
+        }
+    </div>
+</div>
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success">@sucesso</div>
+}
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-danger">@erro</div>
+}
+<p class="text-muted">Horários locais de cada clube. Vagas liberadas com lista de espera são preenchidas por promoção manual.</p>
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead><tr><th>Clube</th><th>Atividade</th><th>Período local</th><th>Instrutor</th><th>Vagas</th><th>Fila</th><th>Situação</th><th>Ações</th></tr></thead>
+        <tbody>
+        @foreach (var linha in Model)
+        {
+            var turma = linha.Turma;
+            <tr>
+                <td>@turma.Clube</td>
+                <td><strong>@turma.Atividade</strong><div class="small text-muted">@turma.Tipo</div></td>
+                <td>@turma.InicioLocal.ToString("dd/MM/yyyy HH:mm")<div class="small text-muted">até @turma.FimLocal.ToString("dd/MM/yyyy HH:mm")</div></td>
+                <td>@(turma.Instrutor ?? "Não informado")</td>
+                <td>@(linha.Vagas?.VagasDisponiveis.ToString() ?? "—") / @turma.Capacidade</td>
+                <td>@(linha.Vagas?.EmEspera.ToString() ?? "—")</td>
+                <td>@turma.Status</td>
+                <td>
+                    <div class="d-flex flex-wrap gap-1">
+                        @if (associado && turma.Status == "Aberta")
+                        {
+                            <form asp-action="Inscrever" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@turma.Id" />
+                                <button class="btn btn-sm btn-primary">Inscrever</button>
+                            </form>
+                        }
+                        @if (gestor)
+                        {
+                            <a asp-action="Inscricoes" asp-route-id="@turma.Id" class="btn btn-sm btn-outline-primary">Inscritos</a>
+                            <a asp-action="Editar" asp-route-id="@turma.Id" class="btn btn-sm btn-outline-secondary">Editar</a>
+                            @if (turma.Status == "Aberta")
+                            {
+                                <form asp-action="AlterarSituacao" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@turma.Id" />
+                                    <input type="hidden" name="status" value="Encerrada" />
+                                    <button class="btn btn-sm btn-outline-secondary">Encerrar</button>
+                                </form>
+                                <form asp-action="AlterarSituacao" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@turma.Id" />
+                                    <input type="hidden" name="status" value="Cancelada" />
+                                    <button class="btn btn-sm btn-outline-danger">Cancelar turma</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form asp-action="AlterarSituacao" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@turma.Id" />
+                                    <input type="hidden" name="status" value="Aberta" />
+                                    <button class="btn btn-sm btn-outline-primary">Reabrir</button>
+                                </form>
+                            }
+                        }
+                    </div>
+                </td>
+            </tr>
+        }
+        @if (Model.Count == 0)
+        {
+            <tr><td colspan="8">Nenhuma turma cadastrada.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>

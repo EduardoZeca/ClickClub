@@ -1,0 +1,67 @@
+@model IReadOnlyList<EventoSocialApi>
+@{
+    ViewData["Title"] = "Eventos sociais";
+    var associado = User.IsInRole("Titular") || User.IsInRole("Dependente");
+    var gestor = User.IsInRole("AdministradorGeral") || User.IsInRole("FuncionarioUnidade");
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Eventos dos clubes</h1>
+    <div class="d-flex gap-2">
+        @if (associado)
+        {
+            <a asp-action="Minhas" class="btn btn-outline-primary">Minhas inscrições</a>
+        }
+        @if (gestor)
+        {
+            <a asp-action="Gerenciar" class="btn btn-primary">Gerenciar eventos</a>
+        }
+    </div>
+</div>
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success">@sucesso</div>
+}
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-danger">@erro</div>
+}
+<p class="text-muted">Eventos públicos podem ser consultados sem login. A entrada de visitantes externos exige cadastro prévio e validação online na portaria, dentro do período do evento.</p>
+<div class="row g-3">
+    @foreach (var item in Model)
+    {
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-secondary">@(item.Tipo == "Torneio" ? "Torneio" : "Evento social")</span>
+                        <span class="small text-muted">@(item.PublicoAlvo == "PublicoGeral" ? "Público geral" : "Associados")</span>
+                    </div>
+                    <h2 class="h5">@item.Nome</h2>
+                    <p class="mb-2"><strong>@item.Clube</strong></p>
+                    <p class="small">@item.InicioLocal.ToString("dd/MM/yyyy HH:mm") a @item.FimLocal.ToString("dd/MM/yyyy HH:mm")</p>
+                    @if (!string.IsNullOrWhiteSpace(item.Descricao))
+                    {
+                        <p>@item.Descricao</p>
+                    }
+                    @if (item.Capacidade.HasValue)
+                    {
+                        <p class="small">Ocupação: @item.Inscritos / @item.Capacidade — vagas: @item.VagasDisponiveis</p>
+                    }
+                    @if (associado && item.Capacidade.HasValue)
+                    {
+                        <form asp-action="Inscrever" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <button class="btn btn-sm btn-primary">Inscrever-se</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    @if (Model.Count == 0)
+    {
+        <div class="col-12"><p>Nenhum evento publicado para este público.</p></div>
+    }
+</div>

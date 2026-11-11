@@ -1,8 +1,8 @@
 # Continuidade — Projeto ClickClub
 
 **Data de criação:** 05/11/2026  
-**Fase atual (11/11/2026):** Componentes 1 (Fundação), 2 (Autenticação e cadastros) e 3 (Espaços e reservas, Etapas 1–7) concluídos **conforme relatos do usuário**. Componente 4 validado na documentação v1.6. **Etapa 1 aprovada segundo o usuário; Etapa 2 testada parcialmente pelo Codex; Etapa 3 recebida sem relato pormenorizado de compilação/testes; Etapa 4 aprovada nos testes iniciais pelo usuário em 11/11/2026.** Correção de ordenação do histórico confirmada pelo usuário; regra Individual sem dependentes aprovada e preparada para validação técnica. Etapas 5–6 não autorizadas. Estado detalhado nas seções 23–29.
-**Fonte oficial:** `DOCUMENTACAO_CLICKCLUB.md` v1.5 (10/11/2026).
+**Fase atual (11/11/2026):** Componentes 1–4 concluídos nos testes iniciais relatados; Componentes 5, 6 e 7 implementados, com SQL e builds confirmados pelo usuário, **sem testes funcionais profundos dos Componentes 5–7**. A Etapa 3 (dashboard) do C7 não exigiu SQL. Próximo componente planejado: C8 — Mobile Android, **ainda sem autorização de implementação**. Não realizar commit/push automaticamente. Detalhes na seção 43 e testes em `docs/TESTES_PENDENTES_CLICKCLUB.md`.
+**Fonte oficial:** `DOCUMENTACAO_CLICKCLUB.md` v1.9 (11/11/2026; permissões C7 aprovadas).
 **Instruções do Project:** `INSTRUCTIONS_PROJECT_CLICKCLUB.md`.
 
 ## 1. Objetivo
@@ -30,7 +30,7 @@ Sistema acadêmico ClickClub para uma organização com múltiplos clubes/unidad
 - [x] Backup lógico criado, restaurado em banco de teste separado e tabelas/dados conferidos; backup ignorado pelo Git, segundo relato de 06/11/2026.
 - [ ] Instalação e testes Android físico realizados.
 
-**Atenção:** As notas das seções 7–15 documentam o histórico dos Componentes 1 e 2 no momento em que foram escritas; seu estado mais recente está nas seções 16–18. Builds e testes relatados pelo usuário não equivalem a execução independente neste ambiente.
+**Atenção:** As seções históricas registram o estado de cada data e não substituem as seções 36–37. Builds e testes relatados pelo usuário não equivalem a execução independente neste ambiente.
 
 ## 3. Decisões centrais
 
@@ -569,3 +569,266 @@ Os scripts foram fornecidos para aplicação sequencial; os testes finais foram 
 **Git/GitHub:** não houve commit ou push a partir desta conversa. O repositório local usado para preparar os ZIPs contém alterações rastreadas e novos arquivos do financeiro, da correção de categoria Individual, dos testes e da documentação; `.gitignore` foi ampliado para artefatos temporários e segredos locais. Antes do commit do usuário, incluir somente código-fonte, migrações versionadas, SQL de validação, documentos e `.gitignore`, conferindo `git diff --cached --name-only` e `git diff --cached --check`. Nunca incluir backups, arquivos `.env`, credenciais, SQLite ou saídas temporárias do Codex.
 
 **Próxima conversa:** ler `DOCUMENTACAO_CLICKCLUB.md` v1.8, esta Continuidade e `TESTES_PENDENTES_CLICKCLUB.md`; conferir o repositório atualizado; planejar o **Componente 5 — Carteirinha e Portaria Online** com o novo fluxo, mas **não implementar antes da autorização expressa do usuário**. Preservar o estado do Componente 4 e todas as decisões aprovadas.
+
+## 33. Componente 5 — Etapa 1 autorizada e preparada (11/11/2026)
+
+**Autorização:** após apresentação do plano de três etapas, o usuário respondeu **"Aprovado, vamos iniciar o componente 5 por favor."** Interpretação: iniciar somente a **Etapa 1 — Estrutura e Emissão de Carteirinhas**, preservando a necessidade de confirmação antes de avançar à Etapa 2.
+
+**Base utilizada:** repositório `EduardoZeca/ClickClub` consultado na revisão com os scripts `001`–`011`, solução .NET 10 API/Web, autenticação JWT e auditoria existentes. `DOCUMENTACAO_CLICKCLUB.md` v1.8 permanece fonte de requisitos. Os testes aprofundados anteriores continuam pendentes.
+
+**Arquivos preparados para o ZIP incremental da Etapa 1:**
+
+- `database/scripts/012_carteirinha_credenciais.sql`: nova tabela de credenciais com pessoa, associação, identificador opaco, instantes UTC, revogação, versão, chaves estrangeiras e unicidade de credencial atual por pessoa; não altera tabelas anteriores.
+- `src/ClickClub.Api/Contratos/CarteirinhaDtos.cs`: DTO de resposta e payload sem dados pessoais/financeiros.
+- `src/ClickClub.Api/Seguranca/CarteirinhaAssinaturaServico.cs`: assinatura ECDSA P-256 com chave PKCS#8 guardada em User Secrets; inclui verificação criptográfica para uso posterior pela portaria. Não utiliza JWT como QR.
+- `src/ClickClub.Api/Dados/CarteirinhaRepositorio.cs`: consulta, emissão e renovação transacional com trava de pessoa, credencial única, reaproveitamento se restar mais de uma hora, validade de 24 horas, escopo exclusivo do próprio associado ativo e registro de auditoria sem token.
+- `src/ClickClub.Api/Controllers/CarteirinhaController.cs`: `GET api/carteirinha/minha` e `POST api/carteirinha/minha/renovar`, restritos aos perfis Titular/Dependente.
+- `src/ClickClub.Api/Program.cs`: registro das dependências e modo local para gerar a chave uma vez; nenhum segredo foi incluído no código.
+- `docs/GUIA_C5_ETAPA1.md`: aplicação do ZIP, migração, compilação e configuração segura da chave.
+- `docs/TESTES_PENDENTES_CLICKCLUB.md`: novos casos E1 para Codex; TP-011 continua bloqueado até integração C5/C8.
+
+**Escopo expressamente não concluído:** validação online na portaria, consulta de inadimplência no acesso, permissão por unidade, acesso a espaços, logs de entrada e telas Web são Etapas 2–3. Cache offline, renovação automática e testes Android pertencem ao Componente 8.
+
+**Evidências:** inspeção de código e arquivos preparados. O ambiente desta conversa não dispõe do SDK `dotnet` nem do MySQL; **não houve build, execução de API, aplicação da migração, teste de assinatura ou comportamento, teste Android ou commit/push**. O usuário fará somente a compilação imediata. A migração SQL e a configuração da chave são preparativos, não testes funcionais. Todos os testes reais constam como pendentes.
+
+**Próxima ação:** aplicar o ZIP sobre a solução, executar o SQL 012 uma vez após backup, compilar `ClickClub.slnx`, configurar a chave local em User Secrets antes do uso da API, relatar o resultado de compilação e autorizar separadamente a Etapa 2.
+
+## 34. Componente 5 — Etapa 1 confirmada; Etapa 2 autorizada e preparada (11/11/2026)
+
+**Retorno do usuário da Etapa 1:** informou que o ZIP compilou, o script SQL `012_carteirinha_credenciais.sql` foi executado com sucesso e os três comandos do guia para gerar a chave ECDSA, gravá-la em User Secrets e remover a variável temporária foram executados. Registrar como **compilação e preparação do banco/chave confirmadas por relato**, não como teste funcional de emissão, assinatura ou portaria. Os TP-022–025 permanecem pendentes.
+
+**Autorização:** a mesma mensagem pediu prosseguir para a próxima etapa. Autoriza somente a **Etapa 2 — Validação Online e Controle de Acesso**, conforme o planejamento de três etapas; não autoriza iniciar a Etapa 3 sem nova confirmação.
+
+**Arquivos preparados para o ZIP incremental da Etapa 2:**
+
+- `database/scripts/013_portaria_registros.sql`: cria `registro_acesso` para conferências online, com unidade, pessoa/convidado/credencial opcionais, reserva opcional, operador, tipo de acesso, resultado, motivo e instante UTC. Convidado fica preparado para integração na Etapa 3. Preserva dados existentes; nenhum campo permite liberação manual.
+- `src/ClickClub.Api/Contratos/PortariaDtos.cs`: entradas e saídas de validação, unidades atribuídas e histórico sem conteúdo do QR.
+- `src/ClickClub.Api/Dados/PortariaRepositorio.cs`: verificação online de assinatura ECDSA, coincidência da credencial com os dados do MySQL, validade/revogação, vínculo, associação, pessoa, conta, papel, inadimplência e acesso por unidade; diferencia `EntradaGeral` de `UsoReserva` para preservar a regra de taxa avulsa em aberto. Registra permitidos/negados na mesma operação. Restringe histórico ao escopo do porteiro.
+- `src/ClickClub.Api/Controllers/PortariaController.cs`: endpoints `GET api/portaria/unidades`, `POST api/portaria/validar-qr` e `GET api/portaria/registros`; porteiro e administrador geral. HTTP 403 para unidade fora de escopo; HTTP 200 para decisões de negócio Permitido/Negado auditadas.
+- `src/ClickClub.Api/Seguranca/CarteirinhaAssinaturaServico.cs`: pequeno endurecimento da verificação; assinaturas criptograficamente inválidas que provoquem exceção da biblioteca são tratadas como QR inválido, sem liberação.
+- `src/ClickClub.Api/Program.cs`: registro de `PortariaRepositorio`, sem alteração nas dependências financeiras, JWT ou chave da Etapa 1.
+- `docs/GUIA_C5_ETAPA2.md`: aplicação do ZIP, SQL 013, compilação e contratos previstos para a Web.
+- `docs/TESTES_PENDENTES_CLICKCLUB.md`: acrescenta TP-026–030 e preserva os testes antigos sem marcar execução por inferência.
+
+**Decisões preservadas:** qualquer acesso depende de validação online; portaria offline não libera. Bloqueio após o décimo dia local de atraso somente para mensalidade em aberto, atingindo titular e dependentes. Taxa avulsa aberta não bloqueia a entrada geral, mas impede o uso de espaço pago até quitação simulada ou transferência. Pessoal da portaria não recebe permissão global por padrão. Nenhum token/segredo é persistido em `registro_acesso`.
+
+**Fora desta etapa:** telas Web, leitura por câmera, convidados, eventos públicos e cache offline Android. A tela Web e convidados de reservas existentes serão abordados na Etapa 3; o público geral será integrado ao módulo de eventos (C6); Android offline integra C8.
+
+**Evidências desta entrega:** arquivos editados e revisão estática; o ambiente de preparação continua sem SDK .NET/MySQL. **Não houve build, migração 013, execução de endpoint, teste financeiro de portaria, segurança, concorrência ou Git commit/push aqui.** A execução imediata autorizada ao usuário é somente compilação, após aplicar o SQL e os arquivos; demais testes permanecem reservados ao Codex.
+
+**Próxima ação:** aplicar ZIP da Etapa 2, realizar backup, executar SQL `013` uma vez com conta administrativa, compilar `ClickClub.slnx` e informar o resultado. Não recriar a chave ECDSA. Aguardar autorização para a Etapa 3.
+
+## 35. Componente 5 — Etapa 2 confirmada; Etapa 3 autorizada e preparada (11/11/2026)
+
+**Retorno recebido:** o usuário relatou **"Build executada com sucesso e script aplicado. Vamos prosseguir por favor."** Registrar a Etapa 2 como **compilada e migração `013` aplicada por relato do usuário**. O relato não constitui evidência de testes funcionais da portaria; TP-026–030 e demais casos permanecem pendentes.
+
+**Autorização:** prosseguir somente com a **Etapa 3 — Interfaces Web da Carteirinha e da Portaria**, última etapa do planejamento do Componente 5. O Componente 6 depende de autorização posterior.
+
+**Arquivos preparados nesta Etapa 3:**
+
+- `src/ClickClub.Web/ClickClub.Web.csproj`: pacote `QRCoder` 1.8.1 para renderizar PNG de QR localmente, sem consultas a provedores externos.
+- `src/ClickClub.Web/Models/PortariaViewModels.cs`: contratos Web e formulários com validação básica.
+- `src/ClickClub.Web/Controllers/CarteirinhaController.cs`: consulta da própria credencial, geração da imagem QR, emissão/renovação explícita por POST com antiforgery, mensagens de indisponibilidade e sem cache da página.
+- `src/ClickClub.Web/Controllers/PortariaController.cs`: seleção de unidade atribuída, conferência online de QR e convidados, resultado positivo/negativo da API e histórico; falhas de conexão não criam autorização.
+- `src/ClickClub.Web/Views/Carteirinha/Index.cshtml`: carteirinha com identificação mínima, QR e validade, além de código textual para demonstração da leitura manual.
+- `src/ClickClub.Web/Views/Portaria/Index.cshtml`: formulário de QR, formulário de convidado de reserva com confirmação de documento, histórico e motivo de decisão. Não há liberação manual.
+- `src/ClickClub.Web/Views/Shared/_Layout.cshtml`: menus `Carteirinha` para titular/dependente e `Portaria` para porteiro/administrador geral.
+- `src/ClickClub.Api/Contratos/PortariaDtos.cs`, `Controllers/PortariaController.cs`, `Dados/PortariaRepositorio.cs`: extensão para `POST api/portaria/validar-convidado`, usando `convidado_id` já preparado no SQL 013; situação da lista autorizada, associação, reserva, tipo de espaço, período, cobrança e unidade, com registro Permitido/Negado e atualização da consulta de histórico. Não altera regras de emissão da credencial.
+- `docs/GUIA_C5_ETAPA3.md`: instalação, comando de build e limitações; `docs/TESTES_PENDENTES_CLICKCLUB.md`: novos TP-031–033.
+
+**Preservado:** scripts `001`–`013`, API como autoridade, JWT separado do QR, chave ECDSA existente, regras de inadimplência e locação, ausência de catraca física, portaria obrigatoriamente online, escopo por unidade e sigilo dos códigos. Nenhuma migração SQL nova, alteração financeira ou limpeza/carga de dados.
+
+**Fora do escopo desta etapa:** leitor automático de câmera, eventos abertos ao público (C6), funcionamento Android offline/renovação automática (C8), testes profundos. Leitura por conteúdo do QR e conferência manual online permanecem no escopo da primeira demonstração Web.
+
+**Evidências desta preparação:** revisão estática dos arquivos; o ambiente não possui .NET SDK/MySQL. Não houve compilação local, execução API/Web, validação de QR, teste de visitante, instalação de NuGet no Windows, commit ou push. O usuário executará apenas `dotnet build ClickClub.slnx` após aplicar o ZIP; testes de comportamento serão realizados posteriormente pelo Codex.
+
+**Próxima ação:** aplicar o ZIP incremental sem repetir os scripts SQL 012/013 nem gerar nova chave, compilar a solução e informar o resultado. Após confirmação, registrar **Componente 5 entregue e compilado no escopo API/Web**, mas não testado funcionalmente. Aguardar autorização explícita para Componente 6 — Atividades, Turmas e Eventos Sociais.
+
+## 36. Componente 5 concluído no escopo API/Web; Componente 6 — Etapa 1 preparada (11/11/2026)
+
+**Confirmação recebida:** o usuário relatou **"Compilação da Etapa 3 concluída!"**. Portanto, as três etapas do Componente 5 foram aplicadas e compiladas **segundo relato do usuário**. Não houve comprovação de testes funcionais da carteirinha, portaria ou convidado, nem testes completos de integração. TP-011 e TP-022–033 seguem pendentes para o Codex.
+
+**Autorização recebida:** iniciar o **Componente 6 — Atividades, Turmas e Eventos Sociais**. O próximo commit ocorrerá **quando a parte Web estiver finalizada**; não efetuar commit/push por etapa.
+
+**Plano incremental, com prazo reduzido:**
+
+1. **Etapa 1 — Base SQL e API de atividades/turmas:** catálogo global, cadastro de turmas por unidade, horários locais/UTC, atribuições e auditoria.
+2. **Etapa 2 — Matrículas e vagas:** inscrição de titular/dependente elegível, limite de vagas, lista de espera cronológica e promoção manual do primeiro elegível, prevenção de matrículas em turmas com horários sobrepostos, sem alterar reservas/financeiro.
+3. **Etapa 3 — Eventos sociais e Web:** eventos para associados/público geral, inscrição/vagas de torneios simplificados e telas Web para atividades, turmas, inscrições e eventos, preservando a validação online da portaria. Não incluir o vínculo de eventos à agenda de espaços sem decisão específica.
+
+**Arquivos preparados nesta Etapa 1:**
+
+- `database/scripts/014_atividades_turmas.sql`: tabelas `atividade` (catálogo global) e `turma` (unidade, instrutor opcional, intervalo UTC, capacidade e status), somente aditivas, sem dados de demonstração.
+- `src/ClickClub.Api/Contratos/AtividadesDtos.cs`: DTOs de catálogo e turmas, com validações básicas e situação `Aberta/Encerrada/Cancelada`.
+- `src/ClickClub.Api/Dados/AtividadeRepositorio.cs`: leitura e manutenção do catálogo global; mudanças com auditoria.
+- `src/ClickClub.Api/Dados/TurmaRepositorio.cs`: consulta de turmas, clubes gerenciáveis, cadastro, edição, situação; fuso da unidade, transações, verificações de funcionário por `papel_usuario` e auditoria.
+- `src/ClickClub.Api/Controllers/AtividadesController.cs` e `Controllers/TurmasController.cs`: rotas HTTP; somente Admin Geral altera catálogo; funcionário atribuído ou Admin Geral administra turmas; usuários autenticados consultam.
+- `src/ClickClub.Api/Program.cs`: registro dos dois novos repositórios.
+- `docs/GUIA_C6_ETAPA1.md`: aplicação/compilação; `docs/TESTES_PENDENTES_CLICKCLUB.md`: TP-034–037.
+
+**Decisões e limites:** modelagem de início/fim por turma representa evento/aula em período específico, sem recorrência automática; calendário de recorrência não está aprovado. Instrutor é `pessoa` ativa, sem novo perfil funcional. Não há alteração em C1–C5, nem migrações de matrícula/eventos, testes profundos, integração Web ou Mobile nesta etapa. Eventos não ocupam automaticamente a agenda dos espaços; proposta anterior segue sem aprovação.
+
+**Evidências:** revisão estática; ambiente de preparação sem SDK .NET ou MySQL. **Compilação da Etapa 1 e migração 014 ainda não executadas aqui**; qualquer sucesso dependerá de relato posterior do usuário. Nenhum commit/push realizado.
+
+**Próxima ação:** aplicar ZIP da Etapa 1, fazer backup e executar `014` uma vez como administrador no MySQL, compilar `dotnet build ClickClub.slnx`. Aguardar o resultado e autorização para a Etapa 2. Testes funcionais serão conduzidos depois pelo Codex.
+
+## 37. Componente 6 — Etapa 1 confirmada; Etapa 2 autorizada e preparada (11/11/2026)
+
+**Retorno recebido:** o usuário informou **"Script SQL executado e Build feita, ambos com sucesso. Vamos continuar."**. Assim, a migração `014` e a compilação da Etapa 1 estão **confirmadas por relato do usuário**. Não representa validação funcional dos cadastros de atividades e turmas; TP-034–037 permanecem pendentes.
+
+**Autorização:** implementar somente a **Etapa 2 — Inscrições, Vagas e Lista de Espera** do Componente 6, mantendo a Etapa 3 (Eventos Sociais e Web) para depois de nova confirmação. O usuário só verificará compilação, e não fará commit até a parte Web estar finalizada.
+
+**Arquivos preparados nesta Etapa 2:**
+
+- `database/scripts/015_inscricoes_turmas.sql`: cria `inscricao_turma` com status `Confirmada`, `EmEspera`, `Cancelada`, data UTC, registro de cancelamento, índice de fila e unicidade de inscrição ativa por pessoa/turma. Posição da espera calculada pelo servidor, não persistida redundante.
+- `src/ClickClub.Api/Contratos/InscricaoTurmaDtos.cs`: respostas de matrícula, minhas inscrições, fila de gestor, vagas e promoção; enum de rejeições de negócio.
+- `src/ClickClub.Api/Dados/InscricaoTurmaRepositorio.cs`: matrícula derivada do JWT, elegibilidade associativa, financeiro RN07, bloqueio de horários RN12, capacidade e espera RN11, consultas, cancelamento próprio e promoção manual cronológica por gestor autorizado. Transações usam isolamento `ReadCommitted` e travamento consistente de pessoa antes da turma para serializar matrículas concorrentes.
+- `src/ClickClub.Api/Controllers/InscricoesTurmaController.cs`: rotas de matrícula própria, cancelamento, filas, vagas e promoção; membros não administram terceiros, funcionários são conferidos pelo escopo da unidade no banco.
+- `src/ClickClub.Api/Dados/TurmaRepositorio.cs`: passa a proteger matrículas diante de alterações de atividade/horário/capacidade e a cancelar inscrições ativas quando a turma é cancelada, preservando histórico.
+- `src/ClickClub.Api/Contratos/AtividadesDtos.cs` e `Controllers/TurmasController.cs`: novos resultados de conflito de edição de turma.
+- `src/ClickClub.Api/Program.cs`: registro de `InscricaoTurmaRepositorio`.
+- `docs/GUIA_C6_ETAPA2.md`: aplicação e compilação; `docs/TESTES_PENDENTES_CLICKCLUB.md`: casos TP-038–043.
+
+**Decisões de implementação coerentes com o aprovado:** sem promoção automática; a fila conserva ordem original por data e ID. Nova inscrição não ultrapassa a fila existente, mesmo após cancelamento que liberou vaga. O funcionário aciona a promoção, e a API seleciona o primeiro elegível (não há escolha arbitrária). Bloqueio de sobreposição considera inscritos confirmados e em espera. Cancelamento de turma cancela inscrições ativas no mesmo ato; reabertura não restaura cancelamentos. Inscrição é aceita somente antes do início da turma e com situação `Aberta`. Vínculo à programação de espaços continua sem aprovação.
+
+**Evidências nesta preparação:** revisão estática; sem SDK .NET e MySQL neste ambiente. **Não houve compilação local, execução SQL 015, testes funcionais, concorrência ou execução API/Web nesta Etapa 2.** Nenhum commit/push realizado.
+
+**Próxima ação:** aplicar ZIP da Etapa 2 na solução existente, executar SQL `015` **uma vez** com conta administrativa MySQL após backup, compilar `dotnet build ClickClub.slnx` e informar resultado. Testes TP-038–043 e anteriores ficam pendentes para o Codex. Aguardar autorização da Etapa 3.
+
+## 38. Componente 6 — Etapa 2 confirmada; Etapa 3A preparada (11/11/2026)
+
+**Retorno recebido:** o usuário informou **"Script e build executados com sucesso. Continue por favor."**. Registrar migração `015` aplicada e solução compilada na Etapa 2, **por relato do usuário**, sem testes funcionais de matrícula, concorrência ou promoção; TP-038–043 seguem pendentes.
+
+**Autorização recebida:** prosseguir com a Etapa 3 — Eventos Sociais e Interfaces Web. Para manter os ZIPs incrementais e reduzir risco de regressão sem build local, ela foi dividida operacionalmente em **3A (Eventos e API)** e **3B (Telas Web e integração de visitantes públicos à portaria)**. O usuário só fará a verificação imediata de compilação, sem commit/push até a conclusão Web.
+
+**Etapa 3A preparada:**
+
+- `database/scripts/016_eventos_sociais.sql`: adiciona `evento_social` (unidade, nome, descrição, início/fim UTC, público-alvo, tipo Social/Torneio, capacidade opcional para Social, status) e `inscricao_evento` (pessoa, evento, situação, instante UTC e índice de unicidade ativa). Migração aditiva sem alterações em reservas, portaria, financeiro ou turmas.
+- `src/ClickClub.Api/Contratos/EventoSocialDtos.cs`: DTOs e estados para eventos e inscrições.
+- `src/ClickClub.Api/Dados/EventoSocialRepositorio.cs`: publicação para associados/público geral; gestão por funcionário da unidade/administrador; conversão de fuso, validações de capacidade, preservação de inscrições em edições e auditoria.
+- `src/ClickClub.Api/Dados/InscricaoEventoRepositorio.cs`: inscrição própria de titulares/dependentes em eventos com vagas, cancelamento, consultas e fila nominal de gestor; elegibilidade associativa, RN07 e transações que evitam superlotação.
+- `src/ClickClub.Api/Controllers/EventosController.cs`: endpoints para catálogo público/autenticado, manutenção administrativa, vagas e inscrições.
+- `src/ClickClub.Api/Program.cs`: registros dos dois repositórios.
+- `docs/GUIA_C6_ETAPA3A.md`: aplicação e compilação; `docs/TESTES_PENDENTES_CLICKCLUB.md`: novos TP-044–048.
+
+**Decisões preservadas:** torneio simplificado com inscrição e capacidade, sem chaves/placares; `PublicoGeral` significa visibilidade pública, **não autorização automática de entrada**. Visitantes de eventos públicos ainda não dispõem de autorização individual neste ZIP; a integração de entrada online será abordada na 3B. Evento não bloqueia nem reserva espaços automaticamente (proposta não aprovada). Nenhuma autorização de liberação manual foi adicionada.
+
+**Evidências:** revisão estática; SDK .NET e MySQL indisponíveis neste ambiente. SQL `016`, build, testes e endpoints ainda não executados; nenhum commit/push realizado. Arquivos do Componente 5 e das Etapas 1–2 do Componente 6 mantidos.
+
+**Próxima ação:** aplicar ZIP 3A, fazer backup, executar SQL 016 uma vez no MySQL com conta administrativa, compilar `dotnet build ClickClub.slnx` e informar o resultado. Aguardar nova confirmação para 3B.
+
+## 39. Componente 6 — Etapa 3A confirmada; Etapa 3B preparada (11/11/2026)
+
+**Confirmação recebida:** o usuário informou **"Tudo OK! Podemos prosseguir para a ultima etapa do componente 6"** após a entrega da Etapa 3A. Na sequência de mensagens, já havia relatado **script SQL 016 e build bem-sucedidos**. Registrar como **migração aplicada e compilação confirmadas por relato**, não como prova de funcionamento da API de eventos. TP-044–048 continuam pendentes.
+
+**Autorização:** preparar a **Etapa 3B — Interfaces Web e conferência online de visitantes de eventos públicos**, última etapa planejada do Componente 6. A verificação imediata continua sendo somente `dotnet build ClickClub.slnx`; os testes de comportamento, segurança e integração permanecem a cargo do Codex. Não efetuar commit/push nesta preparação.
+
+**Arquivos preparados nesta Etapa 3B:**
+
+- `database/scripts/017_visitantes_eventos_portaria.sql`: nova tabela `convidado_evento` com situação `Autorizado/Revogado` e unicidade da identificação por evento; adiciona ao histórico `registro_acesso` a modalidade `EventoPublico` e referências opcionais ao evento e visitante, preservando os registros anteriores.
+- `src/ClickClub.Api/Contratos/VisitanteEventoDtos.cs`: contratos de pré-autorização por evento e decisão de portaria.
+- `src/ClickClub.Api/Dados/VisitanteEventoRepositorio.cs`: cadastro/listagem/alteração de situação pelo administrador ou funcionário **exclusivamente na unidade atribuída**, com auditoria; se o evento tiver capacidade, visitantes autorizados e associados confirmados compartilham o mesmo limite.
+- `src/ClickClub.Api/Dados/PortariaEventoRepositorio.cs`: validação **exclusivamente online** pela API, com porteiro do clube ou administrador geral; exige unidade ativa, evento `PublicoGeral` publicado, evento em andamento, visitante pré-cadastrado e documento conferido presencialmente. Decisão `Permitido/Negado` registrada na mesma transação; API/banco indisponíveis não geram liberação.
+- `src/ClickClub.Api/Controllers/EventosController.cs` e `Controllers/PortariaController.cs`: novos endpoints de visitantes/evento e da portaria, protegidos por autenticação, perfil e escopo no banco.
+- `src/ClickClub.Api/Dados/EventoSocialRepositorio.cs` e `Dados/InscricaoEventoRepositorio.cs`: ocupação e capacidade passam a considerar associados confirmados e visitantes autorizados; cancelamento de evento revoga pré-autorizações. Eventos sociais sem capacidade continuam admitindo edição da descrição/nome mesmo após pré-cadastro de visitante.
+- `src/ClickClub.Api/Dados/PortariaRepositorio.cs`: histórico da portaria passa a identificar, por nome, o visitante de evento quando presente; sem armazenar documentos, QR ou JWT no registro de acesso.
+- `src/ClickClub.Api/Program.cs`: inclusão dos dois novos repositórios para injeção de dependências.
+- `src/ClickClub.Web/Models/AtividadesEventosViewModels.cs`, `Services/ModuloApiWeb.cs` e `Controllers/AtividadesController.cs`, `TurmasController.cs`, `EventosController.cs`: páginas e ações MVC consumindo somente a API; cadastro do catálogo pelo administrador, turmas por gestores locais, inscrições próprias, filas e promoção manual, eventos públicos/associativos, controle de vagas e visitantes pré-autorizados.
+- `src/ClickClub.Web/Views/Atividades/`, `Views/Turmas/`, `Views/Eventos/`: telas do módulo com formulários protegidos por antiforgery; a API continua autoridade para regras e permissões.
+- `src/ClickClub.Web/Models/PortariaViewModels.cs`, `Controllers/PortariaController.cs`, `Views/Portaria/Index.cshtml`: terceira opção de conferência online para visitante de evento público, sem autorização manual, conservando carteirinha e convidado de reserva.
+- `src/ClickClub.Web/Views/Shared/_Layout.cshtml`: links de navegação para Eventos, Turmas e Atividades, conforme perfil.
+- `docs/GUIA_C6_ETAPA3B.md`: guia de instalação, SQL 017 e build; `docs/TESTES_PENDENTES_CLICKCLUB.md`: novos cenários TP-049–054, todos pendentes.
+
+**Regras preservadas:** a divulgação `PublicoGeral` não libera acesso automaticamente; identificação do visitante é conferida presencialmente e online, sem catraca, modo offline ou override. Nenhum vínculo de evento com agenda/ocupação de espaços foi criado, pois isso não está aprovado. Não modificar reservas, mensalidades, carteirinha, regras de turmas ou inscrições fora das extensões necessárias.
+
+**Evidências e limitações:** os novos arquivos foram revisados estaticamente. O ambiente de preparação **não possui `dotnet` nem MySQL**, portanto não houve build da Etapa 3B, aplicação do SQL 017, teste de API/Web/portaria, teste de segurança/concorrência ou execução do Codex. A implementação Web do Componente 6 estará pronta para verificação imediata quando o usuário aplicar este ZIP e compilar; só depois registrar a compilação por relato. **Não declarar Componente 6 funcionalmente validado** antes dos testes profundos.
+
+**Próxima ação:** extrair ZIP incremental na raiz da solução, fazer backup do banco, executar SQL 017 **uma vez** com administrador MySQL, compilar `dotnet build ClickClub.slnx` e informar resultado. O commit ficará a critério do usuário agora que a parte Web do Componente 6 está preparada; não executar `git commit` nem `git push` automaticamente. Autorizar o próximo componente separadamente.
+
+## 40. Componente 6 compilado; Componente 7 — Etapa 1 autorizada e preparada (11/11/2026)
+
+**Confirmação recebida:** o usuário informou **"Componente 6 concluído com sucesso. SQL e build bem sucedidas."** Registrar que a última migração `017_visitantes_eventos_portaria.sql` foi aplicada e que a compilação do C6 passou **por relato do usuário**. O Componente 6 está concluído **no escopo de implementação e compilação**, mas **não foi testado funcionalmente nem validado de ponta a ponta**; TP-034–054 e demais testes aplicáveis continuam pendentes.
+
+**Autorização recebida:** o usuário pediu iniciar o Componente 7 — Comunicação e Relatórios e aprovou expressamente a divisão de papéis recomendada. O documento oficial foi atualizado para `DOCUMENTACAO_CLICKCLUB.md` v1.9, seção 12.7. Escopo aprovado: mural de avisos, ouvidoria de solicitações/reclamações e painel básico; **sem notificações push, WhatsApp, e-mail, integrações externas ou serviços pagos**.
+
+**Planejamento incremental do C7:**
+
+1. **Etapa 1 — Mural de avisos:** criação e edição de avisos gerais ou por clube, período de exibição, retirada/reativação, consulta Web/API, segregação de papéis e auditoria.
+2. **Etapa 2 — Ouvidoria:** chamados `Solicitacao/Reclamacao`, assunto, descrição, histórico de respostas, acompanhamento do próprio associado e gestão por clube, com autorização da API.
+3. **Etapa 3 — Dashboard básico:** totais de reservas/ocupação, faturas e inscrições por período/clube, com permissões do Administrador Geral e gestores locais conforme suas atribuições.
+
+**Permissões aprovadas:** Administrador Geral publica avisos gerais e locais e responde chamados de qualquer clube; PresidenteClube e FuncionarioUnidade publicam avisos e respondem chamados somente nas unidades atribuídas; Titular/Dependente leem avisos e abrem/acompanham seus próprios chamados; Tesoureiro/Porteiro somente leem avisos, sem gestão dos chamados. Novas operações devem validar as permissões no banco, não somente na Web.
+
+**Arquivos preparados nesta Etapa 1:**
+
+- `database/scripts/018_mural_avisos.sql`: cria `aviso` com unidade opcional (nulo significa geral), título/texto, período UTC, status ativo, autor e atualização. Migração exclusivamente aditiva, sem apagar dados anteriores.
+- `src/ClickClub.Api/Contratos/AvisosDtos.cs`: contratos de leitura, entrada, alteração de situação e erros de domínio.
+- `src/ClickClub.Api/Dados/AvisoRepositorio.cs`: publicação dentro do período, cadastro/edição/retirada, verificação de clube ativo e `papel_usuario` conforme a unidade, bloqueio de transferência entre destinos e auditoria na mesma transação.
+- `src/ClickClub.Api/Controllers/AvisosController.cs`: endpoints autenticados de consulta, gestão e alteração; publicação geral exclusiva do administrador.
+- `src/ClickClub.Api/Program.cs`: injeção de dependência de `AvisoRepositorio`.
+- `src/ClickClub.Web/Models/AvisosViewModels.cs`, `Controllers/AvisosController.cs` e `Views/Avisos/`: mural para usuário autenticado e páginas de gestão para administrador/presidente/funcionário, com formulários antiforgery; Web consome somente a API.
+- `src/ClickClub.Web/Views/Shared/_Layout.cshtml`: menu `Avisos` para usuários autenticados.
+- `docs/GUIA_C7_ETAPA1.md` e `docs/TESTES_PENDENTES_CLICKCLUB.md`: roteiro de aplicação/compilação e cenários TP-055–058, todos pendentes.
+
+**Decisão técnica para minimizar dependências:** horários de início/fim da publicação são digitados, armazenados e apresentados **em UTC**; a interface identifica claramente esse padrão. Nenhum fuso da unidade é presumido. Avisos encerrados/retirados permanecem para consulta administrativa; não há exclusão física. Todos os perfis autenticados podem ler avisos gerais e de unidades, mas apenas gestores autorizados os alteram.
+
+**Evidências e limites:** arquivos preparados e revisados estaticamente; o ambiente de preparação não dispõe do SDK .NET nem de MySQL. Não houve `dotnet build` local do C7, execução SQL 018, navegação Web/API, teste funcional, segurança, integração, exclusão de dados ou commit/push. A confirmação de compilação e SQL dependerá do usuário. **Não avançar para a Etapa 2 do C7 sem nova autorização/resultado.**
+
+**Próxima ação:** aplicar ZIP incremental da Etapa 1 sobre o C6 instalado, fazer backup e executar SQL 018 **uma única vez** como administrador MySQL, compilar `dotnet build .\ClickClub.slnx` no PowerShell e informar resultado; testes permanecem com o Codex.
+
+## 41. Componente 7 — Etapa 1 confirmada; Etapa 2 preparada (11/11/2026)
+
+**Confirmação recebida:** o usuário informou **"Script SQL OK, Build demorou 40 segundos mas foi executada com sucesso. Podemos continuar."**. A migração `018_mural_avisos.sql` e a compilação da Etapa 1 estão **confirmadas por relato**, sem evidências de execução funcional do mural; TP-055–058 permanecem pendentes para o Codex. O tempo de compilação relatado não caracteriza falha.
+
+**Autorização recebida:** avançar à **Etapa 2 — Ouvidoria**, mantendo o fluxo de ZIP incremental, SQL e compilação como únicas ações imediatas do usuário. A Etapa 3 (dashboard) exige confirmação posterior.
+
+**Arquivos preparados nesta Etapa 2:**
+
+- `database/scripts/019_ouvidoria.sql`: novas tabelas `chamado_ouvidoria` e `resposta_chamado` com relacionamento a pessoa, clube opcional, categoria, tipo `Solicitacao/Reclamacao`, estado, histórico de mensagens administrativas e datas UTC. Não altera tabelas dos componentes anteriores.
+- `src/ClickClub.Api/Contratos/OuvidoriaDtos.cs`: DTOs de abertura, consulta, detalhe, resposta, clube e resultados de validação.
+- `src/ClickClub.Api/Dados/OuvidoriaRepositorio.cs`: abertura derivando a `PessoaId` da conta autenticada, listas próprias e de gestão com escopo por clube, detalhe protegido, resposta e encerramento em transação SQL, auditoria sem texto privado; fila de respostas preservada por data UTC/ID.
+- `src/ClickClub.Api/Controllers/OuvidoriaController.cs`: endpoints autenticados para titular/dependente abrir e acompanhar chamados, e para Admin Geral/Presidente/Funcionário responder dentro das permissões.
+- `src/ClickClub.Api/Program.cs`: registro de `OuvidoriaRepositorio` no DI.
+- `src/ClickClub.Web/Models/OuvidoriaViewModels.cs`, `Controllers/OuvidoriaController.cs`, `Views/Ouvidoria/`: páginas de criação, minhas solicitações, acompanhamento do histórico, lista administrativa e resposta/encerramento, consumindo somente a API e protegidas com antiforgery.
+- `src/ClickClub.Web/Views/Shared/_Layout.cshtml`: opção de Ouvidoria para titular, dependente, administrador geral, presidente e funcionário da unidade; não oferece gestão a porteiro/tesoureiro.
+- `docs/GUIA_C7_ETAPA2.md` e `docs/TESTES_PENDENTES_CLICKCLUB.md`: aplicação, compilação e novos testes TP-059–063, todos pendentes.
+
+**Decisões técnicas mínimas da etapa:** os status são `Aberto`, `Respondido` e `Encerrado`. O chamado nasce aberto, recebe status respondido na primeira resposta administrativa e somente pode ser encerrado depois de haver resposta. Não há resposta do próprio associado, exclusão de histórico, reabertura automática ou envio externo de notificações nesta primeira versão. Chamado com `unidade_id=NULL` é destinado à ouvidoria geral, gerenciável somente pelo Administrador Geral. Categorias são texto livre, sem catálogo novo. Todas as datas persistem em UTC.
+
+**Permissões consolidadas e verificadas na API:** Titular/Dependente abrem chamados em seu próprio nome e consultam só os próprios, inclusive quando solicitam em outro clube; Admin Geral consulta/responde qualquer chamado; PresidenteClube/FuncionarioUnidade acessam somente chamados de clubes atribuídos e nunca os gerais; Tesoureiro/Porteiro não possuem acesso à gestão da ouvidoria.
+
+**Evidências e limites:** revisão estática de SQL e código; sem SDK .NET ou MySQL neste ambiente. **Não houve compilação local, aplicação da migração 019, execução API/Web, teste de segurança/concorrência, testes de regressão nem commit/push.** O usuário realizará apenas SQL 019 e build. Após confirmação, registrar a Etapa 2 como compilada, sem considerá-la funcionalmente testada.
+
+**Próxima ação:** extrair `ClickClub_C7_Etapa2.zip` na raiz de `ClickClub.slnx`, aplicar SQL 019 uma vez após backup com conta MySQL administrativa, compilar `dotnet build .\ClickClub.slnx` e informar o resultado. Aguardar autorização para a Etapa 3 — Dashboard básico.
+
+## 42. Componente 7 — Etapa 2 confirmada; Etapa 3 preparada (11/11/2026)
+
+**Confirmação recebida:** o usuário informou **"Ok. Build e SQL executados com sucesso. Prossiga por favor."**. A migração `019_ouvidoria.sql` foi aplicada e o build da Etapa 2 passou **por relato do usuário**. Isso não comprova o funcionamento dos fluxos da ouvidoria; TP-059–063 continuam pendentes para o Codex.
+
+**Autorização recebida:** avançar à **Etapa 3 — Dashboard básico**, última etapa do Componente 7. Manter o fluxo incremental por ZIP, sem realizar commit/push. A única verificação imediata será `dotnet build .\ClickClub.slnx`. Não há nova migração SQL nesta etapa.
+
+**Arquivos preparados na Etapa 3:**
+
+- `src/ClickClub.Api/Contratos/DashboardDtos.cs`: resposta do período e resumos separados por clube, com seção financeira opcional.
+- `src/ClickClub.Api/Dados/DashboardRepositorio.cs`: consultas parametrizadas e **somente leitura** sobre os esquemas já existentes. Seleção de clubes autorizados por `papel_usuario`; indicadores operacionais (espaços, reservas, inscrições de turmas/eventos) e financeiros (faturas por competência/origem) segregados por clube e perfil.
+- `src/ClickClub.Api/Controllers/DashboardController.cs`: `GET /api/dashboard?inicio=aaaa-mm-dd&fim=aaaa-mm-dd&unidadeId=123`, protegido para Administrador Geral, Presidente, Funcionário e Tesoureiro; valida período e escopo. Titular/Dependente/Porteiro não acessam.
+- `src/ClickClub.Api/Program.cs`: registro de `DashboardRepositorio`.
+- `src/ClickClub.Web/Models/DashboardViewModels.cs`, `Controllers/DashboardController.cs`, `Views/Dashboard/Index.cshtml`: painel simples com filtros de período e clube, tabelas financeiras em pt-BR, mensagens de erro e restrição de acesso na Web. Consome somente a API.
+- `src/ClickClub.Web/Views/Shared/_Layout.cshtml`: menu Dashboard apenas nos papéis autorizados.
+- `docs/GUIA_C7_ETAPA3.md`, `docs/TESTES_PENDENTES_CLICKCLUB.md`, `docs/DOCUMENTACAO_CLICKCLUB.md` e este arquivo: roteiro de implantação, testes TP-064–068 pendentes e status atualizado.
+
+**Definições técnicas do relatório:** intervalo de dias inclusivo em UTC, com consulta SQL pelo fim exclusivo; reservas/turmas/eventos selecionados por sobreposição de horário de realização, cancelamentos excluídos; `EspacosOcupados` conta espaços **ativos distintos** com reserva confirmada (não horas de ocupação). Financeiro usa **competência da fatura e unidade de origem da associação**, com `Vencida` equivalente a `EmAberto` cujo vencimento passou, sem confundir com bloqueio após tolerância. Faturas `EmPreparacao` são contadas à parte, canceladas omitidas. Somas de `valor_total` são simuladas. Se usuário possui papel de gestor em A e Tesoureiro em B, só recebe financeiro de B, salvo Administrador Geral.
+
+**Limites e evidências:** os arquivos foram preparados para análise estática. Não há SDK .NET ou MySQL neste ambiente, portanto **nenhuma compilação, consulta SQL, autenticação, renderização Web ou teste funcional da Etapa 3 foram realizados aqui**. O usuário ainda precisa aplicar ZIP e compilar; o C7 só estará concluído em implementação/compilação após relato do resultado. TP-055–068 e testes anteriores permanecem pendentes; **nenhum commit ou push foi executado**.
+
+**Próxima ação:** extrair `ClickClub_C7_Etapa3.zip` sobre a solução com C7 Etapa 2, executar `dotnet build .\ClickClub.slnx`, informar o resultado. **Não executar SQL 020 nem reaplicar SQL 019.** Após a confirmação, registrar conclusão técnica do C7 e planejar próximo componente mediante autorização explícita.
+
+## 43. Componente 7 concluído em implementação e compilação (11/11/2026)
+
+**Confirmação recebida:** após aplicar a Etapa 3, o usuário informou **"Build OK."**. O `dotnet build .\ClickClub.slnx` da Etapa 3 foi bem-sucedido **conforme seu relato**; a saída da compilação não foi fornecida para inspeção independente. A Etapa 3 não exigiu aplicação de script SQL. Nas etapas anteriores do C7, o usuário havia confirmado o SQL 018 e o SQL 019 e suas respectivas compilações.
+
+**Estado do C7:** as três etapas planejadas — mural de avisos, ouvidoria e dashboard básico — estão **concluídas em escopo de implementação e compilação**. Isso **não significa validação funcional**, homologação de segurança, integração ponta a ponta ou finalização de todo o ClickClub. Testes TP-055–068 e demais testes de C1–C6 seguem com o estado registrado em `TESTES_PENDENTES_CLICKCLUB.md`, para execução posterior pelo Codex.
+
+**Próximo componente:** C8 — Aplicativo Mobile Android, incluindo os fluxos aprovados de solicitação e acompanhamento de adesão, carteirinha móvel com exibição offline limitada e renovação online, consumo da API e testes no Redmi Note 12. Antes da implementação, apresentar plano incremental levando em conta o prazo e as pendências de login híbrido e ficha associativa, sem tratar estes itens como já implementados. **Nenhuma etapa do C8 foi autorizada nesta confirmação de build.**
+
+**Git/GitHub:** o usuário havia manifestado intenção de commitar quando terminasse a parte Web. Não foi informado novo commit nem push nesta mensagem. Não executar operações de Git automaticamente; orientar o usuário quando solicitado.

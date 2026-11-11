@@ -1,0 +1,42 @@
+@model IReadOnlyList<AtividadeApi>
+@{
+    ViewData["Title"] = "Atividades";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Catálogo de atividades</h1>
+    @if (User.IsInRole("AdministradorGeral"))
+    {
+        <a asp-action="Criar" class="btn btn-primary">Nova atividade</a>
+    }
+</div>
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success">@sucesso</div>
+}
+<p class="text-muted">O catálogo é global. Somente o Administrador Geral pode alterá-lo.</p>
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead><tr><th>Nome</th><th>Tipo</th><th>Descrição</th><th>Ações</th></tr></thead>
+        <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Nome</td><td>@item.Tipo</td>
+                <td>@(item.Descricao ?? "—")</td>
+                <td>
+                    @if (User.IsInRole("AdministradorGeral"))
+                    {
+                        <a asp-action="Editar" asp-route-id="@item.Id"
+                           class="btn btn-sm btn-outline-primary">Editar</a>
+                    }
+                </td>
+            </tr>
+        }
+        @if (Model.Count == 0)
+        {
+            <tr><td colspan="4">Nenhuma atividade cadastrada.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>

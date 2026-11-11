@@ -29,6 +29,39 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Adesao" asp-action="Consultar">Consultar adesão</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Eventos" asp-action="Index">Eventos</a>
+                        </li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Turmas" asp-action="Index">Turmas</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Avisos" asp-action="Index">Avisos</a>
+                            </li>
+                        }
+                        @if (User.IsInRole("Titular") || User.IsInRole("Dependente") ||
+                             User.IsInRole("AdministradorGeral") || User.IsInRole("PresidenteClube") ||
+                             User.IsInRole("FuncionarioUnidade"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Ouvidoria" asp-action="Index">Ouvidoria</a>
+                            </li>
+                        }
+                        @if (User.IsInRole("AdministradorGeral") || User.IsInRole("FuncionarioUnidade"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Atividades" asp-action="Index">Atividades</a>
+                            </li>
+                        }
+                        @if (User.IsInRole("AdministradorGeral") || User.IsInRole("PresidenteClube") ||
+                             User.IsInRole("FuncionarioUnidade") || User.IsInRole("Tesoureiro"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                            </li>
+                        }
                         @if (User.IsInRole("AdministradorGeral"))
                         {
                             <li class="nav-item">
@@ -73,6 +106,9 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="MinhaAssociacao" asp-action="Index">Minha associação</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Carteirinha" asp-action="Index">Carteirinha</a>
+                            </li>
                         }
                         @if (User.IsInRole("Titular") || User.IsInRole("Dependente"))
                         {
@@ -85,6 +121,12 @@
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Financeiro" asp-action="Index">Financeiro</a>
+                            </li>
+                        }
+                        @if (User.IsInRole("AdministradorGeral") || User.IsInRole("Porteiro"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Portaria" asp-action="Index">Portaria</a>
                             </li>
                         }
                     </ul>

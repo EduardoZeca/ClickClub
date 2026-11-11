@@ -1,0 +1,27 @@
+@model AtividadeFormulario
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Nova atividade" : "Editar atividade";
+}
+
+<h1 class="h3">@ViewData["Title"]</h1>
+<form asp-action="Salvar" method="post" class="row g-3">
+    @Html.AntiForgeryToken()
+    <input asp-for="Id" type="hidden" />
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="col-md-8">
+        <label asp-for="Nome" class="form-label">Nome</label>
+        <input asp-for="Nome" maxlength="150" class="form-control" required />
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Tipo" class="form-label">Tipo / modalidade</label>
+        <input asp-for="Tipo" maxlength="80" class="form-control" required />
+    </div>
+    <div class="col-12">
+        <label asp-for="Descricao" class="form-label">Descrição</label>
+        <textarea asp-for="Descricao" maxlength="1000" rows="3" class="form-control"></textarea>
+    </div>
+    <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Salvar atividade</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+</form>

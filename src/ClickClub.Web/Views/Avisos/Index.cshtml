@@ -1,0 +1,37 @@
+@model IReadOnlyList<AvisoApi>
+@{
+    ViewData["Title"] = "Mural de avisos";
+    var gestor = User.IsInRole("AdministradorGeral") ||
+        User.IsInRole("PresidenteClube") || User.IsInRole("FuncionarioUnidade");
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Mural de avisos</h1>
+    @if (gestor)
+    {
+        <a asp-action="Gerenciar" class="btn btn-primary">Administrar avisos</a>
+    }
+</div>
+<p class="text-muted">Avisos gerais e dos clubes, exibidos apenas durante o período definido para publicação. Horários informados em UTC.</p>
+<div class="row g-3">
+    @foreach (var aviso in Model)
+    {
+        <div class="col-md-6">
+            <article class="card h-100">
+                <div class="card-body">
+                    <span class="badge @(aviso.UnidadeId.HasValue ? "bg-secondary" : "bg-primary") mb-2">
+                        @(aviso.UnidadeId.HasValue ? aviso.Clube : "Aviso geral")
+                    </span>
+                    <h2 class="h5">@aviso.Titulo</h2>
+                    <p style="white-space: pre-wrap">@aviso.Corpo</p>
+                    <p class="text-muted small mb-0">Publicado por @aviso.Autor</p>
+                    <p class="text-muted small mb-0">Visível até @aviso.FimUtc.ToString("dd/MM/yyyy HH:mm") UTC</p>
+                </div>
+            </article>
+        </div>
+    }
+    @if (Model.Count == 0)
+    {
+        <div class="col-12"><p>Nenhum aviso ativo neste momento.</p></div>
+    }
+</div>

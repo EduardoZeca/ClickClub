@@ -1,9 +1,9 @@
 # ClickClub — Documento de Requisitos e Planejamento
 
-**Versão:** 1.8 — Escopos de Tesoureiro no financeiro simulado
+**Versão:** 1.9 — Permissões de comunicação aprovadas para o Componente 7
 **Data:** 11/11/2026
 
-**Estado (11/11/2026):** Componentes 1, 2 e 3 concluídos conforme testes relatados pelo usuário. **Componente 4 — Financeiro Simulado concluído no desenvolvimento e nos testes iniciais relatados, incluindo a Etapa 6.** Etapa 2 teve verificações favoráveis do Codex; as evidências detalhadas de outras etapas e os testes profundos ainda estão pendentes. **Ordenação do histórico corrigida e testada; restrição de dependentes da categoria Individual aprovada e preparada para teste.** Os cenários de concorrência, segurança e integração permanecem em `TESTES_PENDENTES_CLICKCLUB.md`. A partir do Componente 5, a verificação imediata aprovada será apenas compilação; o Componente 5 requer autorização específica. A Continuidade separa implementação de evidências reais.
+**Estado (11/11/2026):** Componentes 1–4 concluídos nos testes iniciais relatados; Componentes 5, 6 e 7 implementados e compilados conforme relatos do usuário, **sem testes funcionais profundos dos Componentes 5–7**. Componente 7: Etapas 1 (mural), 2 (ouvidoria) e 3 (dashboard básico) concluídas em implementação/compilação; SQL 018 e 019 aplicados e Etapa 3 sem SQL. Os testes reservados ao Codex permanecem em `TESTES_PENDENTES_CLICKCLUB.md`. Componente 8 (Mobile Android) ainda não autorizado. A Continuidade detalha o estado comprovado.
 
 ## 1. Visão geral
 
@@ -586,6 +586,17 @@ As anotações de correção de **outro projeto** foram tratadas como referênci
 - **Categoria Individual e dependentes — opção B aprovada:** o usuário constatou que era possível vincular dependentes a titulares da categoria `Individual` e aprovou a recomendação de **impedir novos dependentes**, sem conversão automática para Familiar. A API deve bloquear cadastro e reativação de dependentes nessa categoria; alterações de associação ou renomeações de categorias que resultariam em Individual com dependentes ativos também devem ser rejeitadas. Vínculos antigos permanecem para regularização **manual pelo Administrador Geral**, sem exclusão ou migração automática. A implementação foi preparada, mas aguarda build e testes do usuário.
 - **Histórico de reservas — correção validada pelo usuário:** a lista `Minhas reservas` ordenava pela data **de utilização** (`inicio_utc DESC`), colocando reservas criadas recentemente abaixo de reservas de uso futuro. O usuário espera as **últimas criadas primeiro**. A ordenação foi alterada para `criada_em_utc DESC, id DESC`, e o usuário confirmou em 11/11/2026 que a correção **funcionou**. Nenhuma regra de reserva ou dado armazenado foi alterado.
 
+### 12.7 Permissões de comunicação para o Componente 7 — 11/11/2026
+
+**Divisão aprovada expressamente pelo usuário:**
+
+- **Administrador Geral:** publica avisos gerais ou de qualquer clube e pode responder a todos os chamados de ouvidoria.
+- **PresidenteClube e FuncionarioUnidade:** publicam avisos e respondem aos chamados **somente das unidades atribuídas**. Não publicam avisos gerais.
+- **Titular e Dependente:** consultam os avisos, abrem solicitações/reclamações e acompanham somente seus próprios chamados e respostas.
+- **Tesoureiro e Porteiro:** consultam avisos, sem permissão para publicar ou administrar a ouvidoria.
+
+A API confere papéis e atribuições por clube antes de qualquer modificação. Avisos possuem período de exibição; a consulta autenticada poderá apresentar avisos gerais e locais sem conferir privilégios de gestão. A primeira versão não envia e-mails, mensagens externas ou notificações push. O fluxo de status dos chamados e outros detalhes internos serão definidos na etapa de ouvidoria, sem alterar esta divisão.
+
 ## 13. Instruções iniciais sugeridas para o ChatGPT Project
 
 > Você atuará como analista de requisitos, arquiteto e assistente de desenvolvimento do projeto acadêmico ClickClub. A fonte de verdade é este documento **aprovado**, complementado pelo arquivo `INSTRUCTIONS_PROJECT_CLICKCLUB.md`. O sistema usa MySQL centralizado, API ASP.NET Core, Web ASP.NET Core MVC e Mobile .NET MAUI Android com SQLite local quando necessário. A Web e o Mobile só se comunicam com a API; a API concentra autenticação, autorização, regras, transações e auditoria.
@@ -601,4 +612,4 @@ As anotações de correção de **outro projeto** foram tratadas como referênci
 
 ---
 
-**Próximo passo (10/11/2026):** após backup, executar e validar `010_financeiro_base.sql` no MySQL 8.4, conferir o esquema e a preservação das reservas; então confirmar os resultados antes de avançar. **A Etapa 1 está preparada, sem execução nem testes de banco comprovados.** Login híbrido e ficha associativa são ajustes aprovados de escopo, mas ainda não implementados. Os testes Android e a integração ponta a ponta permanecem futuros.
+**Próximo passo (11/11/2026):** planejar o Componente 8 (Mobile Android), aguardando aprovação do plano e autorização explícita de implementação. Testes funcionais e de integração permanecem pendentes para o Codex. Login híbrido e ficha associativa ainda exigem etapas próprias; não presumir que já foram implementados.
