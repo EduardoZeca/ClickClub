@@ -99,6 +99,97 @@ public sealed class ReservasController(ClickClubApiClient api) : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = "Titular")]
+    public async Task<IActionResult> Cobranca(long id, CancellationToken ct)
+    {
+        try
+        {
+            using var resposta = await api.EnviarAsync(HttpMethod.Get,
+                $"api/reservas/{id}/cobranca", null, ct);
+            if (resposta.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("Entrar", "Conta");
+            if (resposta.StatusCode == HttpStatusCode.Forbidden) return Forbid();
+            if (resposta.StatusCode == HttpStatusCode.NotFound) return NotFound();
+            if (!resposta.IsSuccessStatusCode)
+                return Problem("Não foi possível consultar a cobrança desta reserva.");
+
+            var dados = await resposta.Content.ReadFromJsonAsync<CobrancaLocacaoApi>(
+                cancellationToken: ct);
+            return dados is null ? Problem("Resposta inválida da API.") : View(dados);
+        }
+        catch (HttpRequestException)
+        {
+            TempData["Erro"] = "API indisponível.";
+            return RedirectToAction(nameof(Index));
+        }
+        catch (TaskCanceledException)
+        {
+            TempData["Erro"] = "Tempo limite da API excedido.";
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Titular")]
+    [ValidateAntiForgeryToken]
+    public Task<IActionResult> QuitarTaxa(long reservaId, CancellationToken ct) =>
+        RegistrarDecisaoTaxa(reservaId, false, null, ct);
+
+    [HttpPost]
+    [Authorize(Roles = "Titular")]
+    [ValidateAntiForgeryToken]
+    public Task<IActionResult> TransferirTaxa(
+        long reservaId, DateTime? competenciaConfirmada,
+        CancellationToken ct) =>
+        RegistrarDecisaoTaxa(reservaId, true, competenciaConfirmada, ct);
+
+    private async Task<IActionResult> RegistrarDecisaoTaxa(
+        long reservaId, bool transferir, DateTime? competenciaConfirmada,
+        CancellationToken ct)
+    {
+        var rota = transferir
+            ? $"api/reservas/{reservaId}/cobranca/transferir"
+            : $"api/reservas/{reservaId}/cobranca/quitar-avulsa";
+        try
+        {
+            using var resposta = await api.EnviarAsync(HttpMethod.Post, rota,
+                transferir ? new { competenciaConfirmada } : null, ct);
+            if (resposta.StatusCode == HttpStatusCode.Unauthorized)
+                return RedirectToAction("Entrar", "Conta");
+            if (resposta.StatusCode == HttpStatusCode.Forbidden) return Forbid();
+            if (resposta.StatusCode == HttpStatusCode.NotFound) return NotFound();
+            if (resposta.IsSuccessStatusCode)
+            {
+                var dados = await resposta.Content.ReadFromJsonAsync<DecisaoLocacaoApi>(
+                    cancellationToken: ct);
+                if (dados is null) return Problem("Resposta de cobrança inválida.");
+                TempData["Sucesso"] = dados.JaRegistrada
+                    ? "Esta decisão financeira já estava registrada. Nenhum valor foi duplicado."
+                    : transferir
+                        ? $"Locação transferida para a mensalidade {dados.CompetenciaDestino:MM/yyyy} com acréscimo único de 10%."
+                        : "Quitação avulsa simulada registrada para esta locação.";
+                return RedirectToAction(nameof(Cobranca), new { id = reservaId });
+            }
+            if (resposta.StatusCode is HttpStatusCode.BadRequest or HttpStatusCode.Conflict)
+            {
+                var erro = await resposta.Content.ReadFromJsonAsync<ErroApi>(
+                    cancellationToken: ct);
+                TempData["Erro"] = erro?.Erro ?? "Decisão financeira não permitida.";
+            }
+            else TempData["Erro"] = "Não foi possível registrar a decisão financeira.";
+        }
+        catch (HttpRequestException)
+        {
+            TempData["Erro"] = "API indisponível.";
+        }
+        catch (TaskCanceledException)
+        {
+            TempData["Erro"] = "Tempo limite da API excedido.";
+        }
+        return RedirectToAction(nameof(Cobranca), new { id = reservaId });
+    }
+
+    [HttpGet]
     public async Task<IActionResult> Cancelar(long id, CancellationToken ct)
     {
         try
@@ -152,11 +243,19 @@ public sealed class ReservasController(ClickClubApiClient api) : Controller
                     .ReadFromJsonAsync<CancelamentoReservaApi>(cancellationToken: ct);
                 if (resultado is null) return Problem("Resposta inválida da API.");
                 var cultura = CultureInfo.GetCultureInfo("pt-BR");
+                var situacao = resultado.SituacaoFinanceira switch
+                {
+                    "CreditoCompensado" => "Crédito já compensado em fatura elegível.",
+                    "CreditoParcial" => "Crédito compensado parcialmente; saldo transportado.",
+                    "CreditoPendente" => "Crédito disponível para mensalidade futura.",
+                    "MultaPendente" => "Multa de cancelamento pendente.",
+                    _ => "Sem acerto adicional."
+                };
                 TempData["Sucesso"] =
                     $"Reserva #{resultado.ReservaId} cancelada. " +
                     $"Multa simulada: {resultado.MultaSimulada.ToString("C", cultura)}. " +
-                    $"Crédito simulado pendente: {resultado.CreditoSimuladoPendente.ToString("C", cultura)}. " +
-                    $"Situação financeira: {resultado.SituacaoFinanceira}.";
+                    $"Saldo de crédito futuro: {resultado.CreditoSimuladoPendente.ToString("C", cultura)}. " +
+                    situacao;
                 return RedirectToAction(nameof(Index));
             }
 

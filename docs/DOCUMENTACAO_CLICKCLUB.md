@@ -1,9 +1,9 @@
 # ClickClub — Documento de Requisitos e Planejamento
 
-**Versão:** 1.3 — Consolidação das decisões de escopo após análise das observações do professor
-**Data:** 10/11/2026
+**Versão:** 1.8 — Escopos de Tesoureiro no financeiro simulado
+**Data:** 11/11/2026
 
-**Estado:** Requisitos e decisões anteriores preservados; decisões de 10/11/2026 sobre ficha associativa simplificada, login híbrido e exclusões de escopo incorporadas. Componentes 1, 2 e 3 concluídos conforme testes relatados pelo usuário; Componente 4 ainda não iniciado nem autorizado. A implementação e os testes informados estão registrados em `CONTINUIDADE_CLICKCLUB.md`.
+**Estado (11/11/2026):** Componentes 1, 2 e 3 concluídos conforme testes relatados pelo usuário. **Componente 4 — Financeiro Simulado concluído no desenvolvimento e nos testes iniciais relatados, incluindo a Etapa 6.** Etapa 2 teve verificações favoráveis do Codex; as evidências detalhadas de outras etapas e os testes profundos ainda estão pendentes. **Ordenação do histórico corrigida e testada; restrição de dependentes da categoria Individual aprovada e preparada para teste.** Os cenários de concorrência, segurança e integração permanecem em `TESTES_PENDENTES_CLICKCLUB.md`. A partir do Componente 5, a verificação imediata aprovada será apenas compilação; o Componente 5 requer autorização específica. A Continuidade separa implementação de evidências reais.
 
 ## 1. Visão geral
 
@@ -66,6 +66,8 @@ Categoria associativa, tipo de vínculo e perfil de acesso **são classificaçõ
 
 **Categorias iniciais aprovadas:** Familiar, Individual e Atleta. Valores, benefícios, limites de dependentes e eventuais variações por unidade permanecem configuráveis, sem números presumidos nesta documentação.
 
+**Restrição aprovada em 11/11/2026:** a categoria **Individual não admite novos dependentes nem reativação de vínculos inativos**. O administrador não pode trocar uma associação com dependentes ativos para Individual. Dependentes ativos vinculados antes da correção não serão excluídos, migrados nem terão cobranças modificadas automaticamente; o administrador deve regularizar o cadastro manualmente. A regra não altera, por inferência, os benefícios das categorias Familiar e Atleta.
+
 **Tipos de vínculo iniciais aprovados em 09/11/2026:** Associado/Fundador, Convidado e Simpatizante. A inclusão desses tipos não gera descontos, isenções ou benefícios financeiros automáticos. Elegibilidade e valores continuam sujeitos às políticas associativas configuráveis. Dados cadastrais de pessoas devem contemplar CPF, endereço, bairro, cidade, UF, sexo, estado civil e interesses (múltiplos), além dos campos existentes. O acesso a dados pessoais permanece restrito por perfil e necessidade.
 
 **Decisão aprovada (D04; complementada por D14):** dependentes podem possuir login próprio. Para **novas reservas de espaços pagos**, o dependente menor de 18 anos precisa de uma **permissão geral, individual e revogável**, concedida pelo titular da associação; não é exigida aprovação para cada reserva. Sem permissão ativa, a API bloqueia essa operação. Dependentes maiores de idade e reservas gratuitas não dependem dessa autorização. A revogação impede novas reservas pagas pelo menor, mas não cancela as já confirmadas. A cobrança simulada pertence à associação e a escolha de quitação ou transferência para mensalidade permanece exclusiva do titular; o dependente não obtém acesso ao financeiro do titular.
@@ -74,7 +76,7 @@ Categoria associativa, tipo de vínculo e perfil de acesso **são classificaçõ
 
 **Decisão aprovada (D02):** será emitida uma mensalidade por associação/titular, inclusive quando o plano familiar incluir dependentes, sem cobrar uma mensalidade adicional por cada unidade visitada. Mensalidade em aberto antes ou no vencimento **não** é inadimplência passível de bloqueio. O bloqueio atingirá titular e dependentes vinculados somente depois de ultrapassado o prazo de tolerância aprovado de **10 dias**. Pagamentos serão registrados como simulação, sem transações bancárias reais.
 
-**Atualização aprovada:** `D = 10 dias` de tolerância após o vencimento, contados pela data local. Apenas mensalidades vencidas além desse prazo geram bloqueio associativo na primeira versão. A taxa de locação deve estar quitada de forma simulada **ou** transferida formalmente para a mensalidade futura elegível, com acréscimo de 10% uma única vez antes da utilização do espaço. A transferência, depois de incorporada à mensalidade, compõe o valor dessa cobrança e acompanha seu vencimento.
+**Atualização aprovada:** `D = 10 dias` de tolerância após o vencimento, contados pela data local. Apenas mensalidades vencidas além desse prazo geram bloqueio associativo na primeira versão. A mensalidade terá vencimento no **dia 10**, com primeira competência no **mês seguinte à adesão**. Haverá **multa única de 2%, sem juros, a partir do 11º dia de atraso**, calculada sobre o **valor total vencido da fatura, incluindo locações transferidas**. A taxa de locação deve estar quitada de forma simulada **ou** transferida formalmente para a mensalidade futura elegível, com acréscimo de 10% uma única vez antes da utilização do espaço. A transferência, depois de incorporada à mensalidade, compõe o valor dessa cobrança e acompanha seu vencimento.
 
 ### 3.4 Disponibilidade e integridade
 
@@ -108,7 +110,7 @@ Além de atividades esportivas, cada clube poderá cadastrar eventos sociais, co
 - **Login híbrido, aprovado como ampliação futura:** a mesma conta poderá ser autenticada pelo login já cadastrado **ou** por seu e-mail, sempre com a senha existente. Preservar os logins atuais e não tornar e-mail obrigatório para contas existentes. A API só poderá usar o e-mail como identificador se ele determinar uma única conta elegível; colisões entre e-mails e nomes de usuário devem ser tratadas antes da ativação do recurso, sem autenticar arbitrariamente uma conta. A autorização por papel e clube permanece na API. Não exigir escolha prévia de clube no login.
 - **Administração e divulgação:** preservar o perfil `PresidenteClube` e sua vinculação às unidades, sem controle de mandato bienal; não acrescentar integrações automáticas com WhatsApp, e-mail e mídias sociais. Utilizar o mural interno de avisos planejado.
 - **Pontos ainda propostos, sem autorização de implementação:** profissão/qualificação, grau de parentesco, data/hora de cadastro e consulta da última alteração e responsável; filtro por sexo/gênero; possibilidade de novos tipos de espaços, incluindo quiosque; associação de eventos sociais à disponibilidade/ocupação de espaços no Componente 6; eventual cadastro de diretores. Detalhar escopo, permissões e impacto antes de convertê-los em requisitos aprovados.
-- **Finanças ainda indefinidas:** percentuais e critérios de multa/juros por mensalidade atrasada, incluindo termo inicial e periodicidade. Não presumir esses parâmetros. O bloqueio após o 10º dia e o acréscimo único de 10% por transferência de locação são regras **distintas e já aprovadas**.
+- **Finanças (decisão concluída em 10/11/2026):** multa única de **2%** sobre o total vencido da fatura, incluindo locações transferidas, a partir do **11º dia de atraso**, **sem juros**. O bloqueio após o 10º dia e o acréscimo único de 10% por transferência de locação são regras distintas. Consulte RN33 e F06.
 
 ## 4. Perfis e permissões
 
@@ -195,10 +197,16 @@ Toda autorização é conferida pela API; ocultar botões na interface não subs
 | **RN29** | A duração de uma reserva pode atravessar a meia-noite e datas diferentes, desde que `Fim > Início` e sejam respeitadas disponibilidade, funcionamento, política e fuso da unidade. A agenda Web apresenta ocupação sem divulgar dados pessoais indevidos. | Aprovado em 09/11/2026 |
 | **RN30** | A ficha associativa é uma apresentação dos dados do vínculo existente, sem criar contrato formal, número contratual autônomo, vigência anual ou obrigação de renovação. A matrícula continua sendo o identificador associativo. | Aprovado em 10/11/2026 |
 | **RN31** | No login híbrido, um e-mail informado precisa identificar inequivocamente uma conta; nomes de usuário existentes continuam válidos. A API não pode resolver colisão entre identificadores por escolha arbitrária. O escopo de clube é determinado por papéis e atribuições após autenticação. | Aprovado em 10/11/2026 |
+| **RN32** | Mensalidade por associação tem vencimento no **dia 10**; a primeira competência é o **mês seguinte ao início da adesão**. Valores são configuráveis por categoria/clube de origem e não são presumidos por este documento. | Aprovado em 10/11/2026 |
+| **RN33** | Sobre a **fatura vencida**, aplicar **multa única de 2%** a partir do **11º dia de atraso**, calculada sobre o **valor total vencido**, incluindo os itens de locações transferidas, **sem qualquer juros**. Não reaplicar a multa em dias ou meses posteriores e não capitalizar valores. O acréscimo único de 10% pela transferência da locação é distinto dessa multa. | Aprovado integralmente em 10/11/2026 |
+| **RN34** | Ao cancelar locação com direito a restituição, reverter também o acréscimo único de **10%** da transferência, deduzindo somente a multa de cancelamento cabível. Se a fatura estiver quitada, preservar seus itens e gerar crédito simulado futuro; se aberta, ajustar a cobrança. Créditos serão compensados automaticamente na próxima fatura elegível, com saldo remanescente transportado para futuras competências. | Aprovado em 10/11/2026 |
+| **RN35** | Tesoureiro do clube de origem administra as faturas de suas associações. Tesoureiro do clube prestador consulta somente o lançamento de locação originado em seu clube, sem acesso irrestrito à fatura familiar de outra origem. Administrador Geral mantém acesso global. | Aprovado em 10/11/2026 |
 
 ### 6.1 Cálculo de atraso aprovado
 
 Calcular `diasEmAtraso` a partir da **data local do vencimento**, sem arredondar horas de forma inconsistente. Bloquear titular e dependentes somente se `diasEmAtraso > 10`, isto é, a partir do **11º dia de atraso**. A API recalcula a elegibilidade na tentativa de reserva/entrada, sem depender exclusivamente de tarefa automática diária. Apenas mensalidades vencidas acima desse limite bloqueiam a associação na primeira versão; cobranças de locação transferidas passam a integrar a mensalidade de destino.
+
+**Encargo aprovado integralmente em 10/11/2026:** multa única de **2%** sobre o **total vencido da fatura**, incluindo principal de mensalidade e locações transferidas, **a partir do 11º dia** de atraso, **sem juros**. No 10º dia não há multa nem bloqueio por atraso; no 11º dia ambos se aplicam. A multa não se repete por dia, mês ou tentativa de quitação. Exemplo ilustrativo: uma fatura de R$ 260,00 vencida há 11 dias recebe R$ 5,20 de multa única, totalizando R$ 265,20, sem juros adicionais.
 
 ### 6.2 Fluxo proposto das reservas
 
@@ -225,6 +233,8 @@ O valor deve aparecer com **itens separados** (`Aluguel do salão` e `Acréscimo
 Transferências só serão concluídas pela API após verificar que o débito não foi quitado ou transferido antes e que a fatura de destino não está fechada/quitada. Se a próxima mensalidade já estiver quitada, a API deve localizar a primeira mensalidade futura elegível, sem reabrir ou alterar a anterior. O aplicativo deve mostrar antecipadamente o principal, acréscimo, total, competência de destino e vencimento para confirmação do titular. A escolha pode ocorrer no Mobile ou na Web com autenticação do titular, até imediatamente antes do início do uso do espaço.
 
 Se a reserva for cancelada depois de transferida, mas antes do uso, uma fatura ainda aberta poderá ter os respectivos itens ajustados conforme a multa aplicável; uma fatura quitada permanece intacta e o estorno será lançado como crédito simulado em cobrança futura. O registro de histórico e auditoria deve permitir rastrear a reserva e evitar dupla restituição.
+
+**Complementação aprovada em 10/11/2026:** a reversão da locação cancela também os 10% do acréscimo, mantendo apenas eventual multa de cancelamento. Exemplo: locação de R$ 100 transferida por R$ 110; cancelamento com restituição integral gera reversão/crédito de R$ 110; cancelamento tardio de salão sujeito à multa de R$ 50 gera reversão/crédito líquido de R$ 60. Créditos são abatidos automaticamente da próxima fatura elegível, mantendo saldo remanescente para outras competências e sem reabrir fatura quitada. Os valores são exemplos de cálculo, não tarifas obrigatórias.
 
 ### 6.4 Fluxo proposto da portaria
 
@@ -280,11 +290,12 @@ Se a reserva for cancelada depois de transferida, mas antes do uso, uma fatura a
 
 **Financeiro**
 
-- `Fatura`: Id, AssociacaoId, UnidadeIdOpcional, Tipo, Competencia, DataVencimento, ValorTotal, Status.
+- `Fatura`: Id, AssociacaoId, UnidadeOrigemId, PoliticaFinanceiraIdOpcional, Tipo, Competencia, DataVencimento, ValorTotal, Status.
 - `ItemFatura`: Id, FaturaId, Tipo, Descricao, Valor, ReservaIdOpcional, OrigemUnidadeIdOpcional (mensalidade base, principal de locação, acréscimo, outros).
 - `CobrancaReserva`: Id, ReservaId, ValorOriginal, Status (EmAberto/QuitadaSimulada/Transferida), Modalidade, CompetenciaDestinoOpcional, FaturaDestinoIdOpcional, PercentualAcrescimo, ValorAcrescimo, DataDecisao.
 - `LancamentoFinanceiro`: Id, FaturaIdOpcional, CobrancaReservaIdOpcional, Tipo, Valor, DataHora, UsuarioResponsavelId, Observacao.
-- `PoliticaFinanceira`: Id, UnidadeIdOpcional, CategoriaIdOpcional, ValorMensal, DiasTolerancia, Vigencia.
+- `PoliticaFinanceira`: Id, UnidadeId, CategoriaId, ValorMensal, DiaVencimento, DiasTolerancia, PercentualMulta, VigenciaInicio, VigenciaFimOpcional.
+- `CreditoFinanceiro`: Id, AssociacaoId, CancelamentoReservaIdOpcional, ValorOriginal, SaldoDisponivel, CriadoEm. Controla compensações parciais sem duplicidade.
 
 **Atividades e comunicação**
 
@@ -438,6 +449,14 @@ As cardinalidades descrevem o **modelo lógico**. A implementação definirá no
 | T45 | Autenticar a mesma conta pelo login cadastrado e por um e-mail único associado a ela. | Ambos identificam a mesma conta e aplicam as mesmas permissões e validação de senha. |
 | T46 | Tentar login por e-mail ausente, compartilhado por contas diferentes ou coincidente com o login de outra conta. | Não autenticar por correspondência ambígua; retornar falha segura e preservar logins antigos não conflitantes. |
 | T47 | Titular abre sua ficha associativa e tenta visualizar dados financeiros ainda não disponibilizados ou de outra associação. | Exibe somente dados autorizados e já implementados; não apresenta contrato anual fictício ou informações financeiras inexistentes. |
+| T48 | Emitir mensalidade de associação com dependentes e repetir a mesma competência. | Apenas uma fatura da associação; dependentes não geram mensalidade adicional. |
+| T49 | Associação ingressa em novembro e recebe a primeira mensalidade de dezembro. | Primeira competência dezembro, vencimento em 10/12; nenhuma cobrança de mensalidade em novembro. |
+| T50 | Quitar fatura de R$ 260 vencida há 10 dias e outra há 11 dias; repetir quitação. | No 10º dia sem multa; no 11º, multa única de R$ 5,20 sobre o total vencido, incluindo locação transferida, sem juros; quitação idempotente e histórico preservado. |
+| T51 | Transferir uma locação de R$ 100 para fatura de R$ 150. | Fatura discrimina R$ 150 + R$ 100 + R$ 10; segunda transferência não duplica itens. |
+| T52 | Cancelar locação de R$ 100 já transferida por R$ 110, com ou sem multa de R$ 50. | Reversão integral de R$ 110 ou líquida de R$ 60, sem reabrir fatura quitada. |
+| T53 | Aplicar crédito maior que o valor da próxima fatura. | Abate até zerar a fatura e preserva saldo para competência futura, sem débito negativo. |
+| T54 | Tesoureiro de clube prestador consulta locação interclubes e tenta consultar fatura familiar de outra origem. | Visualiza somente lançamento de sua unidade; acesso à fatura alheia é negado pela API. |
+| T55 | Tentar confirmar reserva com mensalidade vencida há 10 e 11 dias e quitar a mensalidade. | Reserva permitida no 10º dia, negada no 11º e liberada após regularização, sem bloquear a consulta financeira. |
 
 ## 11. Proposta de componentes de desenvolvimento
 
@@ -446,7 +465,7 @@ As cardinalidades descrevem o **modelo lógico**. A implementação definirá no
 1. **Fundação (concluído por relato):** solução, projetos, schema MySQL, configuração segura, README e build inicial.
 2. **Autenticação e cadastros (concluído por relato):** sete perfis, clubes/unidades, titulares, dependentes, categorias, tipos de vínculo, interesses, solicitações de adesão e aprovação por Presidente/Administrador Geral; Web de administração e preparação dos endpoints para Mobile. **Ajustes posteriores ainda não implementados:** login híbrido por usuário/e-mail e ficha associativa simplificada.
 3. **Espaços e reservas (concluído por relato):** horários, manutenção, finalidade de locação, agenda Web, intervalos entre datas, contagem mensal por data local de início, convidados, cancelamentos, autorização geral para dependentes menores, regras e concorrência. O acerto financeiro completo das taxas fica no Componente 4.
-4. **Financeiro simulado:** geração de mensalidades itemizadas e taxas, quitação, transferência de locações com acréscimo de 10%, inadimplência e acesso do Tesoureiro limitado ao escopo autorizado.
+4. **Financeiro simulado:** geração de mensalidades itemizadas e taxas, quitação, transferência de locações com acréscimo de 10%, multa única de 2% sobre o total da fatura vencida a partir do 11º dia (sem juros), inadimplência e acesso do Tesoureiro limitado ao escopo autorizado.
 5. **Carteirinha e portaria online:** emissão, leitura/verificação, bloqueios e auditoria; considerar visitantes de eventos públicos sem dispensar conferência online.
 6. **Atividades, turmas e eventos sociais:** inscrições, vagas, lista de espera, eventos com público-alvo de associados ou público geral. Avaliar, antes da implementação, a proposta de vincular eventos à ocupação dos espaços e à agenda do Componente 3.
 7. **Comunicação e relatórios:** avisos, ouvidoria separando solicitação/reclamação e indicadores principais.
@@ -454,6 +473,25 @@ As cardinalidades descrevem o **modelo lógico**. A implementação definirá no
 9. **Possíveis evoluções futuras (não incluídas na primeira entrega):** validação offline na portaria, notificações push remotas e integração física de acesso. A catraca real não é necessária ao projeto.
 
 Após cada componente: informar arquivos alterados, instruções de execução, `dotnet build`, testes mínimos observados e pendências; atualizar documento de continuidade. Não declarar testes aprovados sem evidência. Preservar módulos que já funcionam e esperar aprovação antes de iniciar o próximo componente.
+
+### 11.1 Plano incremental do Componente 4 — validado em 10/11/2026
+
+**Autorização atualizada em 11/11/2026:** o usuário autorizou iniciar o Componente 4, avançou às Etapas 3 e 4 e, após confirmar os testes iniciais das Etapas 4 e 5, autorizou a **Etapa 6**. O Componente 5 requer autorização separada:
+
+1. **Estrutura financeira:** novo script `010_financeiro_base.sql` para faturas, itens, lançamentos e políticas, com índices de unicidade e migrações posteriores preservando `001`–`009`.
+2. **Mensalidades:** configuração de valores por categoria/clube de origem, emissão inicialmente manual por competência, vencimento no dia 10, primeira competência no mês seguinte à adesão, leitura e prevenção de duplicidade.
+3. **Quitação e inadimplência:** pagamento integral simulado, multa única de 2% sobre o valor total da fatura vencida a partir do 11º dia, sem juros, cálculo dinâmico do atraso, bloqueio de novas reservas a partir do 11º dia e liberação após quitação. Portaria será integrada no Componente 5.
+4. **Integração das locações:** quitação avulsa ou transferência, somente pelo titular e antes do uso, com prévia de competência/vencimento e dois itens (principal + 10%) em fatura futura elegível; controle transacional e idempotente.
+5. **Cancelamentos/créditos:** permitir cancelar cobrança transferida, ajustar fatura aberta ou gerar crédito futuro quando quitada, reverter também os 10%, considerar a multa de salão e aproveitar créditos pendentes do Componente 3.
+6. **Permissões, Web e regressão:** consultas financeiras por titular, Administrador Geral e Tesoureiro em escopos distintos. Tesoureiro pode consultar e registrar quitação simulada apenas de faturas do clube de origem a que esteja atribuído; para locações interclubes, enxerga somente as prestadas pelo seu clube, sem acesso às faturas do outro clube. Somente o Administrador Geral cadastra políticas e emite mensalidades. Auditoria e regressão dos principais fluxos continuam necessárias.
+
+**Testes mínimos:** T06–T08, T19–T24, T37, T48–T55, além dos cenários de concorrência, crédito remanescente e regressão dos Componentes 2 e 3. As verificações de permissão e transação são obrigatórias durante todas as etapas, não apenas na etapa final.
+
+### 11.2 Ajuste de fluxo aprovado em 11/11/2026
+
+Até concluir o **Componente 4**, manter o ciclo incremental existente, incluindo os testes básicos propostos. **A partir do Componente 5**, o usuário fará apenas a compilação como verificação imediata por etapa/componente; os testes funcionais e de integração serão registrados em `TESTES_PENDENTES_CLICKCLUB.md` e executados posteriormente pelo Codex. Essa redução de validação não equivale à aprovação dos fluxos, e erros ainda poderão aparecer durante a demonstração.
+
+**Tarefa futura separada, após concluir a Web:** o Codex deverá receber instruções para (1) limpar somente dados de teste identificados, com backup e autorização específica antes de exclusões, e (2) criar/popular dados inteiramente fictícios para a apresentação de 11/11/2026. Não executar limpeza ou carga durante as etapas do Componente 4. Não usar dados pessoais reais no dataset de demonstração.
 
 ## 12. Decisões registradas e pendências
 
@@ -529,7 +567,24 @@ As anotações de correção de **outro projeto** foram tratadas como referênci
 | **PC13 — Divulgação** | Não integrar envio automático por WhatsApp, e-mail ou publicação em redes sociais; manter mural de avisos previsto. | Aprovada; exclusão de escopo |
 | **PC14 — Presidência** | Manter Presidente com escopo local, sem mandato obrigatório de dois anos ou módulo de eleições. | Aprovada; exclusão de escopo |
 
-**Melhorias não convertidas em requisitos aprovados:** profissão, parentesco, data de cadastro e histórico visual de alterações, filtro por gênero, novos tipos de espaços, vínculo de evento a espaço/agenda, diretores e eventual limite por tipo de ambiente. O usuário considerou as sugestões pertinentes, mas ainda não foram detalhadas nem autorizadas para implementação. A regra de três reservas mensais continua intacta. Taxa/juros de mensalidade vencida também **não têm parâmetros aprovados**; precisam de decisão antes do Componente 4.
+**Melhorias não convertidas em requisitos aprovados:** profissão, parentesco, data de cadastro e histórico visual de alterações, filtro por gênero, novos tipos de espaços, vínculo de evento a espaço/agenda, diretores e eventual limite por tipo de ambiente. O usuário considerou as sugestões pertinentes, mas ainda não foram detalhadas nem autorizadas para implementação. A regra de três reservas mensais continua intacta. Os encargos de mensalidade são atualizados na seção 12.5.
+
+### 12.5 Decisões financeiras para o Componente 4 — 10/11/2026
+
+| Referência | Decisão do usuário | Estado |
+|---|---|---|
+| **F06 — Encargo por atraso** | Opção B: multa **única de 2%**, **sem juros**, aplicada **a partir do 11º dia de atraso** sobre o **valor total vencido da fatura, incluindo locações transferidas**. Diferente do acréscimo único de 10% pela transferência de locação. | Aprovada integralmente |
+| **F07 — Início/vencimento** | Opção B: primeira mensalidade no **mês seguinte à adesão**; vencimento no **dia 10** de cada mês. Valores permanecem configuráveis. | Aprovada |
+| **F08 — Cancelamento de locação transferida** | Opção A: reverter também o acréscimo de 10%, preservando somente multa de cancelamento aplicável. | Aprovada |
+| **F09 — Créditos** | Opção A: compensar créditos automaticamente na próxima fatura elegível; transportar saldo residual sem criar fatura negativa. | Aprovada |
+| **F10 — Tesouraria interclubes** | Opção A: tesoureiro do clube de origem administra faturas de suas associações; tesoureiro do prestador consulta lançamentos de locações do seu clube sem acesso à fatura familiar de outra origem; Administrador Geral tem escopo global. | Aprovada |
+
+**Validação final da F06:** o usuário confirmou expressamente o **11º dia de atraso** como início da multa e o **total vencido da fatura, incluindo locações transferidas**, como base de cálculo. Não há juros nem aplicação repetida da multa. A emissão manual, a quitação integral sem pagamentos parciais e os valores fictícios de teste são propostas técnicas da seção 11.1, não novas decisões obrigatórias. O planejamento está validado e a **Etapa 1 foi autorizada**, com execução e testes ainda pendentes.
+
+### 12.6 Observações após os testes da Etapa 4 — 11/11/2026
+
+- **Categoria Individual e dependentes — opção B aprovada:** o usuário constatou que era possível vincular dependentes a titulares da categoria `Individual` e aprovou a recomendação de **impedir novos dependentes**, sem conversão automática para Familiar. A API deve bloquear cadastro e reativação de dependentes nessa categoria; alterações de associação ou renomeações de categorias que resultariam em Individual com dependentes ativos também devem ser rejeitadas. Vínculos antigos permanecem para regularização **manual pelo Administrador Geral**, sem exclusão ou migração automática. A implementação foi preparada, mas aguarda build e testes do usuário.
+- **Histórico de reservas — correção validada pelo usuário:** a lista `Minhas reservas` ordenava pela data **de utilização** (`inicio_utc DESC`), colocando reservas criadas recentemente abaixo de reservas de uso futuro. O usuário espera as **últimas criadas primeiro**. A ordenação foi alterada para `criada_em_utc DESC, id DESC`, e o usuário confirmou em 11/11/2026 que a correção **funcionou**. Nenhuma regra de reserva ou dado armazenado foi alterado.
 
 ## 13. Instruções iniciais sugeridas para o ChatGPT Project
 
@@ -546,4 +601,4 @@ As anotações de correção de **outro projeto** foram tratadas como referênci
 
 ---
 
-**Próximo passo (10/11/2026):** sincronizar esta documentação v1.3, a continuidade e o README no repositório; planejar e validar os testes mínimos do **Componente 4 — Financeiro simulado**, inclusive parâmetros ainda indefinidos para encargos de atraso. **O Componente 4 não foi iniciado e requer autorização explícita para implementação.** Login híbrido e ficha associativa são ajustes aprovados de escopo, mas ainda não implementados. Os testes Android e a integração ponta a ponta permanecem futuros.
+**Próximo passo (10/11/2026):** após backup, executar e validar `010_financeiro_base.sql` no MySQL 8.4, conferir o esquema e a preservação das reservas; então confirmar os resultados antes de avançar. **A Etapa 1 está preparada, sem execução nem testes de banco comprovados.** Login híbrido e ficha associativa são ajustes aprovados de escopo, mas ainda não implementados. Os testes Android e a integração ponta a ponta permanecem futuros.

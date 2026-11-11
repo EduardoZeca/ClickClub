@@ -56,6 +56,10 @@ public sealed class CategoriasController(CategoriaRepositorio repositorio) : Con
         {
             return Conflict(new { erro = "Já existe uma categoria com esse nome." });
         }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { erro = ex.Message });
+        }
     }
 
     [HttpPatch("{id:long}/situacao")]

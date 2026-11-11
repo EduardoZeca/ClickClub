@@ -1,0 +1,41 @@
+@model IReadOnlyList<PoliticaFinanceiraApi>
+@{
+    ViewData["Title"] = "Valores das mensalidades";
+    var culturaMoeda = System.Globalization.CultureInfo.GetCultureInfo("pt-BR");
+}
+
+<div class="d-flex justify-content-between align-items-center gap-2 flex-wrap mb-3">
+    <h1 class="h3 mb-0">Valores das mensalidades</h1>
+    <a asp-action="CriarPolitica" class="btn btn-primary">Cadastrar valor</a>
+</div>
+<p class="text-muted">Os valores são configurados por clube e categoria. O valor aplicado fica registrado na fatura emitida e não muda com novas políticas.</p>
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success" role="status">@sucesso</div>
+}
+@if (ViewBag.Erro is string erro)
+{
+    <div class="alert alert-danger" role="alert">@erro</div>
+}
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead><tr><th>Clube</th><th>Categoria</th><th>Valor</th><th>Início da vigência</th><th>Fim da vigência</th></tr></thead>
+        <tbody>
+            @foreach (var politica in Model)
+            {
+                <tr>
+                    <td>@politica.Unidade</td>
+                    <td>@politica.Categoria</td>
+                    <td>@politica.ValorMensal.ToString("C", culturaMoeda)</td>
+                    <td>@politica.VigenciaInicio.ToString("MM/yyyy")</td>
+                    <td>@(politica.VigenciaFim?.ToString("MM/yyyy") ?? "Sem data final")</td>
+                </tr>
+            }
+            @if (Model.Count == 0)
+            {
+                <tr><td colspan="5">Nenhum valor mensal cadastrado.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
+<a asp-action="Index" class="btn btn-outline-secondary">Voltar às faturas</a>

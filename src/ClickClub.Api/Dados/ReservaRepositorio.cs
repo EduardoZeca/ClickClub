@@ -54,7 +54,8 @@ public sealed class ReservaRepositorio(IConfiguration configuration)
                    AND EXISTS (SELECT 1 FROM dependente_associacao d
                        WHERE d.associacao_id=a.id AND d.dependente_pessoa_id=us.pessoa_id
                          AND d.ativo=TRUE))
-            ORDER BY r.inicio_utc DESC
+            -- Histórico em ordem de cadastro, independentemente da data de uso.
+            ORDER BY r.criada_em_utc DESC, r.id DESC
             """, conexao);
         cmd.Parameters.AddWithValue("@usuario", usuarioId);
         cmd.Parameters.AddWithValue("@titular", titular);
@@ -137,6 +138,47 @@ public sealed class ReservaRepositorio(IConfiguration configuration)
             pessoaId = reader.GetInt64(1);
             vinculoId = reader.IsDBNull(2) ? 0 : reader.GetInt64(2);
             nascimento = reader.IsDBNull(3) ? null : reader.GetDateTime(3);
+        }
+
+        // RN07: o bloqueio é recalculado na própria tentativa de reserva,
+        // sem depender de processamento agendado da multa.
+        string fusoOrigem;
+        using (var origem = new MySqlCommand("""
+            SELECT u.fuso_horario FROM associacao a
+            JOIN unidade u ON u.id=a.unidade_origem_id
+            WHERE a.id=@associacao
+            """, conexao, transacao))
+        {
+            origem.Parameters.AddWithValue("@associacao", associacaoId);
+            var resposta = await origem.ExecuteScalarAsync(ct);
+            if (resposta is not string fusoCadastrado)
+                return (ResultadoReserva.FusoInvalido, 0);
+            fusoOrigem = fusoCadastrado;
+        }
+
+        DateTime hojeOrigem;
+        try
+        {
+            hojeOrigem = RegraInadimplencia.DataLocal(
+                DateTime.UtcNow, fusoOrigem);
+        }
+        catch (InvalidOperationException)
+        {
+            return (ResultadoReserva.FusoInvalido, 0);
+        }
+
+        using (var atraso = new MySqlCommand("""
+            SELECT EXISTS(SELECT 1 FROM fatura f
+                WHERE f.associacao_id=@associacao
+                  AND f.tipo='Mensalidade' AND f.status='EmAberto'
+                  AND f.valor_total > 0 AND f.data_vencimento < @limite)
+            """, conexao, transacao))
+        {
+            atraso.Parameters.AddWithValue("@associacao", associacaoId);
+            atraso.Parameters.AddWithValue("@limite",
+                hojeOrigem.AddDays(-RegraInadimplencia.DiasTolerancia));
+            if (Convert.ToInt32(await atraso.ExecuteScalarAsync(ct)) == 1)
+                return (ResultadoReserva.MensalidadeInadimplente, 0);
         }
 
         long unidadeId;

@@ -1,0 +1,88 @@
+@model CobrancaLocacaoApi
+@{
+    ViewData["Title"] = "Cobrança da reserva";
+    var moeda = System.Globalization.CultureInfo.GetCultureInfo("pt-BR");
+}
+
+<h1 class="h3 mb-3">Cobrança da reserva #@Model.ReservaId</h1>
+<p class="text-muted">Operações exclusivamente simuladas, sem movimentação bancária.</p>
+
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success" role="status">@sucesso</div>
+}
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-danger" role="alert">@erro</div>
+}
+
+<dl class="row">
+    <dt class="col-sm-4">Clube prestador</dt><dd class="col-sm-8">@Model.ClubePrestador</dd>
+    <dt class="col-sm-4">Espaço</dt><dd class="col-sm-8">@Model.Espaco</dd>
+    <dt class="col-sm-4">Início da utilização</dt><dd class="col-sm-8">@Model.InicioLocal.ToString("dd/MM/yyyy HH:mm")</dd>
+    <dt class="col-sm-4">Reserva</dt><dd class="col-sm-8">@Model.SituacaoReserva</dd>
+    <dt class="col-sm-4">Cobrança</dt><dd class="col-sm-8">@Model.SituacaoCobranca</dd>
+    <dt class="col-sm-4">Taxa original</dt><dd class="col-sm-8">@Model.ValorOriginal.ToString("C", moeda)</dd>
+</dl>
+
+@if (Model.PodeDecidir)
+{
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h5">Quitar avulso (simulado)</h2>
+                    <p>Valor: <strong>@Model.ValorOriginal.ToString("C", moeda)</strong></p>
+                    <p>Não será realizada nenhuma operação financeira real.</p>
+                    <form asp-action="QuitarTaxa" method="post"
+                          onsubmit="return confirm('Registrar a quitação avulsa simulada? Esta decisão não pode ser substituída pela transferência.');">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="reservaId" value="@Model.ReservaId" />
+                        <button type="submit" class="btn btn-primary">Registrar quitação avulsa</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h5">Transferir para mensalidade</h2>
+                    <dl class="row">
+                        <dt class="col-7">Principal</dt><dd class="col-5 text-end">@Model.ValorOriginal.ToString("C", moeda)</dd>
+                        <dt class="col-7">Acréscimo único (10%)</dt><dd class="col-5 text-end">@Model.AcrescimoTransferencia.ToString("C", moeda)</dd>
+                        <dt class="col-7">Total transferido</dt><dd class="col-5 text-end"><strong>@Model.TotalTransferencia.ToString("C", moeda)</strong></dd>
+                        <dt class="col-7">Competência</dt><dd class="col-5 text-end">@(Model.CompetenciaDestino?.ToString("MM/yyyy"))</dd>
+                        <dt class="col-7">Vencimento</dt><dd class="col-5 text-end">@(Model.VencimentoDestino?.ToString("dd/MM/yyyy"))</dd>
+                    </dl>
+                    <form asp-action="TransferirTaxa" method="post"
+                          onsubmit="return confirm('Transferir para a competência exibida, com acréscimo único de 10%?');">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="reservaId" value="@Model.ReservaId" />
+                        <input type="hidden" name="competenciaConfirmada"
+                               value="@(Model.CompetenciaDestino?.ToString("yyyy-MM-dd"))" />
+                        <button type="submit" class="btn btn-outline-primary">Confirmar transferência</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        @(Model.MotivoIndisponibilidade ?? "Não há decisão disponível para esta cobrança.")
+    </div>
+    @if (Model.SituacaoCobranca == "Transferida")
+    {
+        <p>Transferência registrada: acréscimo de @Model.AcrescimoTransferencia.ToString("C", moeda),
+           competência @(Model.CompetenciaDestino?.ToString("MM/yyyy")), vencimento @(Model.VencimentoDestino?.ToString("dd/MM/yyyy")).</p>
+        @if (Model.FaturaDestinoId.HasValue)
+        {
+            <a asp-controller="Financeiro" asp-action="Detalhes"
+               asp-route-id="@Model.FaturaDestinoId.Value" class="btn btn-outline-primary mb-3">Consultar fatura de destino</a>
+        }
+    }
+}
+
+<p class="text-muted">Cancelamentos antes do início do uso ajustam a fatura aberta ou geram crédito futuro quando a fatura já foi quitada, revertendo principal e 10% menos eventual multa.</p>
+<a asp-action="Index" class="btn btn-outline-secondary">Voltar às reservas</a>

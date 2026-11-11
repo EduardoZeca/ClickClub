@@ -64,7 +64,7 @@ public enum ResultadoReserva
     ConflitoReserva, CotaEsgotada, CapacidadeExcedida,
     AntecedenciaInsuficiente, ListaConvidadosInvalida,
     ListaConvidadosIncompleta, FusoInvalido,
-    PermissaoTitularNecessaria
+    PermissaoTitularNecessaria, MensalidadeInadimplente
 }
 
 public enum ResultadoConvidados
@@ -76,5 +76,5 @@ public enum ResultadoConvidados
 public enum ResultadoCancelamento
 {
     Concluido, ReservaNaoEncontrada, JaCancelada,
-    UtilizacaoIniciada, CobrancaTransferida
+    UtilizacaoIniciada
 }

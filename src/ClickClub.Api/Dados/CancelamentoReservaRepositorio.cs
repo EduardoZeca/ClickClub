@@ -20,8 +20,10 @@ public sealed class CancelamentoReservaRepositorio(IConfiguration configuration)
         // Mesmo padrão do cadastro: travar primeiro a associação.
         // Cancelamento e nova reserva do mesmo titular ficam serializados.
         long associacaoId;
+        string fusoOrigem;
         using (var identificar = new MySqlCommand("""
-            SELECT a.id FROM associacao a
+            SELECT a.id, un.fuso_horario FROM associacao a
+            JOIN unidade un ON un.id=a.unidade_origem_id
             JOIN usuario u ON u.id=@usuario
             WHERE u.id=@usuario AND EXISTS (
                 SELECT 1 FROM reserva r
@@ -37,21 +39,25 @@ public sealed class CancelamentoReservaRepositorio(IConfiguration configuration)
             identificar.Parameters.AddWithValue("@usuario", usuarioId);
             identificar.Parameters.AddWithValue("@reserva", reservaId);
             identificar.Parameters.AddWithValue("@titular", titular);
-            var valor = await identificar.ExecuteScalarAsync(ct);
-            if (valor is null)
+            await using var leitor = await identificar.ExecuteReaderAsync(ct);
+            if (!await leitor.ReadAsync(ct))
                 return (ResultadoCancelamento.ReservaNaoEncontrada, null);
-            associacaoId = Convert.ToInt64(valor);
+            associacaoId = leitor.GetInt64(0);
+            fusoOrigem = leitor.GetString(1);
         }
 
         DateTime inicioUtc;
         decimal valorOriginal;
         string tipo, status, statusCobranca;
         long unidadeId;
+        long? cobrancaId, faturaDestinoId;
+        decimal acrescimoTransferido;
 
         using (var reserva = new MySqlCommand("""
             SELECT r.inicio_utc, r.valor_contratado,
                    r.tipo_espaco_contratado, r.status,
-                   e.unidade_id, c.status
+                   e.unidade_id, c.status, c.id,
+                   c.fatura_destino_id, c.valor_acrescimo
             FROM reserva r
             JOIN espaco e ON e.id=r.espaco_id
             LEFT JOIN cobranca_reserva c ON c.reserva_id=r.id
@@ -71,6 +77,9 @@ public sealed class CancelamentoReservaRepositorio(IConfiguration configuration)
             status = reader.GetString(3);
             unidadeId = reader.GetInt64(4);
             statusCobranca = reader.IsDBNull(5) ? "Gratuita" : reader.GetString(5);
+            cobrancaId = reader.IsDBNull(6) ? null : reader.GetInt64(6);
+            faturaDestinoId = reader.IsDBNull(7) ? null : reader.GetInt64(7);
+            acrescimoTransferido = reader.IsDBNull(8) ? 0m : reader.GetDecimal(8);
         }
 
         if (status != "Confirmada")
@@ -80,18 +89,35 @@ public sealed class CancelamentoReservaRepositorio(IConfiguration configuration)
         if (agoraUtc >= inicioUtc)
             return (ResultadoCancelamento.UtilizacaoIniciada, null);
 
-        // O ajuste de lançamentos já transferidos exige a fatura e será
-        // realizado no componente financeiro, para não gerar crédito duplo.
+        string? statusFatura = null;
         if (statusCobranca == "Transferida")
-            return (ResultadoCancelamento.CobrancaTransferida, null);
+        {
+            if (!faturaDestinoId.HasValue)
+                throw new InvalidOperationException(
+                    "Cobrança transferida sem fatura de destino.");
+            using var consultarFatura = new MySqlCommand("""
+                SELECT status FROM fatura
+                WHERE id=@fatura AND associacao_id=@associacao FOR UPDATE
+                """, conexao, transacao);
+            consultarFatura.Parameters.AddWithValue("@fatura", faturaDestinoId.Value);
+            consultarFatura.Parameters.AddWithValue("@associacao", associacaoId);
+            statusFatura = await consultarFatura.ExecuteScalarAsync(ct) as string;
+            if (statusFatura is not ("EmPreparacao" or "EmAberto" or "QuitadaSimulada"))
+                throw new InvalidOperationException(
+                    "Fatura de transferência indisponível para cancelamento.");
+        }
 
         var multa = tipo == "SalaoFestas" &&
             agoraUtc > inicioUtc.AddHours(-24)
             ? Math.Min(50m, valorOriginal)
             : 0m;
 
-        var credito = statusCobranca == "QuitadaSimulada"
-            ? valorOriginal - multa : 0m;
+        var credito = statusCobranca switch
+        {
+            "QuitadaSimulada" => valorOriginal - multa,
+            "Transferida" => valorOriginal + acrescimoTransferido - multa,
+            _ => 0m
+        };
         var situacao = credito > 0 ? "CreditoPendente"
             : multa > 0 && statusCobranca == "EmAberto"
                 ? "MultaPendente" : "SemAcerto";
@@ -111,7 +137,8 @@ public sealed class CancelamentoReservaRepositorio(IConfiguration configuration)
         {
             using var encerrar = new MySqlCommand("""
                 UPDATE cobranca_reserva SET status='Cancelada'
-                WHERE reserva_id=@reserva AND status IN ('EmAberto','QuitadaSimulada')
+                WHERE reserva_id=@reserva
+                  AND status IN ('EmAberto','QuitadaSimulada','Transferida')
                 """, conexao, transacao);
             encerrar.Parameters.AddWithValue("@reserva", reservaId);
             if (await encerrar.ExecuteNonQueryAsync(ct) != 1)
@@ -122,20 +149,88 @@ public sealed class CancelamentoReservaRepositorio(IConfiguration configuration)
             INSERT INTO cancelamento_reserva
                 (reserva_id, usuario_responsavel_id, cancelada_em_utc,
                  valor_original, situacao_original_cobranca,
-                 multa_simulada, credito_simulado_pendente,
+                 valor_acrescimo_transferido, multa_simulada, credito_simulado_pendente,
                  situacao_financeira)
             VALUES (@reserva, @usuario, UTC_TIMESTAMP(6),
-                    @original, @cobrancaAnterior, @multa, @credito, @situacao)
+                    @original, @cobrancaAnterior, @acrescimo, @multa, @credito, @situacao)
             """, conexao, transacao))
         {
             registrar.Parameters.AddWithValue("@reserva", reservaId);
             registrar.Parameters.AddWithValue("@usuario", usuarioId);
             registrar.Parameters.AddWithValue("@original", valorOriginal);
             registrar.Parameters.AddWithValue("@cobrancaAnterior", statusCobranca);
+            registrar.Parameters.AddWithValue("@acrescimo",
+                statusCobranca == "Transferida" ? acrescimoTransferido : 0m);
             registrar.Parameters.AddWithValue("@multa", multa);
             registrar.Parameters.AddWithValue("@credito", credito);
             registrar.Parameters.AddWithValue("@situacao", situacao);
             await registrar.ExecuteNonQueryAsync(ct);
+        }
+
+        if (credito > 0)
+        {
+            long cancelamentoId;
+            using (var buscarId = new MySqlCommand("""
+                SELECT id FROM cancelamento_reserva WHERE reserva_id=@reserva
+                """, conexao, transacao))
+            {
+                buscarId.Parameters.AddWithValue("@reserva", reservaId);
+                cancelamentoId = Convert.ToInt64(await buscarId.ExecuteScalarAsync(ct));
+            }
+            var hoje = RegraInadimplencia.DataLocal(agoraUtc, fusoOrigem);
+            var proxima = new DateTime(hoje.Year, hoje.Month, 1).AddMonths(1);
+            var creditoId = await CreditoFinanceiroServico.RegistrarAsync(conexao,
+                transacao, associacaoId, cancelamentoId, credito,
+                proxima, usuarioId, ct);
+
+            if (statusCobranca == "Transferida" &&
+                statusFatura is ("EmPreparacao" or "EmAberto"))
+            {
+                // Estorno na própria fatura aberta, sem remover o histórico
+                // de principal e acréscimo. A multa permanece retida.
+                await CreditoFinanceiroServico.AplicarAsync(conexao,
+                    transacao, associacaoId, faturaDestinoId!.Value, usuarioId,
+                    ct, creditoId);
+            }
+            else
+            {
+                await CreditoFinanceiroServico.AplicarNaProximaFaturaAsync(
+                    conexao, transacao, associacaoId, proxima, usuarioId, ct);
+            }
+
+            // A resposta deve indicar apenas o saldo futuro ainda disponível,
+            // não o valor já compensado na fatura aberta.
+            using var consultarSaldo = new MySqlCommand("""
+                SELECT c.saldo_disponivel, cr.situacao_financeira
+                FROM credito_financeiro c
+                JOIN cancelamento_reserva cr ON cr.id=c.cancelamento_reserva_id
+                WHERE cr.id=@cancelamento
+                """, conexao, transacao);
+            consultarSaldo.Parameters.AddWithValue("@cancelamento", cancelamentoId);
+            await using var leitor = await consultarSaldo.ExecuteReaderAsync(ct);
+            if (await leitor.ReadAsync(ct))
+            {
+                credito = leitor.GetDecimal(0);
+                situacao = leitor.GetString(1);
+            }
+        }
+
+        if (cobrancaId.HasValue && statusCobranca == "Transferida")
+        {
+            using var lancarEstorno = new MySqlCommand("""
+                INSERT INTO lancamento_financeiro
+                    (cobranca_reserva_id, unidade_referencia_id, tipo,
+                     valor, usuario_responsavel_id, observacao)
+                VALUES (@cobranca, @unidade, 'CancelamentoLocacaoTransferida',
+                        @valor, @usuario,
+                        'Cancelamento simulado: principal e 10% revertidos; multa retida')
+                """, conexao, transacao);
+            lancarEstorno.Parameters.AddWithValue("@cobranca", cobrancaId.Value);
+            lancarEstorno.Parameters.AddWithValue("@unidade", unidadeId);
+            lancarEstorno.Parameters.AddWithValue("@valor",
+                -(valorOriginal + acrescimoTransferido - multa));
+            lancarEstorno.Parameters.AddWithValue("@usuario", usuarioId);
+            await lancarEstorno.ExecuteNonQueryAsync(ct);
         }
 
         await LogAuditoria.RegistrarAsync(conexao, transacao, usuarioId,

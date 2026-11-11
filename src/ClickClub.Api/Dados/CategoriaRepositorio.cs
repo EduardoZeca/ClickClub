@@ -65,6 +65,34 @@ public sealed class CategoriaRepositorio(IConfiguration configuration)
         await using var conexao = new MySqlConnection(_connectionString);
         await conexao.OpenAsync(ct);
         await using var transacao = await conexao.BeginTransactionAsync(ct);
+
+        using (var consultar = new MySqlCommand("""
+            SELECT nome FROM categoria_associativa WHERE id=@id FOR UPDATE
+            """, conexao, transacao))
+        {
+            consultar.Parameters.AddWithValue("@id", id);
+            var nomeAtual = await consultar.ExecuteScalarAsync(ct) as string;
+            if (nomeAtual is null) return false;
+
+            // Impede transformar uma categoria com famílias ativas em Individual.
+            if (!EhIndividual(nomeAtual) && EhIndividual(nome))
+            {
+                using var dependentes = new MySqlCommand("""
+                    SELECT EXISTS(
+                        SELECT 1 FROM associacao a
+                        JOIN dependente_associacao d
+                          ON d.associacao_id=a.id AND d.ativo=TRUE
+                        WHERE a.categoria_id=@categoria
+                    )
+                    """, conexao, transacao);
+                dependentes.Parameters.AddWithValue("@categoria", id);
+                if (Convert.ToInt32(await dependentes.ExecuteScalarAsync(ct)) == 1)
+                    throw new InvalidOperationException(
+                        "Não é possível renomear esta categoria para Individual " +
+                        "enquanto houver dependentes ativos em suas associações.");
+            }
+        }
+
         using var comando = new MySqlCommand("""
             UPDATE categoria_associativa SET nome = @nome WHERE id = @id
             """, conexao, transacao);
@@ -79,6 +107,10 @@ public sealed class CategoriaRepositorio(IConfiguration configuration)
         await transacao.CommitAsync(ct);
         return true;
     }
+
+    private static bool EhIndividual(string nome) =>
+        string.Equals(nome.Trim(), "Individual",
+            StringComparison.OrdinalIgnoreCase);
 
     public async Task<bool> AlterarSituacaoAsync(long id, bool ativa,
         long autorId, CancellationToken ct)

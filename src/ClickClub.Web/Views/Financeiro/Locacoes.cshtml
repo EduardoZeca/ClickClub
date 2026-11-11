@@ -1,0 +1,64 @@
+@model IReadOnlyList<LocacaoFinanceiraApi>
+@{
+    ViewData["Title"] = "Locações dos clubes";
+    var cultura = System.Globalization.CultureInfo.GetCultureInfo("pt-BR");
+}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <h1 class="h3 mb-0">Locações dos clubes prestadores</h1>
+    <a asp-action="Index" class="btn btn-outline-secondary">Ver faturas de origem</a>
+</div>
+
+<p class="text-muted">
+    Consulta de locações pagas exclusivamente simuladas. O Tesoureiro visualiza
+    somente as locações dos clubes aos quais está vinculado. Esta tela não
+    concede acesso às faturas de associações pertencentes a outros clubes.
+    Valores históricos de cobranças canceladas não representam débito atual.
+</p>
+
+@if (ViewBag.Erro is string erro)
+{
+    <div class="alert alert-danger">@erro</div>
+}
+
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Reserva</th>
+                <th>Clube prestador</th>
+                <th>Clube de origem</th>
+                <th>Espaço</th>
+                <th>Início local</th>
+                <th>Principal</th>
+                <th>Acréscimo</th>
+                <th>Total</th>
+                <th>Cobrança</th>
+                <th>Reserva</th>
+                <th>Competência</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var locacao in Model)
+            {
+                <tr>
+                    <td>#@locacao.ReservaId</td>
+                    <td>@locacao.ClubePrestador</td>
+                    <td>@locacao.ClubeOrigem</td>
+                    <td>@locacao.Espaco</td>
+                    <td>@locacao.InicioLocal.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@locacao.Principal.ToString("C", cultura)</td>
+                    <td>@locacao.Acrescimo.ToString("C", cultura)</td>
+                    <td>@locacao.Total.ToString("C", cultura)</td>
+                    <td>@locacao.SituacaoCobranca</td>
+                    <td>@locacao.SituacaoReserva</td>
+                    <td>@(locacao.CompetenciaDestino?.ToString("MM/yyyy") ?? "—")</td>
+                </tr>
+            }
+            @if (Model.Count == 0)
+            {
+                <tr><td colspan="11">Nenhuma locação paga encontrada para os clubes autorizados.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

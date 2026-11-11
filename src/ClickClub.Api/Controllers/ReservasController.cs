@@ -3,6 +3,7 @@ using ClickClub.Api.Contratos;
 using ClickClub.Api.Dados;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MySqlConnector;
 
 namespace ClickClub.Api.Controllers;
 
@@ -12,7 +13,8 @@ namespace ClickClub.Api.Controllers;
 public sealed class ReservasController(
     ReservaRepositorio repositorio,
     ConvidadosReservaRepositorio convidadosRepositorio,
-    CancelamentoReservaRepositorio cancelamentoRepositorio) : ControllerBase
+    CancelamentoReservaRepositorio cancelamentoRepositorio,
+    CobrancaLocacaoRepositorio cobrancas) : ControllerBase
 {
     private long UsuarioId => long.Parse(
         User.FindFirst(JwtRegisteredClaimNames.Sub)!.Value);
@@ -90,12 +92,55 @@ public sealed class ReservasController(
             {
                 erro = "Não é possível cancelar uma reserva cujo uso já começou."
             }),
-            ResultadoCancelamento.CobrancaTransferida => Conflict(new
-            {
-                erro = "Cancelamento de cobrança transferida será habilitado junto ao componente financeiro."
-            }),
             _ => BadRequest(new { erro = "Cancelamento não permitido." })
         };
+    }
+
+    [HttpGet("{id:long}/cobranca")]
+    [Authorize(Roles = "Titular")]
+    public async Task<IActionResult> ConsultarCobranca(long id, CancellationToken ct)
+    {
+        try
+        {
+            var dados = await cobrancas.ConsultarAsync(id, UsuarioId, ct);
+            return dados is null ? NotFound() : Ok(dados);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { erro = ex.Message });
+        }
+    }
+
+    [HttpPost("{id:long}/cobranca/quitar-avulsa")]
+    [Authorize(Roles = "Titular")]
+    public async Task<IActionResult> QuitarTaxa(long id, CancellationToken ct) =>
+        await DecidirCobranca(id, false, null, ct);
+
+    [HttpPost("{id:long}/cobranca/transferir")]
+    [Authorize(Roles = "Titular")]
+    public async Task<IActionResult> TransferirTaxa(long id,
+        [FromBody] TransferenciaLocacaoEntrada entrada, CancellationToken ct) =>
+        await DecidirCobranca(id, true, entrada.CompetenciaConfirmada, ct);
+
+    private async Task<IActionResult> DecidirCobranca(
+        long id, bool transferir, DateTime? competenciaConfirmada,
+        CancellationToken ct)
+    {
+        try
+        {
+            var resultado = await cobrancas.DecidirAsync(
+                id, UsuarioId, transferir, competenciaConfirmada, ct);
+            return resultado is null ? NotFound() : Ok(resultado);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { erro = ex.Message });
+        }
+        catch (MySqlException ex) when (ex.Number == 1062)
+        {
+            return Conflict(new { erro =
+                "Cobrança ou item já registrado. Recarregue a reserva antes de repetir a operação." });
+        }
     }
 
     private IActionResult Erro(ResultadoReserva resultado) => resultado switch
@@ -105,6 +150,9 @@ public sealed class ReservasController(
         ResultadoReserva.PermissaoTitularNecessaria =>
             Conflict(new { erro =
                 "Para reservar espaço pago, o dependente menor de idade precisa da permissão geral do titular. Solicite a habilitação em Reservas > Permissões de dependentes." }),
+        ResultadoReserva.MensalidadeInadimplente =>
+            Conflict(new { erro =
+                "A associação possui mensalidade vencida há mais de 10 dias. A quitação simulada da mensalidade deve ser registrada pelo titular ou pela administração antes de confirmar novas reservas." }),
         ResultadoReserva.EspacoIndisponivel =>
             NotFound(new { erro = "Espaço não encontrado ou inativo." }),
         ResultadoReserva.AntecedenciaInsuficiente =>

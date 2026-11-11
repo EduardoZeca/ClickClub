@@ -1,0 +1,86 @@
+@model FaturaDetalheApi
+@{
+    ViewData["Title"] = "Detalhes da fatura";
+    var culturaMoeda = System.Globalization.CultureInfo.GetCultureInfo("pt-BR");
+}
+
+<h1 class="h3 mb-3">Fatura #@Model.Fatura.Id</h1>
+
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success" role="status">@sucesso</div>
+}
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-danger" role="alert">@erro</div>
+}
+
+@if (Model.Fatura.BloqueioPorAtraso)
+{
+    <div class="alert alert-warning" role="alert">
+        Esta mensalidade está vencida há @Model.Fatura.DiasAtraso dias.
+        A associação está bloqueada para novas reservas até a quitação simulada.
+    </div>
+}
+@if (Model.Fatura.Status == "EmPreparacao")
+{
+    <div class="alert alert-info">
+        Esta fatura foi preparada para receber cobranças de locações transferidas.
+        A mensalidade-base ainda precisa ser emitida pela administração.
+        Não é possível quitá-la enquanto estiver em preparação.
+    </div>
+}
+
+<dl class="row">
+    <dt class="col-sm-3">Associação</dt><dd class="col-sm-9">@Model.Fatura.Matricula — @Model.Fatura.Titular</dd>
+    <dt class="col-sm-3">Clube de origem</dt><dd class="col-sm-9">@Model.Fatura.Clube</dd>
+    <dt class="col-sm-3">Competência</dt><dd class="col-sm-9">@Model.Fatura.Competencia.ToString("MM/yyyy")</dd>
+    <dt class="col-sm-3">Vencimento</dt><dd class="col-sm-9">@Model.Fatura.DataVencimento.ToString("dd/MM/yyyy")</dd>
+    <dt class="col-sm-3">Situação</dt><dd class="col-sm-9">@Model.Fatura.Status</dd>
+</dl>
+
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead><tr><th>Descrição</th><th>Tipo</th><th>Unidade de origem</th><th>Reserva</th><th class="text-end">Valor</th></tr></thead>
+        <tbody>
+            @foreach (var item in Model.Itens)
+            {
+                <tr>
+                    <td>@item.Descricao</td>
+                    <td>@item.Tipo</td>
+                    <td>@(item.ClubeOrigem ?? "—")</td>
+                    <td>@(item.ReservaId?.ToString() ?? "—")</td>
+                    <td class="text-end">@item.Valor.ToString("C", culturaMoeda)</td>
+                </tr>
+            }
+            @if (Model.Itens.Count == 0)
+            {
+                <tr><td colspan="5">Nenhum item lançado.</td></tr>
+            }
+        </tbody>
+        <tfoot>
+            @if (Model.Fatura.MultaPendente > 0)
+            {
+                <tr>
+                    <td colspan="4" class="text-end">Multa única de 2% prevista na quitação</td>
+                    <td class="text-end">@Model.Fatura.MultaPendente.ToString("C", culturaMoeda)</td>
+                </tr>
+            }
+            <tr>
+                <th colspan="4" class="text-end">Total para quitação simulada</th>
+                <th class="text-end">@Model.Fatura.TotalAtualizado.ToString("C", culturaMoeda)</th>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+<p class="text-muted">Nenhum pagamento real será efetuado. A multa prevista é calculada na consulta e registrada uma única vez se a quitação ocorrer após o prazo de tolerância.</p>
+@if (Model.Fatura.Status == "EmAberto")
+{
+    <form asp-action="Quitar" method="post" class="mb-3"
+          onsubmit="return confirm('Registrar a quitação integral simulada desta mensalidade? Esta operação não poderá ser desfeita nesta etapa.');">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Fatura.Id" />
+        <button type="submit" class="btn btn-primary">Registrar quitação integral simulada</button>
+    </form>
+}
+<a asp-action="Index" class="btn btn-outline-secondary">Voltar às faturas</a>

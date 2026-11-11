@@ -488,3 +488,33 @@ $RECYCLE.BIN/
 database/backups/
 *.sql.bak
 *.sql.gz
+
+# ClickClub/Codex: resultados e arquivos locais dos testes.
+# Scripts SQL versionados (database/scripts e database/tests),
+# documentacao e instrucoes AGENTS.md devem continuar no Git.
+/test-artifacts/
+/codex-output/
+/tests/_local/
+/tests/output/
+/database/testes_locais/
+/docs/relatorios_locais/
+
+# Bancos de cache/offline e arquivos auxiliares locais.
+*.sqlite
+*.sqlite3
+*.sqlite-shm
+*.sqlite-wal
+*.db
+*.db-shm
+*.db-wal
+
+# Resultados de testes .NET e cobertura.
+*.trx
+coverage/
+coverage-report/
+
+# Segredos locais sem bloquear exemplos seguros versionados.
+.env.*
+!.env.example
+**/appsettings.Local.json
+**/appsettings.*.Local.json

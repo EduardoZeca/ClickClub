@@ -30,6 +30,11 @@ builder.Services.AddScoped<ReservaRepositorio>();
 builder.Services.AddScoped<ConvidadosReservaRepositorio>();
 builder.Services.AddScoped<CancelamentoReservaRepositorio>();
 builder.Services.AddScoped<PermissaoReservaDependenteRepositorio>();
+builder.Services.AddScoped<PoliticaFinanceiraRepositorio>();
+builder.Services.AddScoped<FaturaRepositorio>();
+builder.Services.AddScoped<QuitacaoMensalidadeRepositorio>();
+builder.Services.AddScoped<CobrancaLocacaoRepositorio>();
+builder.Services.AddScoped<FinanceiroLocacoesRepositorio>();
 builder.Services.AddScoped<AutenticacaoServico>();
 builder.Services.AddSingleton<IPasswordHasher<ContaAcesso>, PasswordHasher<ContaAcesso>>();
 

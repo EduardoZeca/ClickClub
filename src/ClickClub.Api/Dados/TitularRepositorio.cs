@@ -175,15 +175,40 @@ public sealed class TitularRepositorio(IConfiguration configuration)
         await using var transacao = await conexao.BeginTransactionAsync(ct);
 
         using var consulta = new MySqlCommand("""
-            SELECT titular_pessoa_id FROM associacao
+            SELECT titular_pessoa_id, categoria_id FROM associacao
             WHERE id = @id AND status <> 'Cancelada' FOR UPDATE
             """, conexao, transacao);
         consulta.Parameters.AddWithValue("@id", id);
-        var resultado = await consulta.ExecuteScalarAsync(ct);
-        if (resultado is null) return false;
-        var pessoaId = Convert.ToInt64(resultado);
+        long pessoaId, categoriaAnteriorId;
+        await using (var reader = await consulta.ExecuteReaderAsync(ct))
+        {
+            if (!await reader.ReadAsync(ct)) return false;
+            pessoaId = reader.GetInt64(0);
+            categoriaAnteriorId = reader.GetInt64(1);
+        }
 
         await ValidarReferenciasAsync(conexao, transacao, entrada, ct);
+
+        // Não impedir edição cadastral de associações Individuais que já
+        // tenham vínculos legados; bloquear somente a troca PARA Individual.
+        if (entrada.CategoriaId != categoriaAnteriorId)
+        {
+            using var validarCategoria = new MySqlCommand("""
+                SELECT EXISTS (
+                    SELECT 1 FROM categoria_associativa c
+                    JOIN dependente_associacao d
+                      ON d.associacao_id=@associacao AND d.ativo=TRUE
+                    WHERE c.id=@categoria
+                      AND LOWER(TRIM(c.nome))='individual'
+                )
+                """, conexao, transacao);
+            validarCategoria.Parameters.AddWithValue("@associacao", id);
+            validarCategoria.Parameters.AddWithValue("@categoria", entrada.CategoriaId);
+            if (Convert.ToInt32(await validarCategoria.ExecuteScalarAsync(ct)) == 1)
+                throw new ArgumentException(
+                    "Não é possível alterar para a categoria Individual " +
+                    "enquanto houver dependentes ativos na associação.");
+        }
 
         using var pessoaCmd = new MySqlCommand("""
             UPDATE pessoa SET nome=@nome, cpf=@cpf, data_nascimento=@nasc,

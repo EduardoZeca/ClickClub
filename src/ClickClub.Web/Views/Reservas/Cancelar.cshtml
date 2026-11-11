@@ -34,7 +34,8 @@ else
     <p>Para este tipo de espaço, não foi definida multa de cancelamento na primeira versão.</p>
 }
 
-<p>Se a taxa ainda estiver em aberto, ela será encerrada e somente eventual multa permanecerá pendente. Se já tiver sido quitada de forma simulada, o saldo restituível será registrado como crédito pendente.</p>
+<p>Uma taxa avulsa em aberto será encerrada, mantendo eventual multa pendente. Para taxas avulsas quitadas, será criado crédito simulado a compensar.</p>
+<p>Quando a locação estiver transferida, o ajuste considera o principal e o acréscimo de 10%, descontada eventual multa. Em fatura aberta, o crédito será aplicado imediatamente; em fatura quitada, ficará disponível para uma próxima mensalidade elegível, sem alterar o histórico quitado.</p>
 <p>O cálculo definitivo é efetuado pela API no instante da confirmação. Não é possível cancelar uma utilização já iniciada.</p>
 
 <form asp-action="ConfirmarCancelamento" method="post">

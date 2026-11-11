@@ -141,10 +141,20 @@ public sealed class DependentesController(ClickClubApiClient api) : Controller
             using var resposta = await api.EnviarAsync(
                 HttpMethod.Patch, $"api/dependentes/{id}/situacao",
                 new { ativo }, ct);
-            TempData[resposta.IsSuccessStatusCode ? "Sucesso" : "Erro"] =
-                resposta.IsSuccessStatusCode
-                    ? "Situação do dependente atualizada."
-                    : "Não foi possível alterar a situação do dependente.";
+            if (resposta.IsSuccessStatusCode)
+                TempData["Sucesso"] = "Situação do dependente atualizada.";
+            else
+            {
+                var mensagem = "Não foi possível alterar a situação do dependente.";
+                if (resposta.StatusCode is HttpStatusCode.BadRequest or
+                    HttpStatusCode.Conflict)
+                {
+                    var erro = await resposta.Content.ReadFromJsonAsync<ErroApi>(
+                        cancellationToken: ct);
+                    if (!string.IsNullOrWhiteSpace(erro?.Erro)) mensagem = erro.Erro;
+                }
+                TempData["Erro"] = mensagem;
+            }
         }
         catch (HttpRequestException)
         {

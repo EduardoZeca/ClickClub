@@ -12,6 +12,19 @@ public sealed record ReservaApi(
     string? Finalidade, int QuantidadeParticipantes, decimal ValorContratado,
     string Status, string SituacaoTaxa, string Responsavel);
 
+public sealed record CobrancaLocacaoApi(
+    long ReservaId, string ClubePrestador, string Espaco,
+    DateTime InicioLocal, string SituacaoReserva, string SituacaoCobranca,
+    decimal ValorOriginal, decimal AcrescimoTransferencia,
+    decimal TotalTransferencia, DateTime? CompetenciaDestino,
+    DateTime? VencimentoDestino, long? FaturaDestinoId,
+    bool PodeDecidir, string? MotivoIndisponibilidade);
+
+public sealed record DecisaoLocacaoApi(long ReservaId,
+    string SituacaoCobranca, bool JaRegistrada, decimal ValorOriginal,
+    decimal AcrescimoTransferencia, DateTime? CompetenciaDestino,
+    DateTime? VencimentoDestino, long? FaturaDestinoId);
+
 public sealed record CancelamentoReservaApi(
     long ReservaId, decimal MultaSimulada,
     decimal CreditoSimuladoPendente, string SituacaoFinanceira);

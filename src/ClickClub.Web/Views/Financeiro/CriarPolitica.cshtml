@@ -1,0 +1,46 @@
+@model PoliticaFinanceiraFormulario
+@{
+    ViewData["Title"] = "Cadastrar valor mensal";
+}
+
+<h1 class="h3 mb-3">Cadastrar valor mensal</h1>
+<p class="text-muted">Vigência a partir do dia 1º de um mês. O vencimento será sempre no dia 10; a regra de multa é fixa (2%, uma vez, a partir do 11º dia de atraso), mas a cobrança da multa ainda não está ativa nesta etapa.</p>
+
+<form asp-action="SalvarPolitica" method="post" class="col-lg-7">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    <div class="mb-3">
+        <label asp-for="UnidadeId" class="form-label">Clube</label>
+        <select asp-for="UnidadeId" class="form-select">
+            <option value="0">Selecione um clube</option>
+            @foreach (var unidade in Model.Opcoes.Unidades)
+            {
+                <option value="@unidade.Id">@unidade.Nome</option>
+            }
+        </select>
+        <span asp-validation-for="UnidadeId" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="CategoriaId" class="form-label">Categoria</label>
+        <select asp-for="CategoriaId" class="form-select">
+            <option value="0">Selecione uma categoria</option>
+            @foreach (var categoria in Model.Opcoes.Categorias)
+            {
+                <option value="@categoria.Id">@categoria.Nome</option>
+            }
+        </select>
+        <span asp-validation-for="CategoriaId" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="ValorMensal" class="form-label">Mensalidade (R$)</label>
+        <input asp-for="ValorMensal" type="number" step="0.01" min="0" class="form-control" />
+        <span asp-validation-for="ValorMensal" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="VigenciaInicio" class="form-label">Início da vigência (dia 1º)</label>
+        <input asp-for="VigenciaInicio" type="date" class="form-control" />
+        <span asp-validation-for="VigenciaInicio" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Salvar política</button>
+    <a asp-action="Politicas" class="btn btn-outline-secondary">Cancelar</a>
+</form>

@@ -105,10 +105,15 @@ public sealed class CategoriasController(ClickClubApiClient api) : Controller
             if (resposta.StatusCode == HttpStatusCode.Forbidden)
                 return Forbid();
 
-            ModelState.AddModelError(string.Empty,
-                resposta.StatusCode == HttpStatusCode.Conflict
-                    ? "Já existe uma categoria com esse nome."
-                    : "Não foi possível salvar a categoria.");
+            var mensagem = "Não foi possível salvar a categoria.";
+            if (resposta.StatusCode is HttpStatusCode.Conflict or
+                HttpStatusCode.BadRequest)
+            {
+                var erro = await resposta.Content.ReadFromJsonAsync<ErroApi>(
+                    cancellationToken: ct);
+                if (!string.IsNullOrWhiteSpace(erro?.Erro)) mensagem = erro.Erro;
+            }
+            ModelState.AddModelError(string.Empty, mensagem);
         }
         catch (HttpRequestException)
         {

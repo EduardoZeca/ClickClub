@@ -23,7 +23,7 @@
     <div class="alert alert-danger">@erro</div>
 }
 
-<p>As taxas de locação são simuladas. A quitação e a transferência para mensalidades serão habilitadas no componente financeiro.</p>
+<p>As taxas de locação são simuladas. Antes do uso, o titular pode registrar a quitação avulsa ou transferir a cobrança para uma mensalidade futura elegível com acréscimo único de 10%.</p>
 @if (User.IsInRole("Dependente") && !User.IsInRole("Titular"))
 {
     <p>Esta lista mostra somente as reservas feitas por você. O titular pode consultar todas as reservas da associação.</p>
@@ -56,6 +56,12 @@
                     }
                 </td>
                 <td>
+                    @if (User.IsInRole("Titular") && reserva.ValorContratado > 0 &&
+                         reserva.Status == "Confirmada")
+                    {
+                        <a asp-action="Cobranca" asp-route-id="@reserva.Id"
+                           class="btn btn-outline-primary btn-sm mb-1">Cobrança</a>
+                    }
                     @if (reserva.Status == "Confirmada")
                     {
                         <a asp-action="Cancelar" asp-route-id="@reserva.Id" class="btn btn-outline-danger btn-sm">Cancelar</a>

@@ -72,7 +72,8 @@ public sealed class DependenteRepositorio(IConfiguration configuration)
         await conexao.OpenAsync(ct);
         await using var transacao = await conexao.BeginTransactionAsync(ct);
         var unidadeId = await VerificarAssociacaoAsync(
-            conexao, transacao, entrada.AssociacaoId, ct);
+            conexao, transacao, entrada.AssociacaoId,
+            validarNovoVinculo: true, ct: ct);
 
         using var pessoa = new MySqlCommand("""
             INSERT INTO pessoa
@@ -128,7 +129,8 @@ public sealed class DependenteRepositorio(IConfiguration configuration)
                 "O vínculo não pode ser transferido pela edição cadastral.");
 
         var unidadeId = await VerificarAssociacaoAsync(
-            conexao, transacao, associacaoId, ct);
+            conexao, transacao, associacaoId,
+            validarNovoVinculo: false, ct: ct);
 
         using var pessoa = new MySqlCommand("""
             UPDATE pessoa SET nome=@nome, cpf=@cpf, data_nascimento=@nascimento,
@@ -154,29 +156,54 @@ public sealed class DependenteRepositorio(IConfiguration configuration)
         await conexao.OpenAsync(ct);
         await using var transacao = await conexao.BeginTransactionAsync(ct);
 
-        using var consulta = new MySqlCommand("""
-            SELECT d.associacao_id, d.ativo, a.unidade_origem_id, a.status
-            FROM dependente_associacao d
-            JOIN associacao a ON a.id = d.associacao_id
-            WHERE d.id = @id FOR UPDATE
+        // Identifica o vínculo sem travá-lo; a associação é bloqueada primeiro,
+        // como nos cadastros, para serializar reativação e troca de categoria.
+        using var identificar = new MySqlCommand("""
+            SELECT associacao_id FROM dependente_associacao WHERE id=@id
             """, conexao, transacao);
-        consulta.Parameters.AddWithValue("@id", id);
+        identificar.Parameters.AddWithValue("@id", id);
+        var identificacao = await identificar.ExecuteScalarAsync(ct);
+        if (identificacao is null) return false;
+        var associacaoId = Convert.ToInt64(identificacao);
+
+        long unidadeId;
+        string statusAssociacao, categoria;
+        using (var associacao = new MySqlCommand("""
+            SELECT a.unidade_origem_id, a.status, c.nome
+            FROM associacao a
+            JOIN categoria_associativa c ON c.id=a.categoria_id
+            WHERE a.id=@associacao FOR UPDATE
+            """, conexao, transacao))
+        {
+            associacao.Parameters.AddWithValue("@associacao", associacaoId);
+            await using var reader = await associacao.ExecuteReaderAsync(ct);
+            if (!await reader.ReadAsync(ct)) return false;
+            unidadeId = reader.GetInt64(0);
+            statusAssociacao = reader.GetString(1);
+            categoria = reader.GetString(2);
+        }
 
         bool situacaoAtual;
-        long unidadeId;
-        string statusAssociacao;
-        await using (var reader = await consulta.ExecuteReaderAsync(ct))
+        using (var consulta = new MySqlCommand("""
+            SELECT ativo FROM dependente_associacao
+            WHERE id=@id AND associacao_id=@associacao FOR UPDATE
+            """, conexao, transacao))
         {
-            if (!await reader.ReadAsync(ct)) return false;
-            situacaoAtual = reader.GetBoolean(1);
-            unidadeId = reader.GetInt64(2);
-            statusAssociacao = reader.GetString(3);
+            consulta.Parameters.AddWithValue("@id", id);
+            consulta.Parameters.AddWithValue("@associacao", associacaoId);
+            var valor = await consulta.ExecuteScalarAsync(ct);
+            if (valor is null) return false;
+            situacaoAtual = Convert.ToBoolean(valor);
         }
 
         if (ativo && statusAssociacao == "Cancelada")
             throw new InvalidOperationException(
                 "Não é possível reativar dependente de associação cancelada.");
         if (situacaoAtual == ativo) return true;
+        if (ativo && EhIndividual(categoria))
+            throw new InvalidOperationException(
+                "A categoria Individual não permite reativar dependentes. " +
+                "Regularize a categoria da associação antes de reativar o vínculo.");
 
         using var comando = new MySqlCommand("""
             UPDATE dependente_associacao SET ativo=@ativo WHERE id=@id
@@ -194,18 +221,28 @@ public sealed class DependenteRepositorio(IConfiguration configuration)
 
     private static async Task<long> VerificarAssociacaoAsync(
         MySqlConnection conexao, MySqlTransaction transacao,
-        long associacaoId, CancellationToken ct)
+        long associacaoId, bool validarNovoVinculo, CancellationToken ct)
     {
         using var consulta = new MySqlCommand("""
-            SELECT unidade_origem_id FROM associacao
-            WHERE id=@id AND status <> 'Cancelada' FOR UPDATE
+            SELECT a.unidade_origem_id, c.nome
+            FROM associacao a
+            JOIN categoria_associativa c ON c.id=a.categoria_id
+            WHERE a.id=@id AND a.status <> 'Cancelada' FOR UPDATE
             """, conexao, transacao);
         consulta.Parameters.AddWithValue("@id", associacaoId);
-        var unidadeId = await consulta.ExecuteScalarAsync(ct);
-        if (unidadeId is null)
+        await using var reader = await consulta.ExecuteReaderAsync(ct);
+        if (!await reader.ReadAsync(ct))
             throw new ArgumentException("Associação inexistente ou cancelada.");
-        return Convert.ToInt64(unidadeId);
+        if (validarNovoVinculo && EhIndividual(reader.GetString(1)))
+            throw new ArgumentException(
+                "A categoria Individual não permite cadastrar dependentes. " +
+                "Altere a categoria da associação para Familiar antes do cadastro.");
+        return reader.GetInt64(0);
     }
+
+    private static bool EhIndividual(string categoria) =>
+        string.Equals(categoria.Trim(), "Individual",
+            StringComparison.OrdinalIgnoreCase);
 
     private static void PreencherPessoa(MySqlCommand comando, DependenteEntrada e)
     {

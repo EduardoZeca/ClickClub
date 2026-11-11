@@ -1,0 +1,30 @@
+@model EmissaoMensalidadeFormulario
+@{
+    ViewData["Title"] = "Emitir mensalidade";
+}
+
+<h1 class="h3 mb-3">Emitir mensalidade simulada</h1>
+<p class="text-muted">A primeira competência permitida é o mês seguinte à data de início da associação, com vencimento no dia 10. Emissão repetida não cria outra fatura.</p>
+
+<form asp-action="ConfirmarEmissao" method="post" class="col-lg-8">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    <div class="mb-3">
+        <label asp-for="AssociacaoId" class="form-label">Associação / titular</label>
+        <select asp-for="AssociacaoId" class="form-select">
+            <option value="0">Selecione uma associação</option>
+            @foreach (var associacao in Model.Opcoes.Associacoes)
+            {
+                <option value="@associacao.Id">@associacao.Matricula — @associacao.Titular (@associacao.Clube / @associacao.Categoria; início @associacao.DataInicio.ToString("dd/MM/yyyy"))</option>
+            }
+        </select>
+        <span asp-validation-for="AssociacaoId" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Competencia" class="form-label">Competência (dia 1º)</label>
+        <input asp-for="Competencia" type="date" class="form-control" />
+        <span asp-validation-for="Competencia" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Emitir fatura</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+</form>
