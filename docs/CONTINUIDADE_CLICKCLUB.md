@@ -1,8 +1,8 @@
 # Continuidade — Projeto ClickClub
 
 **Data de criação:** 05/11/2026  
-**Fase atual (11/11/2026):** Componentes 1–4 concluídos nos testes iniciais relatados; Componentes 5, 6 e 7 implementados, com SQL e builds confirmados pelo usuário, **sem testes funcionais profundos dos Componentes 5–7**. A Etapa 3 (dashboard) do C7 não exigiu SQL. Próximo componente planejado: C8 — Mobile Android, **ainda sem autorização de implementação**. Não realizar commit/push automaticamente. Detalhes na seção 43 e testes em `docs/TESTES_PENDENTES_CLICKCLUB.md`.
-**Fonte oficial:** `DOCUMENTACAO_CLICKCLUB.md` v1.9 (11/11/2026; permissões C7 aprovadas).
+**Fase atual (11/11/2026):** Componentes 1–4 concluídos nos testes iniciais relatados. Componentes 5–7 implementados em API/Web, com SQL e compilações confirmados pelo usuário. Componente 8 — Mobile .NET MAUI Android — Etapas 1–4 entregues e compiladas com sucesso segundo relatos do usuário; aplicativo instalado/executando em aparelho Android e comunicação com a API restabelecida conforme confirmação de 11/11/2026. **Testes funcionais, de segurança, regressão e integração não foram concluídos**; a execução do Codex foi interrompida por limite de créditos. Existem integrações ainda não confirmadas/implementadas. Estado detalhado na seção 49. Não declarar homologação ou finalização integral.
+**Fonte oficial:** `DOCUMENTACAO_CLICKCLUB.md` v1.9 (revisão de estado em 11/11/2026; requisitos inalterados).
 **Instruções do Project:** `INSTRUCTIONS_PROJECT_CLICKCLUB.md`.
 
 ## 1. Objetivo
@@ -23,14 +23,16 @@ Sistema acadêmico ClickClub para uma organização com múltiplos clubes/unidad
 - [x] Conta `clickclub_api` criada e configuração de conexão da API feita com User Secrets; build e teste do endpoint de banco relatados como bem-sucedidos em 06/11/2026.
 - [x] Funcionalidades dos Componentes 2 e 3 implementadas nos arquivos locais de API/Web e testadas pelo usuário, conforme relato; não houve auditoria independente de logs de execução.
 - [x] Componente 4, Etapa 1: instalação e testes 1–4 reportados como concluídos pelo usuário (10/11/2026).
-- [ ] Componente 4, Etapa 2: formalização de aprovação pelo usuário e verificação das pendências profundas; relatório do Codex não substitui confirmação dos testes iniciais do usuário.
+- [x] Componente 4, Etapa 2: relatório anterior do Codex com verificações principais favoráveis; cobertura aprofundada e regressão seguem pendentes.
 - [x] Relatório do Codex de 10/11/2026 recebido: testes funcionais principais da Etapa 2 aprovados conforme relatório, sem cobertura integral; pendências no novo arquivo `docs/TESTES_PENDENTES_CLICKCLUB.md`.
-- [ ] Funcionalidades Mobile Android, financeiro completo, carteirinha/portaria, atividades e comunicação implementadas e testadas.
+- [x] Componentes 4–7 implementados em API/Web e Comp. 8 Etapas 1–4 compiladas segundo relatos do usuário; Mobile instalado e executando no Android segundo relato final.
+- [ ] Todas as funcionalidades acima verificadas por testes completos de integração, segurança, concorrência e regressão.
 - [x] Builds e testes locais de API, Web, comunicação Web–API e indisponibilidade da API informados como bem-sucedidos pelo usuário em 05/11/2026. Saídas não fornecidas para inspeção independente.
 - [x] Backup lógico criado, restaurado em banco de teste separado e tabelas/dados conferidos; backup ignorado pelo Git, segundo relato de 06/11/2026.
-- [ ] Instalação e testes Android físico realizados.
+- [x] Instalação/execução do aplicativo no Android físico e conectividade API restabelecida, conforme relato de 11/11/2026.
+- [ ] Testes de ponta a ponta no Android físico finalizados e documentados.
 
-**Atenção:** As seções históricas registram o estado de cada data e não substituem as seções 36–37. Builds e testes relatados pelo usuário não equivalem a execução independente neste ambiente.
+**Atenção:** As seções históricas preservam o estado de cada etapa. Para o estado atual, consultar a seção 49. Builds e testes relatados pelo usuário não equivalem a execução independente neste ambiente.
 
 ## 3. Decisões centrais
 
@@ -832,3 +834,103 @@ Os scripts foram fornecidos para aplicação sequencial; os testes finais foram 
 **Próximo componente:** C8 — Aplicativo Mobile Android, incluindo os fluxos aprovados de solicitação e acompanhamento de adesão, carteirinha móvel com exibição offline limitada e renovação online, consumo da API e testes no Redmi Note 12. Antes da implementação, apresentar plano incremental levando em conta o prazo e as pendências de login híbrido e ficha associativa, sem tratar estes itens como já implementados. **Nenhuma etapa do C8 foi autorizada nesta confirmação de build.**
 
 **Git/GitHub:** o usuário havia manifestado intenção de commitar quando terminasse a parte Web. Não foi informado novo commit nem push nesta mensagem. Não executar operações de Git automaticamente; orientar o usuário quando solicitado.
+
+## 44. Componente 8 — Etapa 1 autorizada, projeto MAUI preparado (11/11/2026)
+
+**Autorização:** usuário pediu expressamente iniciar o Mobile por prazo reduzido. Componentes 1–7 concluídos em implementação/compilação, segundo relatos do usuário, com testes funcionais pendentes; Codex está em tarefa paralela de validação/preparação isolada, sem permissão implícita para alterar `clickclub_db`.
+
+**Escopo preparado em ZIP:** novo projeto `src/ClickClub.Mobile/ClickClub.Mobile.csproj` (`net10.0-android`), `MauiProgram`, ciclo de vida `App`, `LoginPage`, `InicioPage`, `CarteirinhaPage`, serviços `ApiClickClub`, `SessaoLocal`, `CarteirinhaLocal`, modelos e configuração de rede Android. Login via `POST /api/autenticacao/login` e verificação `/api/autenticacao/me`; carteirinha via `POST /api/carteirinha/minha/renovar`. Armazenamento seguro do JWT e da credencial assinada, QR local QRCoder 1.8.1, exibição offline limitada a 24h e ocultação quando expirar; a portaria permanece exclusivamente online. Endpoint HTTP local `127.0.0.1:5201` via `adb reverse` no aparelho físico.
+
+**Arquivos anteriores preservados:** nenhum `Program.cs` da API, controller ou projeto Web foi alterado; nenhuma migração SQL nova. Projeto Mobile deve ser adicionado à solução local com `dotnet sln ClickClub.slnx add src/ClickClub.Mobile/ClickClub.Mobile.csproj` uma única vez.
+
+**Pendências técnicas:** resposta exata do endpoint de login não acessível nos pacotes fornecidos; cliente inclui leitura de nomes conhecidos de token e validação posterior em `/me`, mas o contrato precisa ser confirmado nos testes. SQLite e demais fluxos Mobile aguardam etapas posteriores.
+
+**Evidências:** arquivos gerados e XML verificado estaticamente; este ambiente não tem SDK .NET, MySQL nem Android. **Build e testes de dispositivo ainda pendentes.** TP-069–074 acrescentados para Codex. Não foi feito commit/push nem modificação em banco.
+
+**Próxima ação:** extrair ZIP, adicionar projeto à solução, compilar `net10.0-android` no Windows e enviar erros caso existam; solicitar autorização antes da Etapa 2.
+
+## 45. Componente 8 — Falha de compilação da Etapa 1 e correção preparada (11/11/2026)
+
+**Relato do usuário:** `dotnet build ClickClub.slnx` falhou para `ClickClub.Mobile net10.0-android`, com CS1061 em `MauiProgram.cs` na chamada `builder.Logging.AddDebug()`; warnings MA002 (referência explícita ao `Microsoft.Maui.Controls` ausente) e CS0618 (`DisplayAlert` obsoleto). Foi observado o SDK `Microsoft.Maui.Sdk 10.0.110` no log do usuário. Nenhum outro erro foi informado.
+
+**Correção preparada:** no `ClickClub.Mobile.csproj`, incluir `PackageReference` de `Microsoft.Maui.Controls` versão `10.0.110`; em `MauiProgram.cs`, remover `AddDebug` e o `using Microsoft.Extensions.Logging` não utilizado (logging de depuração não é necessário para a funcionalidade atual); em `Paginas/InicioPage.xaml.cs`, trocar `DisplayAlert` por `DisplayAlertAsync`. **Sem mudanças em API, Web, SQL ou regra de negócio.**
+
+**Evidências e pendências:** correção somente inspecionada estaticamente, sem SDK .NET disponível neste ambiente. Reexecutar `dotnet restore .\ClickClub.slnx` e `dotnet build .\ClickClub.slnx` no Windows, apresentar eventuais novos erros. Não registrar como compilado enquanto o usuário não confirmar. Os testes TP-069–074 continuam pendentes. Nenhum commit/push realizado.
+
+## 46. Componente 8 — Etapa 1 compilada e Etapa 2 preparada (11/11/2026)
+
+**Confirmação recebida:** o usuário informou **"build executada com sucesso"** após aplicar o pacote corretivo de `ClickClub.Mobile` (.NET MAUI 10, referência explícita a `Microsoft.Maui.Controls` 10.0.110, remoção de `AddDebug` e adoção de `DisplayAlertAsync`). Registrar **Etapa 1 compilada por relato**; os testes funcionais da sessão, da carteirinha e do Android físico continuam pendentes.
+
+**Autorização para a Etapa 2:** o usuário pediu prosseguir. Objetivo: consulta de clubes, espaços, criação e histórico de reservas e cancelamento no Android. Somente o projeto `src/ClickClub.Mobile` e os documentos foram editados neste ZIP incremental, sem alterações em API/Web/MySQL e sem nova migração SQL.
+
+**Arquivos novos:** `src/ClickClub.Mobile/Modelos/ReservasMobile.cs`, `Servicos/ApiClickClub.Reservas.cs`, `Paginas/{ClubesPage,EspacosPage,NovaReservaPage,MinhasReservasPage}.xaml` e respectivos code-behind. **Arquivos atualizados:** `Servicos/ApiClickClub.cs` (classe tornada `partial`), `Paginas/InicioPage.xaml` e `.xaml.cs` (atalhos), `docs/GUIA_C8_ETAPA2.md`, `docs/TESTES_PENDENTES_CLICKCLUB.md` e esta Continuidade.
+
+**Restrições preservadas:** o Android só usa HTTP na API com token de sessão; reservas não são confirmadas por cache offline; concorrência, cota mensal, horários, inadimplência, autorizações de dependentes, convidados, créditos e cancelamentos seguem exclusivamente no servidor. Datas são enviadas como horário local de clube sem offset. Nenhum método reenvia automaticamente POST após timeout.
+
+**Risco de integração explícito:** os Controllers/DTOs concretos do Componente 3 não estavam disponíveis neste ambiente e o GitHub remoto não respondeu. Os caminhos `api/clubes` (fallback `api/unidades`), `api/espacos`, `api/reservas/minhas`, `POST api/reservas`, `POST api/reservas/{id}/cancelar` e nomes de campos do payload são **hipóteses a verificar**, NÃO contratos comprovados. Estão centralizados no cliente Mobile. Confrontar com API atual antes de marcar como funcional. O build apenas garante compatibilidade sintática, não correspondência de rotas/payload.
+
+**Verificações desta entrega:** geração de arquivos, estrutura do pacote e parsing XML local; não há SDK .NET, MySQL ou dispositivo Android conectado neste ambiente. **Nenhuma compilação, teste de reserva, teste de API ou integração foi executado aqui.** Aguardando `dotnet build .\ClickClub.slnx` no Windows. TP-075–081 incluídos como pendentes para o Codex; os TP anteriores permanecem inalterados. Nenhum commit/push realizado.
+
+**Próxima ação:** aplicar somente C8 Etapa 2 sobre Etapa 1 corrigida, compilar no Windows, enviar eventuais erros. Para teste funcional posterior, validar contratos API–Mobile no ambiente isolado antes de tentar criar/cancelar reservas. Avançar à Etapa 3 mediante nova autorização.
+
+
+## 47. Componente 8 — Etapa 2 compilada e Etapa 3 preparada (11/11/2026)
+
+**Relato do usuário:** informou "Compilação bem-sucedida" após aplicar a Etapa 2 (clubes, espaços, reservas e cancelamento). Registra-se o build como concluído **por relato**, sem logs ou evidência de execução Android. Os testes TP-069–081 continuam pendentes.
+
+**Autorização:** o usuário solicitou prosseguir para a Etapa 3 — Financeiro e Atividades no Mobile. Esta entrega é somente incremental sobre a Etapa 2 já instalada e compilada. Nenhuma migração SQL, alteração de API, Web ou Git foi realizada.
+
+**Código preparado:** `src/ClickClub.Mobile/Modelos/FinanceiroAtividadesMobile.cs`, `Servicos/ApiClickClub.C8Etapa3.cs` e atualização aditiva de `Servicos/ApiClickClub.Reservas.cs` para reconhecer coleções `faturas`, `turmas`, `eventos`, `inscricoes`; páginas `FinanceiroPage`, `FaturaDetalhesPage`, `LocacaoFinanceiraPage`, `AtividadesEventosPage`, `MinhasInscricoesPage` e ajustes de navegação nas páginas `InicioPage` e `MinhasReservasPage`.
+
+**Contratos confirmados no material disponível do Componente 6:** `GET api/turmas`, `GET api/turmas/{id}/vagas`, `GET api/turmas/minhas-inscricoes`, `POST api/turmas/{id}/inscricoes`, `DELETE api/turmas/{id}/inscricoes/minha`, `GET api/eventos`, `GET api/eventos/minhas-inscricoes`, `POST api/eventos/{id}/inscricoes`, `DELETE api/eventos/{id}/inscricoes/minha`. Regra de vagas, duplicidades, conflitos de horário, bloqueio por mensalidade, permissão de inscrição e promoção manual permanecem na API.
+
+**Risco explícito financeiro:** o controlador e DTOs finais do Componente 4 não estavam disponíveis para inspeção nesta sessão, e o repositório GitHub não pôde ser recuperado. Rotas `GET api/financeiro/faturas`, `GET api/financeiro/faturas/{id}`, `POST api/financeiro/faturas/{id}/quitar`, `GET api/reservas/{id}/cobranca` e `POST api/reservas/{id}/cobranca/decidir` e formatos de resposta/corpo são **hipóteses isoladas no cliente**, NÃO contratos verificados. Seu funcionamento deve ser conferido antes de qualquer demonstração financeira. A UI exige prévia suficiente da API para decidir taxa de locação, não calcula valores/competências definitivos localmente, não reenvia mutações automaticamente e nunca considera uma falha de rede uma confirmação. APIs anteriores não foram alteradas para aceitar rotas hipotéticas.
+
+**Validação efetiva:** XML dos arquivos XAML e correspondência de manipuladores de eventos verificados estaticamente. Integridade do ZIP a conferir no empacotamento. Ambiente desta conversa sem SDK .NET, MySQL ou Android; **nenhum build ou teste funcional foi executado**. TP-082–089 adicionados à lista pendente; não marcados como aprovados.
+
+**Próxima ação:** extrair este pacote sobre a solução já corrigida e compilada até E2; executar `dotnet restore .\ClickClub.slnx` e `dotnet build .\ClickClub.slnx`. Não executar migrações SQL. Se houver erro, corrigir antes de avançar. Após confirmação, planejar Etapa 4 (adesão, mural, ouvidoria, ficha e validação Android físico), sem afirmar conclusão do C8 até os testes reais.
+
+
+## 48. Componente 8 — Etapa 3 compilada e Etapa 4 preparada (11/11/2026)
+
+- **Confirmação do usuário:** `dotnet build` da Etapa 3 executado com sucesso no Windows. Testes funcionais ainda pendentes.
+- **Autorização:** usuário respondeu "OK" após proposta de Etapa 4; interpretado como autorização para avançar.
+- **Entregues nesta etapa (arquivos):** `src/ClickClub.Mobile/Modelos/ComunicacaoMobile.cs`, `Servicos/ApiClickClub.C8Etapa4.cs`, páginas `MuralPage`, `OuvidoriaPage`, `NovoChamadoPage`, `DetalhesChamadoPage`, `FichaAssociativaPage`, `AdesaoPage` e atalhos da `InicioPage` e `LoginPage`.
+- **Contratos confirmados nos Controllers do C7:** `GET api/avisos`, `GET api/ouvidoria/clubes`, `GET api/ouvidoria/minhas`, `GET api/ouvidoria/{id}`, `POST api/ouvidoria`. Apenas titulares/dependentes podem criar e consultar próprios chamados; a API mantém as autorizações.
+- **Pendências expressas:** a ficha utiliza consultas GET alternativas para o C2, **ainda não verificadas**; o cadastro inicial de adesão Convidado/Simpatizante **não envia solicitação**, pois não foi possível verificar endpoints e DTOs de C2. A tela explica a limitação, sem coleta de CPF/credenciais ou falsa confirmação. RF26 e RF30 dependem de conferência e integração final. O login híbrido RF31 também continua pendente de verificação.
+- **Sem modificação de SQL/API/Web** nesta etapa, nem criação de associação ou de dados simulados. A compilação e testes em Android ainda serão realizados no computador/aparelho do usuário. Não presumir homologação; conferir os contratos finais pelo Codex.
+- **Próximo passo:** aplicar este ZIP somente sobre a solução após a Etapa 3, executar `dotnet build .\ClickClub.slnx`, relatar o resultado. Resolver os contratos de C2 e executar testes Android físico antes de declarar o sistema pronto.
+
+## 49. Fechamento parcial do Mobile e preparação da demonstração (11/11/2026)
+
+**Relatos de execução recebidos após a seção 48:**
+
+- **Componente 8 — Etapa 4:** o usuário confirmou `dotnet build .\ClickClub.slnx` bem-sucedido. As Etapas 1–3 também tiveram builds informados como bem-sucedidos; na Etapa 1 houve inicialmente erro de compilação `CS1061` associado a `AddDebug()`, depois corrigido, juntamente com os avisos MA002 e CS0618. Não foram anexados logs completos dos builds finais.
+- **Android físico:** houve inicialmente falha na instalação via Visual Studio/ADB (`ADB0010`, `INSTALL_FAILED_VERIFICATION_FAILURE`). Posteriormente o usuário informou que a **aplicação está funcionando**, portanto foi possível avançar além do bloqueio inicial de instalação; não há relato técnico suficiente para afirmar qual ajuste específico solucionou esse erro.
+- **Conexão com a API:** o usuário confirmou `adb devices`, `adb reverse tcp:5201 tcp:5201` e `adb reverse --list` com resultados esperados, mas inicialmente o aplicativo não conseguia acessar a API, que estava em execução em `http://localhost:5201` no computador. Foi investigado possível redirecionamento HTTP → HTTPS na API (`app.UseHttpsRedirection()`); orientou-se verificar o HTTP com `curl` e, se necessário, restringir o redirecionamento HTTPS aos ambientes que não fossem Development. **Após as orientações, o usuário declarou que a aplicação está funcionando.** O teste HTTP exato e a alteração efetivamente aplicada no `Program.cs` não foram informados; não presumir que a causa foi demonstrada.
+- **Resultado funcional limitado:** a declaração "aplicação está funcionando" confirma execução geral relatada pelo usuário, **não** valida isoladamente login, QR offline, renovação, reservas, quitação/transferência simulada, turmas, eventos, mural, ouvidoria e regras de acesso. Nenhum conjunto completo de evidências Android foi fornecido.
+- **Codex:** o usuário comunicou que os testes não foram totalmente realizados por **esgotamento dos créditos**. Há histórico de testes parciais em fases anteriores, mas não foi fornecido relatório conclusivo de todos os testes dos Componentes 1–8. **Não marcar os cenários de `docs/TESTES_PENDENTES_CLICKCLUB.md` como aprovados por inferência.**
+
+**Estado do desenvolvimento:**
+
+| Área | Última evidência relatada | Situação de validação |
+|---|---|---|
+| Componentes 1–4 (API/Web/SQL) | Implementação e testes iniciais relatados; C4 etapa 2 com relatório parcial do Codex | Testes profundos/regressão pendentes |
+| Componentes 5–7 (API/Web/SQL) | Scripts 012–019 aplicados e builds confirmados, conforme etapas | Testes profundos e ponta a ponta pendentes |
+| Mobile — C8 Etapas 1–4 | `dotnet build` bem-sucedido por relato | Endpoints e fluxos funcionais ainda não completamente validados |
+| Android físico | Aplicativo em execução e conexão com API restabelecida, conforme relato | Execução geral confirmada por relato; cobertura insuficiente para homologação |
+
+**Pendências funcionais conhecidas antes de declarar o projeto finalizado:**
+
+1. **Adesão via Mobile (RF26):** a tela da Etapa 4 é apenas informativa. Não há envio funcional de solicitação Convidado/Simpatizante implementado naquela entrega; confirmar contratos da API do Componente 2 e integrar.
+2. **Ficha associativa (RF30):** consultas propostas no Mobile ainda precisam de verificação contra os endpoints reais da API; não afirmar exibição correta da ficha.
+3. **Login híbrido (RF31):** requisito aprovado, sem confirmação de implementação/validação no estado atual.
+4. **Reservas e financeiro Mobile:** contratos e payloads de reservas (Etapa 2) e operações financeiras (Etapa 3) precisam ser confrontados com a API real. A compilação não garante correspondência HTTP nem regras operacionais.
+5. **Carteirinha offline:** confirmar emissão, armazenamento, validade de 24 horas, renovação automática e comportamento sem rede. A portaria exige validação online e não admite liberação manual.
+6. **Dados de demonstração:** o planejamento de backup, bancos `clickclub_validacao`/`clickclub_demo` e trabalho isolado do Codex foi discutido, mas **não há confirmação aqui de criação, carga fictícia completa ou limpeza de dados**. Preservar `clickclub_db`; não executar limpeza destrutiva sem autorização e backup verificado.
+7. **Testes restantes:** manter os casos de `docs/TESTES_PENDENTES_CLICKCLUB.md`, com prioridade para fluxos essenciais da apresentação, escopos de autorização e regressão.
+8. **GitHub:** houve planejamento de commit após concluir Web; a confirmação de um novo commit/push desta fase não foi fornecida. Não registrar sincronização com o remoto sem evidência.
+
+**Diretriz para a próxima conversa:** o usuário solicitará um **roteiro demonstrável passo a passo** para o professor, priorizando funções que já pode observar na Web/API/Mobile. Antes de propor uma sequência, conferir os dados de demonstração realmente disponíveis e os perfis de acesso; não depender de recursos ainda não verificados. Sugerir uma apresentação curta com inicialização API/Web, logins de perfis fictícios, clube/titular, reserva, financeiro simulado, QR/portaria, atividades/eventos, mural/ouvidoria e Android, identificando as alternativas caso algum módulo falhe. Não presumir que os testes do Codex terminaram, que o banco demo foi populado ou que o sistema foi homologado.
+
+**Nenhuma mudança de regra aprovada, migração, código-fonte, banco de dados, Git, teste ou instalação Android foi executada nesta atualização documental.** Este registro reflete apenas relatos disponíveis até 11/11/2026.

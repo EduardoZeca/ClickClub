@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ClickClub.Mobile.Paginas.ClubesPage"
+             Title="Clubes" BackgroundColor="#F4F7FB">
+    <ScrollView>
+        <VerticalStackLayout Padding="22,24" Spacing="12">
+            <Label Text="Clubes disponíveis" FontSize="26" FontAttributes="Bold" TextColor="#153559" />
+            <Label Text="Escolha o clube onde deseja consultar espaços. Reservas entre clubes são avaliadas pela API." TextColor="#536477" />
+            <Button x:Name="BotaoAtualizar" Text="Atualizar clubes" Clicked="AoAtualizar" />
+            <ActivityIndicator x:Name="Indicador" IsRunning="False" IsVisible="False" Color="#153559" />
+            <Label x:Name="Mensagem" TextColor="#536477" />
+            <VerticalStackLayout x:Name="ListaClubes" Spacing="10" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ClickClub.Mobile.Paginas.FichaAssociativaPage"
+             Title="Ficha associativa" BackgroundColor="#F4F7FB">
+    <ScrollView>
+        <VerticalStackLayout Padding="22" Spacing="14">
+            <Label Text="Ficha associativa" FontSize="26" FontAttributes="Bold" TextColor="#153559" />
+            <Label Text="Consulta simplificada do vínculo, sem contrato anual."
+                   TextColor="#536477" />
+            <Button Text="Consultar ficha" Clicked="AoAtualizar" />
+            <ActivityIndicator x:Name="Indicador" IsVisible="False" IsRunning="False" />
+            <Label x:Name="Mensagem" TextColor="#536477" />
+            <VerticalStackLayout x:Name="Campos" Spacing="10" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

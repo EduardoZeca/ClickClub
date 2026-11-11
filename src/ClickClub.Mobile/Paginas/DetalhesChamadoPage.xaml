@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ClickClub.Mobile.Paginas.DetalhesChamadoPage"
+             Title="Detalhes do chamado" BackgroundColor="#F4F7FB">
+    <ScrollView>
+        <VerticalStackLayout Padding="22" Spacing="14">
+            <Label Text="Detalhes do chamado" FontSize="25" FontAttributes="Bold" TextColor="#153559" />
+            <Button Text="Atualizar" Clicked="AoAtualizar" />
+            <ActivityIndicator x:Name="Indicador" IsVisible="False" IsRunning="False" />
+            <Label x:Name="Mensagem" TextColor="#536477" />
+            <Label x:Name="Assunto" FontSize="19" FontAttributes="Bold" TextColor="#153559" />
+            <Label x:Name="Resumo" TextColor="#536477" />
+            <Label x:Name="Descricao" TextColor="#25384B" />
+            <Label Text="Respostas" FontSize="19" FontAttributes="Bold" TextColor="#153559" />
+            <VerticalStackLayout x:Name="Respostas" Spacing="12" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

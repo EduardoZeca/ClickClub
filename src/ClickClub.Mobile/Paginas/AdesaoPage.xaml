@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ClickClub.Mobile.Paginas.AdesaoPage"
+             Title="Solicitação de adesão" BackgroundColor="#F4F7FB">
+    <ScrollView>
+        <VerticalStackLayout Padding="22" Spacing="15">
+            <Label Text="Solicitação de adesão" FontSize="26"
+                   FontAttributes="Bold" TextColor="#153559" />
+            <Label Text="O ClickClub aceita solicitações como Convidado ou Simpatizante. A aprovação depende do Presidente do clube ou do Administrador Geral."
+                   TextColor="#25384B" />
+            <Border BackgroundColor="White" Stroke="#DFE5EF" Padding="16">
+                <VerticalStackLayout Spacing="9">
+                    <Label Text="Integração em validação" FontAttributes="Bold"
+                           TextColor="#153559" />
+                    <Label Text="O contrato de cadastro inicial do Componente 2 precisa ser conferido antes de enviar dados pessoais. Esta versão não realiza solicitação nem ativa associação automaticamente."
+                           TextColor="#536477" />
+                    <Label Text="Acompanhe as solicitações pela administração Web enquanto o endpoint Mobile não for confirmado."
+                           TextColor="#536477" />
+                </VerticalStackLayout>
+            </Border>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

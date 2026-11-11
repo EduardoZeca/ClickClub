@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ClickClub.Mobile.App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <Color x:Key="Azul">#153559</Color>
+            <Color x:Key="Fundo">#F4F7FB</Color>
+            <Style TargetType="Button">
+                <Setter Property="BackgroundColor" Value="#153559" />
+                <Setter Property="TextColor" Value="White" />
+                <Setter Property="CornerRadius" Value="12" />
+                <Setter Property="Padding" Value="16,12" />
+            </Style>
+            <Style TargetType="Entry">
+                <Setter Property="TextColor" Value="#15263D" />
+                <Setter Property="PlaceholderColor" Value="#66788A" />
+                <Setter Property="BackgroundColor" Value="White" />
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

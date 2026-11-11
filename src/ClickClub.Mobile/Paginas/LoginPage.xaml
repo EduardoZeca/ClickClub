@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ClickClub.Mobile.Paginas.LoginPage"
+             Title="Entrar" BackgroundColor="#F4F7FB">
+    <ScrollView>
+        <VerticalStackLayout Padding="28,70,28,24" Spacing="16">
+            <Label Text="ClickClub" FontSize="36" FontAttributes="Bold" TextColor="#153559" />
+            <Label Text="Acesso do associado" FontSize="17" TextColor="#56677A" />
+            <BoxView HeightRequest="18" Color="Transparent" />
+            <Label Text="Usuário" FontAttributes="Bold" TextColor="#153559" />
+            <Entry x:Name="EntradaUsuario" Placeholder="Seu login" ReturnType="Next" />
+            <Label Text="Senha" FontAttributes="Bold" TextColor="#153559" />
+            <Entry x:Name="EntradaSenha" Placeholder="Sua senha" IsPassword="True" ReturnType="Go" />
+            <Button x:Name="BotaoEntrar" Text="Entrar" Clicked="AoEntrar" Margin="0,10,0,0" />
+            <Button Text="Informações sobre adesão" BackgroundColor="#596779" Clicked="AoAbrirAdesao" />
+            <ActivityIndicator x:Name="Indicador" IsRunning="False" IsVisible="False" Color="#153559" />
+            <Label x:Name="Mensagem" TextColor="#8A2E2E" FontSize="13" />
+            <Label Text="Para funções online, a API deve estar ligada no computador e acessível pelo Android. A carteirinha previamente emitida pode ser exibida offline." FontSize="12" TextColor="#56677A" Margin="0,35,0,0" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

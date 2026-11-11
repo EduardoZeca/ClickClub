@@ -1,9 +1,13 @@
 # ClickClub — Documento de Requisitos e Planejamento
 
-**Versão:** 1.9 — Permissões de comunicação aprovadas para o Componente 7
+**Versão:** 1.9 — Requisitos aprovados; estado de implementação atualizado em 11/11/2026
 **Data:** 11/11/2026
 
-**Estado (11/11/2026):** Componentes 1–4 concluídos nos testes iniciais relatados; Componentes 5, 6 e 7 implementados e compilados conforme relatos do usuário, **sem testes funcionais profundos dos Componentes 5–7**. Componente 7: Etapas 1 (mural), 2 (ouvidoria) e 3 (dashboard básico) concluídas em implementação/compilação; SQL 018 e 019 aplicados e Etapa 3 sem SQL. Os testes reservados ao Codex permanecem em `TESTES_PENDENTES_CLICKCLUB.md`. Componente 8 (Mobile Android) ainda não autorizado. A Continuidade detalha o estado comprovado.
+**Estado (11/11/2026; atualização documental):** Componentes 1–4 concluídos nos testes iniciais relatados. Componentes 5–7 implementados/compilados com migrações aplicadas conforme relatos do usuário. Componente 8 — Mobile Android — Etapas 1–4 compiladas, com aplicativo instalado e em execução no aparelho físico e acesso à API restabelecido segundo o usuário. **Não há homologação funcional integral:** testes aprofundados do Codex foram interrompidos por esgotamento de créditos; permanecem validações Android/API, segurança, concorrência, regressão e integrações Mobile de adesão, ficha, reservas e financeiro. O status atualizado está na seção 49 da Continuidade; os requisitos aprovados permanecem inalterados.
+
+### Registro de entrega — 11/11/2026 (informativo; sem alteração de requisitos)
+
+A implantação inicial da API/Web e o projeto Android compilam conforme sucessivos relatos do usuário. O aplicativo foi executado no Android físico após resolução de uma dificuldade de instalação e de conectividade local com a API (`adb reverse`, porta HTTP 5201). Esses resultados demonstram execução inicial, **não** a validação integral dos requisitos. O cadastro de adesão pelo Mobile ainda não envia solicitação; ficha associativa, login híbrido e contratos de reserva/financeiro no aplicativo exigem confirmação ou complementação. QR Code offline/validade, permissões, portaria e regressões ainda precisam de testes documentados. Não há confirmação de banco fictício de demonstração plenamente preparado. As regras RF/RN deste documento não foram modificadas.
 
 ## 1. Visão geral
 
@@ -612,4 +616,4 @@ A API confere papéis e atribuições por clube antes de qualquer modificação.
 
 ---
 
-**Próximo passo (11/11/2026):** planejar o Componente 8 (Mobile Android), aguardando aprovação do plano e autorização explícita de implementação. Testes funcionais e de integração permanecem pendentes para o Codex. Login híbrido e ficha associativa ainda exigem etapas próprias; não presumir que já foram implementados.
+**Próximo passo (11/11/2026):** preparar roteiro de demonstração para aula, confirmar os dados fictícios realmente existentes, testar rapidamente os fluxos essenciais na Web e no Android e corrigir falhas bloqueantes. Os testes aprofundados continuam pendentes; a pausa do Codex por falta de créditos não equivale a aprovação. Não alterar requisitos, credenciais, dados ou código nesta atualização documental. Consultar a seção 49 da Continuidade para pendências e evidências.

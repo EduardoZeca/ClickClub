@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ClickClub.Mobile.Paginas.NovaReservaPage"
+             Title="Nova reserva" BackgroundColor="#F4F7FB">
+    <ScrollView>
+        <VerticalStackLayout Padding="22,24" Spacing="12">
+            <Label Text="Nova reserva" FontSize="26" FontAttributes="Bold" TextColor="#153559" />
+            <Label x:Name="DetalhesEspaco" TextColor="#536477" />
+            <Border BackgroundColor="White" Stroke="#DFE5EF" Padding="18" StrokeShape="RoundRectangle 16">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Data de início" FontAttributes="Bold" TextColor="#153559" />
+                    <DatePicker x:Name="DiaInicio" Format="dd/MM/yyyy" TextColor="#153559" />
+                    <Label Text="Horário de início (hora local do clube)" FontAttributes="Bold" TextColor="#153559" />
+                    <TimePicker x:Name="HoraInicio" Format="HH:mm" TextColor="#153559" />
+                    <Label Text="Data de término" FontAttributes="Bold" TextColor="#153559" />
+                    <DatePicker x:Name="DiaFim" Format="dd/MM/yyyy" TextColor="#153559" />
+                    <Label Text="Horário de término (hora local do clube)" FontAttributes="Bold" TextColor="#153559" />
+                    <TimePicker x:Name="HoraFim" Format="HH:mm" TextColor="#153559" />
+                    <Label Text="Finalidade (opcional)" TextColor="#153559" FontAttributes="Bold" />
+                    <Entry x:Name="FinalidadeEntrada" Placeholder="Ex.: encontro familiar" TextColor="#153559" />
+                    <Label Text="Convidados (salão/churrasqueira, quando aplicável)" FontAttributes="Bold" TextColor="#153559" />
+                    <Label Text="Informe um convidado por linha: Nome | Identificação. A API aplica o prazo de 24 horas." FontSize="12" TextColor="#536477" />
+                    <Editor x:Name="ConvidadosEntrada" HeightRequest="96" TextColor="#153559" AutoSize="TextChanges" />
+                </VerticalStackLayout>
+            </Border>
+            <Label Text="A solicitação está sujeita a horários, manutenção, cota mensal, situação associativa, permissões de dependentes e disponibilidade. Taxas são simuladas." FontSize="12" TextColor="#536477" />
+            <Label x:Name="Mensagem" TextColor="#536477" />
+            <ActivityIndicator x:Name="Indicador" IsRunning="False" IsVisible="False" Color="#153559" />
+            <Button x:Name="BotaoConfirmar" Text="Confirmar reserva na API" Clicked="AoConfirmar" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

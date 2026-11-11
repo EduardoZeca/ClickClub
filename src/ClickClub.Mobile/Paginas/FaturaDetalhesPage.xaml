@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ClickClub.Mobile.Paginas.FaturaDetalhesPage"
+             Title="Detalhes da fatura" BackgroundColor="#F4F7FB">
+    <ScrollView>
+        <VerticalStackLayout Padding="22,24" Spacing="12">
+            <Label x:Name="Titulo" Text="Fatura" FontSize="25" FontAttributes="Bold" TextColor="#153559" />
+            <Label Text="Somente simulação, sem PIX, cartão ou cobrança real." TextColor="#536477" />
+            <ActivityIndicator x:Name="Indicador" Color="#153559" IsVisible="False" IsRunning="False" />
+            <Label x:Name="Mensagem" TextColor="#536477" />
+            <Label x:Name="Resumo" FontSize="17" TextColor="#153559" />
+            <Label Text="Itens discriminados" FontSize="18" FontAttributes="Bold" TextColor="#153559" />
+            <VerticalStackLayout x:Name="ListaItens" Spacing="5" />
+            <Button x:Name="BotaoQuitar" Text="Registrar quitação simulada"
+                    Clicked="AoQuitar" IsVisible="False" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

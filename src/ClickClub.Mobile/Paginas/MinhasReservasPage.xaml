@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ClickClub.Mobile.Paginas.MinhasReservasPage"
+             Title="Minhas reservas" BackgroundColor="#F4F7FB">
+    <ScrollView>
+        <VerticalStackLayout Padding="22,24" Spacing="12">
+            <Label Text="Minhas reservas" FontSize="26" FontAttributes="Bold" TextColor="#153559" />
+            <Label Text="Os dados são consultados diretamente da API. Cancelamentos exigem conexão e confirmação." TextColor="#536477" />
+            <Button x:Name="BotaoAtualizar" Text="Atualizar histórico" Clicked="AoAtualizar" />
+            <ActivityIndicator x:Name="Indicador" IsRunning="False" IsVisible="False" Color="#153559" />
+            <Label x:Name="Mensagem" TextColor="#536477" />
+            <VerticalStackLayout x:Name="ListaReservas" Spacing="10" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

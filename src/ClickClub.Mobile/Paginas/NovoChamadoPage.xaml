@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ClickClub.Mobile.Paginas.NovoChamadoPage"
+             Title="Novo chamado" BackgroundColor="#F4F7FB">
+    <ScrollView>
+        <VerticalStackLayout Padding="22" Spacing="13">
+            <Label Text="Novo chamado" FontSize="26" FontAttributes="Bold" TextColor="#153559" />
+            <Label Text="Clube responsável" TextColor="#153559" />
+            <Picker x:Name="Clube" Title="Escolher clube" TextColor="#153559" TitleColor="#536477" />
+            <Label Text="Tipo" TextColor="#153559" />
+            <Picker x:Name="Tipo" Title="Tipo" TextColor="#153559" TitleColor="#536477">
+                <Picker.Items>
+                    <x:String>Solicitação</x:String>
+                    <x:String>Reclamação</x:String>
+                </Picker.Items>
+            </Picker>
+            <Label Text="Categoria" TextColor="#153559" />
+            <Entry x:Name="Categoria" Placeholder="Ex.: Atendimento" TextColor="#153559" />
+            <Label Text="Assunto" TextColor="#153559" />
+            <Entry x:Name="Assunto" Placeholder="Resumo da solicitação" TextColor="#153559" />
+            <Label Text="Descrição" TextColor="#153559" />
+            <Editor x:Name="Descricao" Placeholder="Descreva a situação" AutoSize="TextChanges"
+                    HeightRequest="150" TextColor="#153559" />
+            <Button x:Name="Enviar" Text="Enviar chamado" Clicked="AoEnviar" />
+            <ActivityIndicator x:Name="Indicador" IsVisible="False" IsRunning="False" />
+            <Label x:Name="Mensagem" TextColor="#536477" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ClickClub.Mobile.Paginas.CarteirinhaPage"
+             Title="Minha carteirinha" BackgroundColor="#F4F7FB">
+    <ScrollView>
+        <VerticalStackLayout Padding="24,26" Spacing="12">
+            <Label Text="Carteirinha digital" FontSize="25" FontAttributes="Bold" TextColor="#153559" />
+            <Label x:Name="Situacao" Text="Consultando a credencial..." TextColor="#34465A" FontAttributes="Bold" />
+            <Border x:Name="PainelQr" IsVisible="False" BackgroundColor="White" Stroke="#DFE5EF" Padding="20" StrokeShape="RoundRectangle 16">
+                <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
+                    <Image x:Name="ImagemQr" WidthRequest="260" HeightRequest="260" Aspect="AspectFit" />
+                    <Label x:Name="Identificador" FontSize="12" TextColor="#34465A" HorizontalTextAlignment="Center" />
+                    <Label x:Name="Validade" FontSize="13" TextColor="#34465A" HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Border>
+            <Label x:Name="Mensagem" FontSize="13" TextColor="#536477" />
+            <Button x:Name="BotaoAtualizar" Text="Atualizar com a API" Clicked="AoAtualizar" />
+            <ActivityIndicator x:Name="Indicador" IsVisible="False" IsRunning="False" Color="#153559" />
+            <Label Text="A carteirinha não libera a entrada por si só. O porteiro precisa consultar a API online, que pode negar o acesso se houver bloqueio ou revogação." FontSize="12" TextColor="#56677A" Margin="0,18,0,0" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

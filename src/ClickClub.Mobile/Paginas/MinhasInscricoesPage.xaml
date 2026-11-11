@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ClickClub.Mobile.Paginas.MinhasInscricoesPage"
+             Title="Minhas inscrições" BackgroundColor="#F4F7FB">
+    <ScrollView>
+        <VerticalStackLayout Padding="22,24" Spacing="12">
+            <Label Text="Minhas inscrições" FontSize="26" FontAttributes="Bold" TextColor="#153559" />
+            <Label Text="Consulte vagas confirmadas e lista de espera; cancelamentos exigem API online."
+                   TextColor="#536477" />
+            <Button x:Name="Atualizar" Text="Atualizar" Clicked="AoAtualizar" />
+            <ActivityIndicator x:Name="Indicador" IsVisible="False" IsRunning="False" Color="#153559" />
+            <Label x:Name="Mensagem" TextColor="#536477" />
+            <Label Text="Turmas" FontSize="19" FontAttributes="Bold" TextColor="#153559" />
+            <VerticalStackLayout x:Name="ListaTurmas" Spacing="10" />
+            <Label Text="Eventos" FontSize="19" FontAttributes="Bold" TextColor="#153559" Margin="0,12,0,0" />
+            <VerticalStackLayout x:Name="ListaEventos" Spacing="10" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

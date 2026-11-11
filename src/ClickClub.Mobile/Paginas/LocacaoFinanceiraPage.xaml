@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ClickClub.Mobile.Paginas.LocacaoFinanceiraPage"
+             Title="Taxa da locação" BackgroundColor="#F4F7FB">
+    <ScrollView>
+        <VerticalStackLayout Padding="22,24" Spacing="12">
+            <Label x:Name="Titulo" FontSize="24" FontAttributes="Bold" TextColor="#153559" />
+            <Label Text="O servidor decide a cobrança. Não há pagamento real. Somente o titular pode confirmar decisões financeiras."
+                   TextColor="#536477" />
+            <Button Text="Atualizar prévia" Clicked="AoAtualizar" />
+            <ActivityIndicator x:Name="Indicador" IsVisible="False" IsRunning="False" Color="#153559" />
+            <Label x:Name="Mensagem" TextColor="#536477" />
+            <Label x:Name="Resumo" TextColor="#153559" FontSize="17" />
+            <Button x:Name="BotaoQuitar" Text="Quitar taxa (simulação)" IsEnabled="False"
+                    Clicked="AoQuitar" />
+            <Button x:Name="BotaoTransferir" Text="Transferir para mensalidade (+10%)"
+                    IsEnabled="False" Clicked="AoTransferir" />
+            <Label Text="A competência, o vencimento e os valores precisam ser retornados pela API antes de confirmar a transferência."
+                   FontSize="12" TextColor="#536477" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

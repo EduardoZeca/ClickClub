@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ClickClub.Mobile.Paginas.InicioPage"
+             Title="Início" BackgroundColor="#F4F7FB">
+    <ScrollView>
+        <VerticalStackLayout Padding="24,28" Spacing="18">
+            <Label Text="ClickClub" FontSize="32" FontAttributes="Bold" TextColor="#153559" />
+            <Label Text="Área do associado" FontSize="17" TextColor="#56677A" />
+            <Border BackgroundColor="White" Stroke="#DFE5EF" StrokeThickness="1"
+                    Padding="20" StrokeShape="RoundRectangle 16">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Minha carteirinha" FontSize="22" FontAttributes="Bold" TextColor="#153559" />
+                    <Label Text="QR Code armazenado para exibição offline enquanto estiver válido." TextColor="#34465A" />
+                    <Button Text="Abrir carteirinha" Clicked="AoAbrirCarteirinha" />
+                </VerticalStackLayout>
+            </Border>
+            <Border BackgroundColor="White" Stroke="#DFE5EF" Padding="20"
+                    StrokeShape="RoundRectangle 16">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Clubes e espaços" FontSize="22" FontAttributes="Bold" TextColor="#153559" />
+                    <Label Text="Consulte os clubes e seus espaços para solicitar uma reserva." TextColor="#34465A" />
+                    <Button Text="Consultar clubes e espaços" Clicked="AoAbrirClubes" />
+                </VerticalStackLayout>
+            </Border>
+            <Border BackgroundColor="White" Stroke="#DFE5EF" Padding="20"
+                    StrokeShape="RoundRectangle 16">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Minhas reservas" FontSize="22" FontAttributes="Bold" TextColor="#153559" />
+                    <Label Text="Consulte suas reservas e solicite cancelamento quando permitido." TextColor="#34465A" />
+                    <Button Text="Consultar reservas" Clicked="AoAbrirReservas" />
+                </VerticalStackLayout>
+            </Border>
+            <Border BackgroundColor="White" Stroke="#DFE5EF" Padding="20"
+                    StrokeShape="RoundRectangle 16">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Financeiro simulado" FontSize="22" FontAttributes="Bold" TextColor="#153559" />
+                    <Label Text="Titular: mensalidades e quitações simuladas." TextColor="#34465A" />
+                    <Button Text="Consultar financeiro" Clicked="AoAbrirFinanceiro" />
+                </VerticalStackLayout>
+            </Border>
+            <Border BackgroundColor="White" Stroke="#DFE5EF" Padding="20"
+                    StrokeShape="RoundRectangle 16">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Atividades e eventos" FontSize="22" FontAttributes="Bold" TextColor="#153559" />
+                    <Label Text="Turmas, eventos sociais, vagas e minhas inscrições." TextColor="#34465A" />
+                    <Button Text="Consultar atividades e eventos" Clicked="AoAbrirAtividades" />
+                </VerticalStackLayout>
+            </Border>
+            <Border BackgroundColor="White" Stroke="#DFE5EF" Padding="20"
+                    StrokeShape="RoundRectangle 16">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Mural" FontSize="22" FontAttributes="Bold" TextColor="#153559" />
+                    <Label Text="Avisos gerais e dos clubes." TextColor="#34465A" />
+                    <Button Text="Consultar avisos" Clicked="AoAbrirMural" />
+                </VerticalStackLayout>
+            </Border>
+            <Border BackgroundColor="White" Stroke="#DFE5EF" Padding="20"
+                    StrokeShape="RoundRectangle 16">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Ouvidoria" FontSize="22" FontAttributes="Bold" TextColor="#153559" />
+                    <Label Text="Solicitações, reclamações e acompanhamento das respostas." TextColor="#34465A" />
+                    <Button Text="Meus chamados" Clicked="AoAbrirOuvidoria" />
+                </VerticalStackLayout>
+            </Border>
+            <Border BackgroundColor="White" Stroke="#DFE5EF" Padding="20"
+                    StrokeShape="RoundRectangle 16">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Ficha associativa" FontSize="22" FontAttributes="Bold" TextColor="#153559" />
+                    <Label Text="Consulta do vínculo associativo, quando fornecida pela API." TextColor="#34465A" />
+                    <Button Text="Consultar ficha" Clicked="AoAbrirFicha" />
+                </VerticalStackLayout>
+            </Border>
+            <Border BackgroundColor="White" Stroke="#DFE5EF" Padding="20"
+                    StrokeShape="RoundRectangle 16">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Adesão" FontSize="22" FontAttributes="Bold" TextColor="#153559" />
+                    <Label Text="Orientações sobre Convidado e Simpatizante; envio pendente de contrato API." TextColor="#34465A" />
+                    <Button Text="Ver adesão" Clicked="AoAbrirAdesao" />
+                </VerticalStackLayout>
+            </Border>
+            <Label Text="Consultas e alterações de reserva exigem API online. As regras continuam no servidor." FontSize="12" TextColor="#56677A" />
+            <Button Text="Sair da conta" BackgroundColor="#596779" Clicked="AoSair" Margin="0,8,0,0" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
